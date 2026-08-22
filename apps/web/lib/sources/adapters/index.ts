@@ -7,7 +7,11 @@ export const eventSourceAdapters = [ticketmasterAdapter, predictHqAdapter];
 
 export async function discoverAcrossSources(
   query: DiscoveryQuery,
-): Promise<{ events: DiscoveredEvent[]; errors: Array<{ provider: string; message: string }> }> {
+): Promise<{
+  events: DiscoveredEvent[];
+  errors: Array<{ provider: string; message: string }>;
+  providers: Array<{ provider: string; eventsSeen: number; errorsSeen: number }>;
+}> {
   const results = await Promise.allSettled(
     eventSourceAdapters.map(async (adapter) => ({
       provider: adapter.id,
@@ -17,6 +21,7 @@ export async function discoverAcrossSources(
 
   const events: DiscoveredEvent[] = [];
   const errors: Array<{ provider: string; message: string }> = [];
+  const providers: Array<{ provider: string; eventsSeen: number; errorsSeen: number }> = [];
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') {
       events.push(
@@ -24,7 +29,9 @@ export async function discoverAcrossSources(
           (event) => !event.countryCode || APAC_COUNTRY_CODES.has(event.countryCode.toUpperCase()),
         ),
       );
+      providers.push({ provider: result.value.provider, eventsSeen: result.value.events.length, errorsSeen: 0 });
     } else {
+      providers.push({ provider: eventSourceAdapters[index].id, eventsSeen: 0, errorsSeen: 1 });
       errors.push({
         provider: eventSourceAdapters[index].id,
         message: result.reason instanceof Error ? result.reason.message : 'Connector failed',
@@ -43,5 +50,6 @@ export async function discoverAcrossSources(
       (left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime(),
     ),
     errors,
+    providers,
   };
 }

@@ -1,4 +1,4 @@
-const COOKIE_NAME = 'cp_session';
+export const PRIVATE_SESSION_COOKIE = 'cp_session';
 const SESSION_PATTERN = /^[0-9a-f]{8}-[0-9a-f-]{27}$/i;
 
 export function getPrivateSessionUserId(value: string | undefined): string | undefined {
@@ -15,7 +15,7 @@ export function getPrivateSession(request: Request): PrivateSession {
   const existing = cookieHeader
     .split(';')
     .map((part) => part.trim().split('='))
-    .find(([name]) => name === COOKIE_NAME)?.[1];
+    .find(([name]) => name === PRIVATE_SESSION_COOKIE)?.[1];
   const userId = getPrivateSessionUserId(existing) ?? crypto.randomUUID();
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
 
@@ -27,6 +27,6 @@ export function getPrivateSession(request: Request): PrivateSession {
     },
     setCookie: existing
       ? undefined
-      : `${COOKIE_NAME}=${userId}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${secure}`,
+      : `${PRIVATE_SESSION_COOKIE}=${userId}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${secure}`,
   };
 }

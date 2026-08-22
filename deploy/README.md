@@ -1,8 +1,9 @@
 # Concert Passport deployment
 
-The production app runs as a dedicated container on the existing external
-`jchart_gateway` Docker network. It publishes no host port. The existing Caddy
-gateway reaches it by the unique `concert-passport-app` container name.
+The production app and refresh worker run as dedicated containers on the
+existing external `jchart_gateway` Docker network. Neither publishes a host
+port. The existing Caddy gateway reaches only the unique
+`concert-passport-app` container name.
 
 Server-owned state lives only under `/opt/concert-passport`:
 
@@ -10,6 +11,12 @@ Server-owned state lives only under `/opt/concert-passport`:
 - `data/` — SQLite user state.
 - `cache/` — disposable Next.js runtime cache.
 - `current/` — the uploaded source snapshot and Compose file.
+
+`concert-passport-worker` calls an authenticated internal endpoint on a bounded
+interval. It refreshes followed artist/market pairs, upserts canonical events,
+then resolves trusted official ticket, promoter, artist and venue pages through
+the automatic evidence pipeline. Fetches are host-allowlisted, time/size bounded
+and never automate purchase flows.
 
 The only shared-gateway addition is
 `/config/sites-enabled/concert-passport.caddy` inside the existing Caddy

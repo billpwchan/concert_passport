@@ -1,6 +1,8 @@
 import { discoverAcrossSources, eventSourceAdapters } from '@/lib/sources/adapters';
+import { upsertDiscoveredEvents } from '@/db/events';
 import { DiscoveryInputError, normalizeDiscoveryQuery } from '@/lib/sources/query';
 import { discoverRateLimit } from '@/lib/server/rate-limit';
+import { syncArtistMedia } from '@/lib/sources/media';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,8 +49,31 @@ export async function GET(request: Request): Promise<Response> {
     resultCache.set(cacheKey, { payload: result, expiresAt: Date.now() + CACHE_TTL_MS });
   }
 
+  let artistMedia;
+  if (query.artist) {
+    try {
+      const media = await syncArtistMedia(query.artist);
+      if (media) {
+        artistMedia = {
+          artistName: media.artistName,
+          imagePath: `/api/v1/artists/${encodeURIComponent(media.artistName)}/image`,
+          width: media.imageWidth,
+          height: media.imageHeight,
+          attribution: media.imageAttribution,
+          sourceUrl: media.sourceUrl,
+          updatedAt: new Date(media.updatedAt).toISOString(),
+        };
+      }
+    } catch {
+      // Artist media is additive. A CDN or attraction lookup failure must not
+      // turn a valid event search into an error state.
+    }
+  }
+
   return Response.json({
     ...result,
+    events: upsertDiscoveredEvents(result.events),
+    artistMedia,
     connectors: eventSourceAdapters.map((adapter) => adapter.health()),
     generatedAt: new Date().toISOString(),
     cached: cacheHit,

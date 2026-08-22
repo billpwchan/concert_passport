@@ -1,4 +1,4 @@
-import { getDb } from './index';
+import { getDb } from './index.ts';
 
 type UserIdentity = {
   userId: string;
@@ -61,7 +61,7 @@ export async function submitSource(input: {
   const id = crypto.randomUUID();
   getDb().prepare(`
     INSERT INTO source_submissions (id, user_id, url, host, status, submitted_at)
-    VALUES (?, ?, ?, ?, 'pending', ?)
+    VALUES (?, ?, ?, ?, 'automatic_check', ?)
   `).run(id, input.user.userId, input.url, input.host, Date.now());
   return id;
 }

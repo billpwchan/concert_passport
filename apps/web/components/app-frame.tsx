@@ -3,10 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { localeOptions, type MessageKey } from '@/lib/i18n';
+import type { PublicAccount } from '@/lib/server/auth';
+import { BrandMark } from './brand-mark';
 import { usePreferences } from './preferences-provider';
 
 type AppFrameProps = {
   children: React.ReactNode;
+  account?: PublicAccount;
 };
 
 const navItems: Array<{ href: string; labelKey: MessageKey }> = [
@@ -14,10 +17,9 @@ const navItems: Array<{ href: string; labelKey: MessageKey }> = [
   { href: '/atlas', labelKey: 'nav.atlas' },
   { href: '/plans', labelKey: 'nav.plans' },
   { href: '/passport', labelKey: 'nav.passport' },
-  { href: '/sources', labelKey: 'nav.sources' },
 ];
 
-export function AppFrame({ children }: AppFrameProps) {
+export function AppFrame({ children, account }: AppFrameProps) {
   const pathname = usePathname();
   const { locale, setLocale, theme, setTheme, t } = usePreferences();
   const isActive = (href: string) =>
@@ -28,7 +30,7 @@ export function AppFrame({ children }: AppFrameProps) {
       <header className="global-header">
         <div className="global-header-inner">
           <Link className="wordmark" href="/" aria-label={t('brand.name')}>
-            <span className="wordmark-symbol" aria-hidden="true"><i /></span>
+            <BrandMark className="wordmark-symbol" />
             <span><strong>{t('brand.name')}</strong><small>{t('brand.product')}</small></span>
           </Link>
 
@@ -69,7 +71,10 @@ export function AppFrame({ children }: AppFrameProps) {
               <span className={`theme-glyph ${theme}`} aria-hidden="true" />
             </button>
 
-            <span className="private-beta-label">{t('account.privateBeta')}</span>
+            <Link className="utility-link" href="/sources">{t('nav.sources')}</Link>
+            <Link className="account-link" href="/account">
+              {account?.displayName ?? t('account.signIn')}
+            </Link>
           </div>
         </div>
       </header>

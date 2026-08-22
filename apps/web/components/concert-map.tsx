@@ -24,6 +24,8 @@ export function ConcertMap({
   const { theme, t } = usePreferences();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import('maplibre-gl').Map | null>(null);
+  const initialThemeRef = useRef(theme);
+  const mapThemeRef = useRef(theme);
   const markersRef = useRef<Array<{ id: string; marker: import('maplibre-gl').Marker; element: HTMLButtonElement }>>([]);
   const onSelectRef = useRef(onSelect);
   const [readyVersion, setReadyVersion] = useState(0);
@@ -41,7 +43,7 @@ export function ConcertMap({
       const maplibregl = module.default;
       const map = new maplibregl.Map({
         container: containerRef.current,
-        style: `https://tiles.openfreemap.org/styles/${theme === 'dark' ? 'dark' : 'positron'}`,
+        style: `https://tiles.openfreemap.org/styles/${initialThemeRef.current === 'dark' ? 'dark' : 'positron'}`,
         center: [112, 18],
         zoom: 2.55,
         minZoom: 1.5,
@@ -62,6 +64,13 @@ export function ConcertMap({
       mapRef.current?.remove();
       mapRef.current = null;
     };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || mapThemeRef.current === theme) return;
+    mapThemeRef.current = theme;
+    map.setStyle(`https://tiles.openfreemap.org/styles/${theme === 'dark' ? 'dark' : 'positron'}`);
   }, [theme]);
 
   useEffect(() => {

@@ -104,7 +104,7 @@ Ticketmaster Singapore advises users to join a waiting room before sale, use one
 1. **Contracted APIs/feeds** for permitted discovery and event metadata.
 2. **Official publisher portal** for artists, venues, promoters, and fan-club operators.
 3. **Official pages and structured announcements** ingested only where permission and terms allow.
-4. **User-forwarded material** such as a link, email, screenshot, or pasted announcement, with explicit confirmation and human review.
+4. **User-forwarded material** such as an official link can enter the same automated host, identity, date and market validation pipeline; screenshots and reposts are never treated as primary evidence.
 5. **Community corrections** with reputation, evidence, and reviewer workflows.
 6. **Manual operations** for a deliberately narrow launch catalog.
 

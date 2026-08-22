@@ -1,4 +1,10 @@
 import type { DiscoveredEvent, DiscoveryQuery } from '@/lib/domain/types';
+import {
+  selectTicketmasterImage,
+  ticketmasterConfigured,
+  ticketmasterRequest,
+  type TicketmasterImage,
+} from '@/lib/sources/ticketmaster-client';
 import type { EventSourceAdapter } from './types';
 
 type TicketmasterEvent = {
@@ -9,6 +15,7 @@ type TicketmasterEvent = {
     start: { dateTime?: string; localDate?: string; localTime?: string };
     timezone?: string;
   };
+  images?: TicketmasterImage[];
   _embedded?: {
     venues?: Array<{
       name: string;
@@ -16,7 +23,7 @@ type TicketmasterEvent = {
       country?: { countryCode: string };
       location?: { latitude?: string; longitude?: string };
     }>;
-    attractions?: Array<{ name: string }>;
+    attractions?: Array<{ name: string; images?: TicketmasterImage[] }>;
   };
 };
 
@@ -24,25 +31,11 @@ type TicketmasterResponse = {
   _embedded?: { events?: TicketmasterEvent[] };
 };
 
-function apiKey(): string | undefined {
-  return process.env.TICKETMASTER_API_KEY;
-}
-
-let dailyUsage = { day: '', requests: 0 };
-
-function consumeDailyBudget() {
-  const day = new Date().toISOString().slice(0, 10);
-  if (dailyUsage.day !== day) dailyUsage = { day, requests: 0 };
-  const budget = Number(process.env.TICKETMASTER_DAILY_REQUEST_BUDGET ?? 4_500);
-  if (dailyUsage.requests >= budget) throw new Error('Ticketmaster daily request budget reached');
-  dailyUsage.requests += 1;
-}
-
 export const ticketmasterAdapter: EventSourceAdapter = {
   id: 'ticketmaster-discovery',
   name: 'Ticketmaster Discovery API',
   health() {
-    return apiKey()
+    return ticketmasterConfigured()
       ? { id: this.id, name: this.name, status: 'connected', detail: 'Discovery API configured' }
       : {
           id: this.id,
@@ -52,15 +45,11 @@ export const ticketmasterAdapter: EventSourceAdapter = {
         };
   },
   async discover(query: DiscoveryQuery): Promise<DiscoveredEvent[]> {
-    const key = apiKey();
-    if (!key) return [];
+    if (!ticketmasterConfigured()) return [];
     // Discovery accepts one country code. Region-wide searches are served by
     // PredictHQ; selecting a market adds Ticketmaster's primary listings.
     if (!query.countryCode && !query.city) return [];
-    consumeDailyBudget();
-
     const params = new URLSearchParams({
-      apikey: key,
       classificationName: 'music',
       size: '50',
       sort: 'date,asc',
@@ -71,19 +60,11 @@ export const ticketmasterAdapter: EventSourceAdapter = {
     if (query.startDateTime) params.set('startDateTime', query.startDateTime);
     if (query.endDateTime) params.set('endDateTime', query.endDateTime);
 
-    const response = await fetch(
-      `https://app.ticketmaster.com/discovery/v2/events.json?${params}`,
-      {
-        headers: { accept: 'application/json' },
-        cache: 'no-store',
-        signal: AbortSignal.timeout(8_000),
-      },
-    );
-    if (!response.ok) throw new Error(`Ticketmaster responded ${response.status}`);
-
-    const data = (await response.json()) as TicketmasterResponse;
-    return (data._embedded?.events ?? []).map((event) => {
+    const data = await ticketmasterRequest<TicketmasterResponse>('/discovery/v2/events.json', params);
+    return (data?._embedded?.events ?? []).map((event) => {
       const venue = event._embedded?.venues?.[0];
+      const image = selectTicketmasterImage(event.images)
+        ?? selectTicketmasterImage(event._embedded?.attractions?.[0]?.images);
       const start = event.dates.start;
       const startsAt =
         start.dateTime ?? `${start.localDate ?? ''}T${start.localTime ?? '00:00:00'}`;
@@ -101,6 +82,17 @@ export const ticketmasterAdapter: EventSourceAdapter = {
         longitude: venue?.location?.longitude ? Number(venue.location.longitude) : undefined,
         officialUrl: event.url,
         confidence: 'official',
+        bestLinkUrl: event.url,
+        bestLinkRole: 'ticket',
+        bestLinkSource: this.id,
+        bestLinkScore: 100,
+        bestLinkVerifiedAt: new Date().toISOString(),
+        imageUrl: image?.url,
+        imageWidth: image?.width,
+        imageHeight: image?.height,
+        imageAttribution: image?.attribution,
+        imageSourceUrl: event.url,
+        imageFallback: image?.fallback,
       } satisfies DiscoveredEvent;
     });
   },

@@ -1,13 +1,18 @@
 import { PageHeader } from '@/components/page-header';
 import { PassportLedger } from '@/components/passport-ledger';
-import { demoAttendances } from '@/lib/domain/demo';
+import { getCurrentAccount } from '@/lib/server/auth';
+import { getPassportEntriesForCurrentSession } from '@/lib/server/passport';
 
 export const metadata = {
   title: 'Passport — Concert Passport',
   description: 'Your lifetime of live music, mapped and remembered.',
 };
 
-export default function PassportPage() {
+export default async function PassportPage() {
+  const [entries, account] = await Promise.all([
+    getPassportEntriesForCurrentSession(),
+    getCurrentAccount(),
+  ]);
   return (
     <>
       <PageHeader
@@ -15,7 +20,7 @@ export default function PassportPage() {
         titleKey="passport.title"
         descriptionKey="passport.description"
       />
-      <PassportLedger attendances={demoAttendances} />
+      <PassportLedger entries={entries} displayName={account?.displayName} />
     </>
   );
 }

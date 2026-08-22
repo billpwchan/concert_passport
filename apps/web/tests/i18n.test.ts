@@ -22,9 +22,9 @@ test('keeps product terminology aligned across all three catalogs', () => {
 });
 
 test('interpolates values without changing locale-specific sentence structure', () => {
-  assert.equal(translate('en', 'home.evidenceCount', { count: 2 }), '2 official references');
-  assert.equal(translate('zh-CN', 'home.evidenceCount', { count: 2 }), '2 个官方来源');
-  assert.equal(translate('zh-TW', 'home.evidenceCount', { count: 2 }), '2 個官方來源');
+  assert.equal(translate('en', 'plans.active', { count: 2 }), '2 active journeys');
+  assert.equal(translate('zh-CN', 'plans.active', { count: 2 }), '2 段进行中的行程');
+  assert.equal(translate('zh-TW', 'plans.active', { count: 2 }), '2 段進行中的行程');
 });
 
 test('maps product locales to explicit Intl locale identifiers', () => {

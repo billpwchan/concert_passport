@@ -32,6 +32,31 @@ services:
     mem_limit: 640m
     cpus: 1.25
 
+  worker:
+    image: concert-passport-app:latest
+    container_name: concert-passport-worker
+    restart: unless-stopped
+    init: true
+    command: ["node", "scripts/ingestion-worker.mjs"]
+    healthcheck:
+      disable: true
+    env_file:
+      - /opt/concert-passport/shared/app.env
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - gateway
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 96m
+    cpus: 0.15
+
 networks:
   gateway:
     name: jchart_gateway

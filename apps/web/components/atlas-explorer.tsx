@@ -1,10 +1,13 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
-import type { ConcertJourney, DiscoveredEvent, MarketCode } from '@/lib/domain/types';
-import { formatTravelDateRange, formatVenueTime, getNextMilestone } from '@/lib/domain/lifecycle';
-import { cityKey, marketKey, milestoneTitleKey } from '@/lib/i18n/domain';
+import type { CanonicalEventRecord, SavedEventRecord } from '@/db/events';
+import type { DiscoveredEvent, MarketCode } from '@/lib/domain/types';
+import { formatTravelDateRange, formatVenueTime } from '@/lib/domain/lifecycle';
+import { eventLinkMessageKey, primaryEventHref } from '@/lib/domain/event-link';
+import { cityKey, marketKey } from '@/lib/i18n/domain';
 import { ConcertMap, type AtlasMapPoint } from './concert-map';
 import { usePreferences } from './preferences-provider';
 
@@ -15,10 +18,21 @@ const MARKET_OPTIONS: Array<'ALL' | MarketCode> = [
 type DiscoveryPayload = {
   events: DiscoveredEvent[];
   errors: Array<{ provider: string; message: string }>;
+  artistMedia?: {
+    artistName: string;
+    imagePath: string;
+    width: number;
+    height: number;
+    attribution?: string;
+    sourceUrl: string;
+    updatedAt: string;
+  };
 };
 
 type AtlasResult = {
   id: string;
+  canonicalId?: string;
+  saved?: boolean;
   href: string;
   external: boolean;
   artist: string;
@@ -32,27 +46,33 @@ type AtlasResult = {
   accent: string;
   latitude?: number;
   longitude?: number;
+  imagePath?: string;
 };
 
 export function AtlasExplorer({
-  journeys,
+  savedEvents,
+  catalogEvents,
   windowStartsAt,
 }: {
-  journeys: ConcertJourney[];
+  savedEvents: SavedEventRecord[];
+  catalogEvents: CanonicalEventRecord[];
   windowStartsAt: string;
 }) {
   const { dateLocale, t } = usePreferences();
   const [market, setMarket] = useState<'ALL' | MarketCode>('ALL');
   const [artist, setArtist] = useState('');
   const [liveEvents, setLiveEvents] = useState<DiscoveredEvent[]>([]);
+  const [artistMedia, setArtistMedia] = useState<DiscoveryPayload['artistMedia']>();
   const [searched, setSearched] = useState(false);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [selectedId, setSelectedId] = useState<string>();
+  const [savedIds, setSavedIds] = useState(() => new Set(savedEvents.map((event) => event.id)));
+  const [followed, setFollowed] = useState(false);
 
   const travelWindow = useMemo(() => {
     const start = new Date(windowStartsAt);
-    const end = new Date(start.getTime() + 180 * 86_400_000);
+    const end = new Date(start.getTime() + 365 * 86_400_000);
     return {
       start: start.toISOString(),
       end: end.toISOString(),
@@ -60,37 +80,34 @@ export function AtlasExplorer({
     };
   }, [dateLocale, windowStartsAt]);
 
-  const demoResults = useMemo<AtlasResult[]>(
-    () => journeys
-      .filter((journey) => market === 'ALL' || journey.venue.market === market)
-      .filter((journey) => journey.artist.name.toLowerCase().includes(artist.trim().toLowerCase()))
-      .map((journey) => {
-        const next = getNextMilestone(journey, new Date());
-        return {
-          id: `demo-${journey.id}`,
-          href: `/plans/${journey.slug}`,
-          external: false,
-          artist: journey.artist.name,
-          subtitle: journey.tourName,
-          city: journey.venue.city,
-          market: journey.venue.market,
-          startsAt: journey.performanceStartsAt,
-          timezone: journey.venue.timezone,
-          stage: next ? t(milestoneTitleKey(next.type)) : t('atlas.showConfirmed'),
-          provider: t('common.illustrative'),
-          accent: journey.artist.accent,
-          latitude: journey.venue.latitude,
-          longitude: journey.venue.longitude,
-        };
-      }),
-    [artist, journeys, market, t],
+  const savedResults = useMemo<AtlasResult[]>(
+    () => savedEvents
+      .filter((event) => market === 'ALL' || event.countryCode === market)
+      .map((event) => ({
+        id: `saved-${event.id}`,
+        ...primaryEventHref(event),
+        saved: true,
+        artist: event.artist ?? event.name,
+        subtitle: event.name,
+        city: event.city ?? event.venue ?? event.countryCode ?? '—',
+        market: event.countryCode ?? '—',
+        startsAt: event.startsAt,
+        timezone: event.timezone,
+        stage: t('atlas.saved'),
+        provider: t(eventLinkMessageKey(event.bestLinkRole)),
+        accent: '#4338ca',
+        latitude: event.latitude,
+        longitude: event.longitude,
+        imagePath: event.imageUrl ? `/api/v1/events/${encodeURIComponent(event.id)}/image` : undefined,
+      })),
+    [market, savedEvents, t],
   );
 
   const liveResults = useMemo<AtlasResult[]>(
     () => liveEvents.map((event) => ({
       id: `live-${event.provider}-${event.providerEventId}`,
-      href: event.officialUrl,
-      external: true,
+      canonicalId: event.canonicalId,
+      ...primaryEventHref(event),
       artist: event.artist ?? (artist.trim() || event.name),
       subtitle: event.name,
       city: event.city ?? event.venue ?? event.countryCode ?? '—',
@@ -98,15 +115,45 @@ export function AtlasExplorer({
       startsAt: event.startsAt,
       timezone: event.timezone,
       stage: t('atlas.liveListing'),
-      provider: event.provider === 'ticketmaster-discovery' ? 'Ticketmaster' : 'PredictHQ',
-      accent: event.provider === 'ticketmaster-discovery' ? '#4338ca' : '#18794e',
+      provider: t(eventLinkMessageKey(event.bestLinkRole)),
+      accent: event.bestLinkRole ? '#4338ca' : '#18794e',
       latitude: event.latitude,
       longitude: event.longitude,
+      imagePath: event.imageUrl && event.canonicalId
+        ? `/api/v1/events/${encodeURIComponent(event.canonicalId)}/image`
+        : undefined,
     })),
     [artist, liveEvents, market, t],
   );
 
-  const visible = searched ? liveResults : demoResults;
+  const catalogResults = useMemo<AtlasResult[]>(
+    () => catalogEvents
+      .filter((event) => market === 'ALL' || event.countryCode === market)
+      .filter((event) => !savedEvents.some((saved) => saved.id === event.id))
+      .map((event) => ({
+        id: `catalog-${event.id}`,
+        canonicalId: event.id,
+        ...primaryEventHref(event),
+        artist: event.artist ?? event.name,
+        subtitle: event.name,
+        city: event.city ?? event.venue ?? event.countryCode ?? '—',
+        market: event.countryCode ?? '—',
+        startsAt: event.startsAt,
+        timezone: event.timezone,
+        stage: t('atlas.catalogListing'),
+        provider: t(eventLinkMessageKey(event.bestLinkRole)),
+        accent: event.bestLinkRole ? '#4338ca' : '#18794e',
+        latitude: event.latitude,
+        longitude: event.longitude,
+        imagePath: event.imageUrl ? `/api/v1/events/${encodeURIComponent(event.id)}/image` : undefined,
+      })),
+    [catalogEvents, market, savedEvents, t],
+  );
+
+  const visible = useMemo(
+    () => (searched ? liveResults : [...savedResults, ...catalogResults]),
+    [catalogResults, liveResults, savedResults, searched],
+  );
   const mapPoints = useMemo<AtlasMapPoint[]>(
     () => visible
       .filter((event) => Number.isFinite(event.latitude) && Number.isFinite(event.longitude))
@@ -141,6 +188,7 @@ export function AtlasExplorer({
       const payload = (await response.json()) as DiscoveryPayload & { error?: string };
       if (!response.ok) throw new Error(payload.error ?? t('atlas.searchFailed'));
       setLiveEvents(payload.events);
+      setArtistMedia(payload.artistMedia);
       setSearched(true);
       setSelectedId(payload.events[0] ? `live-${payload.events[0].provider}-${payload.events[0].providerEventId}` : undefined);
       if (payload.errors.length && !payload.events.length) setSearchError(t('atlas.providersUnavailable'));
@@ -149,6 +197,30 @@ export function AtlasExplorer({
     } finally {
       setSearching(false);
     }
+  }
+
+  async function saveShow(event: AtlasResult) {
+    if (!event.canonicalId || savedIds.has(event.canonicalId)) return;
+    const response = await fetch('/api/v1/plans', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ eventId: event.canonicalId }),
+    });
+    if (response.ok) setSavedIds((current) => new Set(current).add(event.canonicalId!));
+  }
+
+  async function followSearch() {
+    const term = artist.trim();
+    if (term.length < 2) {
+      setSearchError(t('atlas.artistRequired'));
+      return;
+    }
+    const response = await fetch('/api/v1/follows', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ artist: term, market }),
+    });
+    if (response.ok) setFollowed(true);
   }
 
   const handleMapSelect = useCallback((id: string) => {
@@ -187,20 +259,40 @@ export function AtlasExplorer({
         <section className="atlas-map-shell" aria-label={t('atlas.title')}>
           <ConcertMap points={mapPoints} selectedId={selectedId} onSelect={handleMapSelect} />
           <div className="map-key">
-            <span><i className="artist" />{searched ? t('atlas.liveData') : t('atlas.savedPlans')}</span>
+            <span><i className="artist" />{searched ? t('atlas.liveData') : t('atlas.upcomingAsiaLegend')}</span>
           </div>
         </section>
 
         <aside className="atlas-results">
           <div className="results-heading">
             <div><span>{visible.length} {t('common.matches')}</span><h2>{searched ? t('atlas.liveResults') : t('atlas.savedInWindow')}</h2></div>
+            {searched ? (
+              <button className="follow-artist-button" type="button" onClick={() => void followSearch()} disabled={followed}>
+                {followed ? t('atlas.following') : t('atlas.followArtist')}
+              </button>
+            ) : null}
           </div>
+          {searched && artistMedia ? (
+            <section className="artist-media-strip">
+              <Image src={artistMedia.imagePath} alt="" fill unoptimized sizes="(max-width: 760px) 100vw, 620px" />
+              <span className="artist-media-scrim" aria-hidden="true" />
+              <div>
+                <small>{t('atlas.artistProfile')}</small>
+                <strong>{artistMedia.artistName}</strong>
+                <span>{t('atlas.imageUpdated')} · {new Intl.DateTimeFormat(dateLocale, { month: 'short', day: '2-digit' }).format(new Date(artistMedia.updatedAt))}</span>
+              </div>
+              <a href={artistMedia.sourceUrl} target="_blank" rel="noreferrer">{t('atlas.openArtistSource')} ↗</a>
+            </section>
+          ) : null}
           <div className="atlas-result-list">
             {visible.map((event) => {
               const translatedCity = cityKey(event.city);
               const content = (
                 <>
-                  <span className="result-code">{event.market}</span>
+                  <span className={`result-visual${event.imagePath ? ' has-image' : ''}`}>
+                    {event.imagePath ? <Image src={event.imagePath} alt="" fill unoptimized sizes="72px" /> : null}
+                    <i>{event.market}</i>
+                  </span>
                   <span className="result-copy">
                     <small>{translatedCity ? t(translatedCity) : event.city}</small>
                     <strong>{event.artist}</strong>
@@ -210,19 +302,30 @@ export function AtlasExplorer({
                     <strong>{formatVenueTime(event.startsAt, event.timezone ?? 'UTC', dateLocale)}</strong>
                     <small>{event.stage} · {event.provider}</small>
                   </span>
-                  <span className="row-arrow" aria-hidden="true">↗</span>
                 </>
               );
               const className = `atlas-result-row${selectedId === event.id ? ' is-selected' : ''}`;
               return event.external ? (
-                <a id={`atlas-result-${event.id}`} className={className} href={event.href} target="_blank" rel="noreferrer" onMouseEnter={() => setSelectedId(event.id)} key={event.id}>{content}</a>
+                <div id={`atlas-result-${event.id}`} tabIndex={-1} className={`${className} atlas-live-result`} onMouseEnter={() => setSelectedId(event.id)} key={event.id}>
+                  <a className="atlas-result-main" href={event.href} target="_blank" rel="noreferrer">{content}</a>
+                  <button className="save-show-button" type="button" onClick={() => void saveShow(event)} disabled={!event.canonicalId || savedIds.has(event.canonicalId)}>
+                    {event.saved || (event.canonicalId && savedIds.has(event.canonicalId)) ? t('atlas.saved') : t('atlas.saveShow')}
+                  </button>
+                  <a className="row-arrow" href={event.href} target="_blank" rel="noreferrer" aria-label={t('atlas.openOfficial')}>↗</a>
+                </div>
               ) : (
-                <Link id={`atlas-result-${event.id}`} className={className} href={event.href} onMouseEnter={() => setSelectedId(event.id)} key={event.id}>{content}</Link>
+                <div id={`atlas-result-${event.id}`} tabIndex={-1} className={`${className} atlas-live-result`} onMouseEnter={() => setSelectedId(event.id)} key={event.id}>
+                  <Link className="atlas-result-main" href={event.href}>{content}</Link>
+                  <button className="save-show-button" type="button" onClick={() => void saveShow(event)} disabled={event.saved || !event.canonicalId || savedIds.has(event.canonicalId)}>
+                    {event.saved || (event.canonicalId && savedIds.has(event.canonicalId)) ? t('atlas.saved') : t('atlas.saveShow')}
+                  </button>
+                  <Link className="row-arrow" href={event.href} aria-label={t('atlas.openListing')}>→</Link>
+                </div>
               );
             })}
-            {!visible.length ? <p className="empty-state">{searched ? t('atlas.noLiveResults') : t('common.noResults')}</p> : null}
+            {!visible.length ? <p className="empty-state">{searched ? t('atlas.noLiveResults') : t('atlas.catalogEmpty')}</p> : null}
           </div>
-          <p className="result-note">{searched ? t('atlas.liveNote') : t('atlas.demoNote')}</p>
+          <p className="result-note">{searched ? t('atlas.liveNote') : t('atlas.catalogNote')}</p>
         </aside>
       </div>
     </div>

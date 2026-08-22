@@ -1,6 +1,7 @@
 import { AtlasExplorer } from '@/components/atlas-explorer';
 import { PageHeader } from '@/components/page-header';
-import { getJourneysForCurrentSession } from '@/lib/server/journeys';
+import { getUpcomingCatalogEvents } from '@/db/events';
+import { getSavedEventsForCurrentSession } from '@/lib/server/saved-events';
 
 export const metadata = {
   title: 'Atlas — Concert Passport',
@@ -9,7 +10,10 @@ export const metadata = {
 
 export default async function AtlasPage() {
   const windowStartsAt = new Date().toISOString();
-  const journeys = await getJourneysForCurrentSession();
+  const [savedEvents, catalogEvents] = await Promise.all([
+    getSavedEventsForCurrentSession(),
+    Promise.resolve(getUpcomingCatalogEvents(36)),
+  ]);
   return (
     <>
       <PageHeader
@@ -17,7 +21,7 @@ export default async function AtlasPage() {
         titleKey="atlas.title"
         descriptionKey="atlas.description"
       />
-      <AtlasExplorer journeys={journeys} windowStartsAt={windowStartsAt} />
+      <AtlasExplorer savedEvents={savedEvents} catalogEvents={catalogEvents} windowStartsAt={windowStartsAt} />
     </>
   );
 }

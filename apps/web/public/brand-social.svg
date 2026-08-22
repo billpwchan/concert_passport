@@ -1,0 +1,35 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="stage" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(935 240) rotate(121) scale(460 640)">
+      <stop stop-color="#6F67C9" stop-opacity=".72"/>
+      <stop offset=".5" stop-color="#332E64" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#10110F" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="806" y1="83" x2="985" y2="606" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5DFC3" stop-opacity=".58"/>
+      <stop offset="1" stop-color="#F5DFC3" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#10110F"/>
+  <rect width="1200" height="630" fill="url(#stage)"/>
+  <path d="M843 65 676 630h245L890 65h-47Z" fill="url(#beam)" opacity=".28"/>
+  <g transform="translate(64 48) scale(1.04)">
+    <circle cx="23" cy="24" r="17.5" fill="#F3F1EB"/>
+    <path d="M4 27c6 0 7-9 12-9s6 13 11 13 7-9 15-9" stroke="#10110F" stroke-width="4.2" stroke-linecap="round"/>
+    <circle cx="42" cy="22" r="3.2" fill="#9C96FF"/>
+  </g>
+  <text x="124" y="80" fill="#F3F1EB" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="1.8">CONCERT PASSPORT</text>
+  <text x="64" y="238" fill="#F3F1EB" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="700" letter-spacing="-4">Every show.</text>
+  <text x="64" y="324" fill="#F3F1EB" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="700" letter-spacing="-4">Every city.</text>
+  <text x="68" y="389" fill="#B6B4AB" font-family="Arial, Helvetica, sans-serif" font-size="25">K-pop dates, ticket windows and the journeys between them.</text>
+  <g opacity=".78">
+    <path d="M760 460C840 350 916 396 1004 238" stroke="#9C96FF" stroke-width="2"/>
+    <path d="M760 460C854 520 964 500 1090 412" stroke="#BC7D51" stroke-width="2"/>
+    <circle cx="760" cy="460" r="8" fill="#F3F1EB"/>
+    <circle cx="1004" cy="238" r="8" fill="#9C96FF"/>
+    <circle cx="1090" cy="412" r="8" fill="#BC7D51"/>
+    <circle cx="760" cy="460" r="24" stroke="#F3F1EB" stroke-opacity=".2"/>
+  </g>
+  <path d="M64 542H1136" stroke="#34352F"/>
+  <text x="64" y="584" fill="#85847D" font-family="Arial, Helvetica, sans-serif" font-size="17" letter-spacing="2">SEARCH · SAVE · PLAN · REMEMBER</text>
+</svg>

@@ -13,6 +13,10 @@ export type MarketCode =
 
 export type Confidence = 'official' | 'verified' | 'reported' | 'unverified';
 
+export type EventLinkRole = 'ticket' | 'event' | 'tour';
+export type EventLinkAuthority = 'seller' | 'promoter' | 'artist' | 'venue' | 'discovery';
+export type EventLinkState = 'verified' | 'quarantined' | 'stale';
+
 export type MilestoneType =
   | 'announcement'
   | 'membership'
@@ -129,6 +133,7 @@ export type DiscoveryQuery = {
 };
 
 export type DiscoveredEvent = {
+  canonicalId?: string;
   provider: string;
   providerEventId: string;
   name: string;
@@ -142,6 +147,17 @@ export type DiscoveredEvent = {
   longitude?: number;
   officialUrl: string;
   confidence: Confidence;
+  bestLinkUrl?: string;
+  bestLinkRole?: EventLinkRole;
+  bestLinkSource?: string;
+  bestLinkScore?: number;
+  bestLinkVerifiedAt?: string;
+  imageUrl?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageAttribution?: string;
+  imageSourceUrl?: string;
+  imageFallback?: boolean;
 };
 
 export type ConnectorHealth = {

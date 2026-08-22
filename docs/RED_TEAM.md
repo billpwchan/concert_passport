@@ -45,7 +45,7 @@ It becomes a gimmick if it is a badge collection disconnected from real attendan
 | Platform dependence changes economics/coverage | High | High | Never make one provider canonical; preserve internal entities and source graph | One provider supplies >70% of critical milestones without fallback |
 | Push notification is delayed/disabled | Medium | High | Multi-channel coverage, local calendar, acknowledgement, in-app alert health | Product copy still implies guarantee or delivery audit is absent |
 | Wrong time-zone conversion causes a miss | Medium | Existential | IANA zones, store UTC + local zone, property tests, source-local display, change audit | Any unexplained critical time conversion incident in beta |
-| Duplicate events or localized-name mismatch | High | High | Entity aliasing, dedupe review queue, provider ID mapping | Duplicates materially confuse 1%+ of protected plans |
+| Duplicate events or localized-name mismatch | High | High | Entity aliasing, deterministic similarity clusters, provider ID mapping, automatic quarantine | Duplicates materially confuse 1%+ of protected plans |
 | Ticket seller/link is unsafe or unofficial | Medium | Existential | Verified-domain registry, source tiers, outbound interstitial, reporting | Any unreviewed user URL can receive “official” treatment |
 | Unofficial resale introduces fraud/liability | High | Existential | Exclude marketplace; only approved official return/resale links | Pressure to monetize gray-market inventory without contracts |
 | Queue automation violates terms or laws | Medium | Existential | No bots, refreshers, login automation, CAPTCHA workarounds, or limit evasion | Product requirement crosses preparation into automated interaction |
@@ -53,7 +53,7 @@ It becomes a gimmick if it is a badge collection disconnected from real attendan
 | Ticket/access code leaks through sharing | Medium | High | Explicit share allowlist, redaction, encrypted sensitive notes, screenshot warnings | Public renderer can access private raw ticket fields |
 | Live/exact location enables stalking | Medium | High | Private default, delayed/coarse share, no background live social map | Exact location appears in public Passport or friend feed by default |
 | Cross-border privacy obligations diverge | High | High | Data minimization, regional counsel, deletion/export, processor inventory, residency review | Launch expands before data map and lawful basis review |
-| Account takeover exposes itineraries/codes | Medium | High | Passkeys/Apple auth, strong session controls, encrypted secrets, device/session review | Sensitive codes stored without threat model and recovery process |
+| Account takeover exposes itineraries/codes | Medium | High | Strong password hashing, revocable sessions, passkeys/MFA, device review, encrypted secrets | Sensitive codes stored without threat model and recovery process |
 | Community submissions create misinformation | High | High | Evidence required, reputation and reviewer queue, source tier visible | Unverified submissions automatically trigger critical alerts |
 | Support burden overwhelms subscription margin | High | High | Concierge pilot, correction tooling, per-market cost accounting, scope control | Data/support cost per payer cannot fit target annual price |
 | Cold start requires too much manual setup | High | High | Start with artist/city selection, share-sheet capture, CSV/history import later | <50% reach first protected journey in pilot |
@@ -85,7 +85,7 @@ It becomes a gimmick if it is a badge collection disconnected from real attendan
 - raw-text/image evidence retention only where rights and privacy permit;
 - OCR/parser output always marked as machine-extracted until reviewed;
 - source-domain allowlist with IDN/homograph protection;
-- conflicting-source review queue;
+- conflicting-source automatic quarantine and retry telemetry;
 - material-change severity classification;
 - alert rescheduling tied to the exact milestone version;
 - fan-visible correction and support path;
@@ -175,6 +175,21 @@ This is a separate business line and should have its own go/no-go review.
 - Never expose seat/barcode details in public images.
 - Offer account export, account deletion, session/device review, and link revocation.
 - Separate operational analytics from sensitive content and avoid raw-content session replay.
+
+## 6A. Identity and session red team
+
+Implemented controls include salted scrypt password hashes, random opaque browser sessions, token hashes at rest, `HttpOnly` cookies, same-origin mutation checks, authentication rate limits, and session rotation at login and registration.
+
+Remaining launch threats:
+
+- unverified addresses enable typo-squatting and account confusion;
+- recovery can become the weakest authentication path;
+- credential stuffing requires shared, durable abuse controls at scale;
+- a stolen device needs user-visible session revocation;
+- deletion must remove or legally isolate derived personal data;
+- administrative access needs MFA, least privilege, and an immutable audit trail.
+
+Do not represent the present account surface as complete until verification, recovery, session/device management, export, deletion, and incident procedures are exercised end to end.
 
 ## 7. Intellectual-property audit
 
@@ -283,7 +298,13 @@ Possible pivots:
 - numbered/sidebar navigation that consumed attention without helping ticket tasks;
 - marketing-style headlines without a corresponding next action;
 - raw English strings inside localized routes;
-- a tablet breakpoint where desktop navigation disappeared before mobile navigation appeared.
+- a tablet breakpoint where desktop navigation disappeared before mobile navigation appeared;
+- generic route/timeline/stamp mini-illustrations that advertised features without carrying real product state;
+- Sources treated as a primary consumer destination instead of an operational transparency utility;
+- instantaneous theme token replacement that made the whole interface appear to flash;
+- coloured left-edge rails, long active underlines, bordered filter states, and purple uppercase labels that resembled a dashboard template;
+- Atlas result columns that could extend beyond the viewport at desktop widths;
+- generic generated Passport artwork where the repository-owned identity should carry the surface.
 
 ### Current design gates
 
@@ -293,5 +314,9 @@ Possible pivots:
 - English, Simplified Chinese, and Traditional Chinese must render from controlled catalogs.
 - Artist accents cannot override operational status colors.
 - Decorative stamp geometry is allowed only in Passport; ticket execution screens remain restrained.
+- Home, search and plan surfaces show real catalog/user state instead of feature-demo graphics.
+- Selection uses typography, a quiet surface change, or one compact point—never a coloured edge rail.
+- Theme changes use a 280 ms root crossfade where supported; the functional map changes style without being destroyed and recreated. Reduced-motion preference removes the transition.
+- Passport identity is code-native and uses the repository-owned mark; the generated route image is not part of the live interface.
 - A screen must remain usable without glow, shadows, imagery, motion, or color alone.
 - Desktop, tablet, and 390 px mobile layouts must retain primary navigation and avoid horizontal overflow.

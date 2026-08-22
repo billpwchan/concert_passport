@@ -19,7 +19,9 @@ export default function SourcesPage() {
         descriptionKey="sources.description"
       />
       <SourceDirectory
-        sources={sourceRegistry}
+        sources={sourceRegistry.filter(
+          (source) => source.category !== 'event_api' && source.category !== 'artist_identity',
+        )}
         connectors={eventSourceAdapters.map((adapter) => adapter.health())}
       />
     </>

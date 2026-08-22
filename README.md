@@ -2,17 +2,18 @@
 
 Concert Passport is a K-pop concert journey operating system for Asia-Pacific fans: verified discovery, registration and sale milestones, cross-border planning, and a lifelong map of shows.
 
-This repository now contains a working vertical slice rather than a concept-only prototype:
+This repository contains a working early-access platform rather than a concept-only prototype:
 
 - a premium responsive web product with Today, Atlas, Plans, Journey, Passport, and Sources;
 - English, Simplified Chinese, and Traditional Chinese content systems plus adaptive light/dark appearances on Web and iOS;
-- private first-party browser sessions and durable SQLite user state;
+- first-party member accounts, revocable secure sessions, anonymous-state migration, and durable SQLite state;
+- canonical events, saved shows, followed artists/markets, and an isolated scheduled refresh worker;
 - live Ticketmaster Discovery and PredictHQ aggregation with validation, caching, and quota protection;
 - a curated official-source registry across 11 Asia-Pacific markets;
 - a native SwiftUI + MapKit iOS app and independently tested Swift lifecycle core;
 - product research, design direction, commercial model, source policy, and red-team gates.
 
-All concert records visible by default are explicitly labeled **illustrative**. Live discovery returns no invented events when provider credentials are absent.
+Member-facing home, Atlas, and saved-plan views are driven by live or user-saved data. The separate planning examples are explicitly labeled **sample plans**. Live discovery returns no invented events when a connector is unavailable.
 
 ## Product boundary
 
@@ -40,8 +41,9 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open `http://localhost:3000`. The web app creates a private, first-party browser
-session and stores local state in `apps/web/data/concert-passport.sqlite` unless
+Open `http://localhost:3000`. The web app supports registration and sign-in while
+retaining an isolated anonymous library before account creation. Local state is
+stored in `apps/web/data/concert-passport.sqlite` unless
 `CONCERT_PASSPORT_DB_PATH` is set.
 
 Quality commands:
@@ -75,6 +77,9 @@ swift test
 - [Product blueprint](docs/PRODUCT_BLUEPRINT.md)
 - [Research and evidence](docs/RESEARCH.md)
 - [Design direction](docs/DESIGN_DIRECTION.md)
+- [Brand and product language](docs/BRAND_SYSTEM.md)
+- [Platform framework](docs/PLATFORM_FRAMEWORK.md)
+- [Source integration system](docs/SOURCE_INTEGRATION_SYSTEM.md)
 - [Localization and content system](docs/LOCALIZATION.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [API contract](docs/API.md)
@@ -83,4 +88,4 @@ swift test
 - [Roadmap](docs/ROADMAP.md)
 - [Original red-team audit](docs/RED_TEAM.md)
 
-Concert Passport remains a working name until domain, App Store, and trademark screening is complete.
+Concert Passport is the product name used across the three language systems. Domain, App Store, and trademark clearance remain commercial launch gates.

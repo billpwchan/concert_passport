@@ -1,14 +1,14 @@
 import { PageHeader } from '@/components/page-header';
-import { PlansDirectory } from '@/components/plans-directory';
-import { getJourneysForCurrentSession } from '@/lib/server/journeys';
+import { SavedShowsDirectory } from '@/components/saved-shows-directory';
+import { getSavedEventsForCurrentSession } from '@/lib/server/saved-events';
 
 export const metadata = {
   title: 'Plans — Concert Passport',
-  description: 'Every protected concert journey, from registration to show day.',
+  description: 'Saved shows, ticket windows and official event links.',
 };
 
 export default async function PlansPage() {
-  const journeys = await getJourneysForCurrentSession();
+  const events = await getSavedEventsForCurrentSession();
   return (
     <>
       <PageHeader
@@ -16,7 +16,9 @@ export default async function PlansPage() {
         titleKey="plans.title"
         descriptionKey="plans.description"
       />
-      <PlansDirectory journeys={journeys} />
+      <div className="page-body plans-platform-page">
+        <SavedShowsDirectory events={events} />
+      </div>
     </>
   );
 }

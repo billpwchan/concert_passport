@@ -1,4 +1,5 @@
 import type { DiscoveredEvent, DiscoveryQuery } from '@/lib/domain/types';
+import { canonicalCoreArtistName } from '@/lib/domain/core-artists';
 import type { EventSourceAdapter } from './types';
 
 const APAC_COUNTRIES = 'AU,HK,ID,JP,KR,MY,NZ,PH,SG,TH,TW,VN';
@@ -19,6 +20,22 @@ type PredictHqResponse = {
 
 function accessToken(): string | undefined {
   return process.env.PREDICTHQ_ACCESS_TOKEN;
+}
+
+function normalizeSearchText(value: string): string {
+  return value.toLocaleLowerCase('en-US').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+}
+
+function matchesArtistQuery(event: NonNullable<PredictHqResponse['results']>[number], artist?: string): boolean {
+  if (!artist) return true;
+  const needle = normalizeSearchText(artist);
+  const shortNeedle = needle.replace(/ (bts|exo|shinee)$/, '');
+  const haystack = normalizeSearchText([
+    event.title,
+    ...(event.entities ?? []).map((entity) => entity.name),
+  ].join(' '));
+  return ` ${haystack} `.includes(` ${needle} `)
+    || (shortNeedle !== needle && ` ${haystack} `.includes(` ${shortNeedle} `));
 }
 
 export const predictHqAdapter: EventSourceAdapter = {
@@ -53,21 +70,23 @@ export const predictHqAdapter: EventSourceAdapter = {
     if (!response.ok) throw new Error(`PredictHQ responded ${response.status}`);
 
     const data = (await response.json()) as PredictHqResponse;
-    return (data.results ?? []).map((event) => {
+    return (data.results ?? []).filter((event) => matchesArtistQuery(event, query.artist)).map((event) => {
       const coordinates = event.geo?.geometry?.coordinates ?? event.location;
       const venue = event.entities?.find((entity) => entity.type === 'venue');
       return {
         provider: this.id,
         providerEventId: event.id,
         name: event.title,
-        artist: event.entities?.find((entity) => entity.type === 'person')?.name,
+        artist: canonicalCoreArtistName(query.artist ?? '')
+          ?? event.entities?.find((entity) => entity.type === 'person')?.name
+          ?? query.artist,
         startsAt: event.start,
         timezone: event.timezone,
         venue: venue?.name,
         countryCode: event.country,
         longitude: coordinates?.[0],
         latitude: coordinates?.[1],
-        officialUrl: `https://www.predicthq.com/events/${event.id}`,
+        officialUrl: `/events/${encodeURIComponent(`predicthq:${event.id}`)}`,
         confidence: 'reported',
       } satisfies DiscoveredEvent;
     });

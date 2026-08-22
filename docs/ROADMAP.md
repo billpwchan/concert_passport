@@ -95,7 +95,7 @@ Direction
 - [ ] Evaluate PredictHQ or alternatives against real anchor-market recall and milestone depth.
 - [ ] Open commercial conversations with event/setlist providers where needed.
 - [ ] Get counsel review of API terms, user-forwarded ingestion, source snapshots, asset use, affiliate links, and jurisdictional privacy.
-- [ ] Estimate manual review minutes and cost per 100 critical milestones.
+- [ ] Track automatic quarantine rate and median recovery time per 100 critical milestones.
 
 ### Product validation
 

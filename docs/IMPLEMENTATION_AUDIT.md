@@ -1,58 +1,62 @@
 # Implementation Audit
 
 **Audit date:** 2026-08-22
-**Scope:** self-hosted web vertical slice, live source layer, SQLite user state, native iOS foundation, tests, and release posture.
+**Scope:** self-hosted web platform, account and catalog persistence, live source layer, refresh worker, native iOS foundation, tests, and release posture.
 
 ## Verdict
 
-The repository now proves the product interaction model and cross-platform technical shape at a high visual and engineering bar. It is suitable for user testing and a source-operations pilot. It is not yet a truthful “never miss a concert” production service because notification delivery, contracted ingestion, reviewer operations, and mobile account persistence are not complete.
+The repository now has a credible member-platform foundation rather than a hardcoded single-browser prototype. Accounts, secure sessions, anonymous-to-member state migration, saved shows, artist follows, canonical events, link semantics, periodic ingestion, and run auditing are implemented. The consumer interface no longer exposes source tiers or credential state, and default pages are driven by saved/live data rather than demo records.
+
+This is suitable for controlled early access. It is not ready to promise comprehensive K-pop coverage or guaranteed alerts: verified email/recovery, versioned migrations, reviewer operations, field-level event provenance, production notification delivery, user data controls, and contractual source coverage remain release gates.
 
 ## What passed
 
-- Web routes compile with strict TypeScript and lint cleanly.
-- Lifecycle, persisted journey state, time formatting, alert offsets, source uniqueness, market coverage, and host lookalikes have automated tests.
-- Milestone writes were exercised end-to-end in production: complete, reload, undo, and reload all returned the expected state from SQLite.
-- Ticketmaster and PredictHQ adapters are configured server-side; unconfigured environments still return empty data with transparent health states.
-- Region-wide discovery is restricted to the declared APAC markets, and market-specific live queries expose an honest empty state instead of fallback data.
-- The CSS placeholder map was replaced by a responsive MapLibre/OpenFreeMap implementation with zoom, pan, marker selection, and accessible list linkage.
-- English, Simplified Chinese, and Traditional Chinese plus light/dark appearances were exercised in-browser.
-- Default UI records are labeled illustrative.
-- Swift lifecycle tests pass and the native app compiles for a generic iOS device without signing.
-- App Icon, launch color, responsive web metadata, and social preview assets are repository-owned.
-- The HTTPS production deployment is isolated behind the existing Caddy gateway; its app container and all pre-existing project containers remained healthy after release.
-- No queue bot, purchase automation, seller credential, payment, ticket barcode, or resale capability exists.
+- Strict TypeScript, lint, automated tests, and production compilation.
+- First-party registration, login, logout, server-side session revocation, and anonymous-state merge.
+- Salted scrypt password hashing, hashed session tokens, secure cookie attributes, same-origin mutation checks, and authentication rate limits.
+- Canonical event upserts, idempotent saved shows, artist/market follows, and ingestion-run persistence.
+- An isolated refresh worker with no public port and an authenticated internal endpoint.
+- Ticketmaster and PredictHQ adapters configured only on the server; one provider failure does not erase another provider’s results.
+- Exact Ticketmaster event pages are distinguished from PredictHQ discovery listings.
+- Consumer source UI uses actual allowlisted logos, removes internal tier labels, and never displays credential requirements.
+- User-facing English, Simplified Chinese, and Traditional Chinese plus light/dark appearances.
+- Responsive MapLibre/OpenFreeMap Atlas with map/list linkage, save, and follow actions.
+- Existing project containers remain outside the Concert Passport Compose ownership boundary.
+- No queue bot, purchase automation, seller credential, payment, ticket barcode, or resale capability.
 
 ## Findings
 
 | Severity | Finding | Disposition |
 |---|---|---|
-| P0 | No production notification scheduler or delivery audit exists. | Blocks any reliability promise; next major workstream. |
-| P0 | API access is configured, but contractual coverage and editorial verification operations are not complete. | Pilot must narrow its declared catalog and keep event-level review. |
-| P1 | Mobile write authentication is not designed; native state is currently in-memory. | Keep iOS mutations local until a supported mobile session/token flow is implemented. |
-| P1 | Browser-cookie preview state is not recoverable across devices and is not a production account system. | Add Apple/OAuth identity, recovery, export, and deletion before public accounts. |
-| P1 | Event-level seller authorization still requires editorial review even for known hosts. | Submission API correctly remains `pending`; build reviewer tooling next. |
-| P1 | No privacy-safe public share renderer, export, or deletion flow exists yet. | Do not expose public Passport pages before structural redaction is implemented. |
-| P2 | A single-container in-memory discovery cache and limiter reset on deploy. | Suitable for the controlled pilot; move quota accounting to shared storage before horizontal scaling. |
-| P2 | CSP currently permits inline Next.js hydration scripts. | Introduce request nonces before a wider public launch if the framework path remains stable. |
+| P0 | No production notification scheduler or delivery audit exists. | Blocks any missed-deadline reliability promise. |
+| P0 | API access exists, but contractual coverage and editorial verification are incomplete. | Keep declared coverage narrow and review critical ticket facts. |
+| P1 | Email verification and credential recovery are not implemented. | Required before broad public registration. |
+| P1 | Schema bootstrap is idempotent but not a versioned migration system. | Add forward/backward compatible migrations before overlapping releases. |
+| P1 | No operator console or event-level official-link approval exists. | Keep user submissions pending and do not elevate host reputation to event authority. |
+| P1 | Account export, deletion, and user-visible session management are absent. | Required privacy and security launch work. |
+| P1 | Native iOS state is still local/sample-first and lacks a mobile token flow. | Keep mobile mutations local until supported authentication exists. |
+| P2 | Discovery cache, public rate limiting, and connector budget state are process-local. | Move to shared infrastructure before horizontal scaling. |
+| P2 | Source logos depend on external publisher favicon availability through an allowlisted proxy. | Add a rights-reviewed owned asset manifest for commercial launch. |
+| P2 | CSP permits inline Next.js hydration scripts. | Introduce request nonces when framework and deployment path are stable. |
 
-## Red-team challenges
+## Red-team conclusions
 
-### “The beautiful UI creates false trust.”
+### A polished interface can overstate reliability
 
-Mitigation in this slice: every demonstration journey is labeled illustrative, source status is visible, and live connectors do not fabricate results. Remaining gate: critical facts need field-level evidence and correction history before the product uses stronger reliability language.
+The revised consumer language states what is live, saved, official, or merely a listing. It does not expose internal confidence theatre. The remaining defense is operational: field-level evidence, change history, correction SLAs, and notification audit must exist before stronger reliability claims.
 
-### “An allowlisted seller can still host a malicious or unrelated listing.”
+### A known ticket host can still contain the wrong listing
 
-Correct. Domain checks prevent basic lookalikes but do not establish event authorization. The operations process therefore keeps submissions pending and requires event-level promoter/artist evidence.
+Host allowlisting prevents basic lookalikes but does not prove event authorization. Exact links still require event-level evidence and a reviewer path.
 
-### “The app encourages parasocial claims.”
+### Accounts can create new harm
 
-Passport copy uses a warm “first met” memory framing but never implies communication or artist endorsement. Spending, status, exact travel, and ticket proof are not social rankings.
+Future travel and fandom preferences are sensitive. The current sessions are server-revocable and Passport remains private, but public launch still requires recovery hardening, device review, data export/deletion, retention policy, and incident response.
 
-### “Cross-platform parity will slow the wedge.”
+### Automated refresh can become accidental scraping
 
-The current split is intentional: web handles dense planning and source transparency; iOS proves glanceable Today, journey completion, MapKit Atlas, and Passport. Production mobile authentication and notifications should be built only after the data pilot validates the promise.
+The worker only invokes configured provider adapters for followed pairs and is deliberately bounded. Adding HTML monitoring or purchase assistance is a separate legal and security decision, not an incremental implementation detail.
 
 ## Go/no-go gate
 
-Proceed to a controlled concierge pilot. Do not market the product as a comprehensive live alert service or accept payment for reliability until contracted/official source coverage, reviewer tooling, APNs delivery audit, correction handling, privacy controls, and declared-market SLAs pass the original red-team gates.
+Proceed with controlled early access and real-user product validation. Do not sell comprehensive coverage or alert reliability until lawful source coverage, reviewer tooling, notification audit, corrections, migration discipline, identity recovery, privacy controls, and declared-market SLAs pass the red-team gates.
