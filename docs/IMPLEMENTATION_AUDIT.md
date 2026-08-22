@@ -28,7 +28,7 @@ The repository now proves the product interaction model and cross-platform techn
 | P1 | Runtime D1 bootstrap covers current user-state tables, not the full normalized ingestion schema. | Apply checked-in migrations in the ingestion/release environment before enabling it. |
 | P1 | Event-level seller authorization still requires editorial review even for known hosts. | Submission API correctly remains `pending`; build reviewer tooling next. |
 | P1 | No privacy-safe public share renderer, export, or deletion flow exists yet. | Do not expose public Passport pages before structural redaction is implemented. |
-| P2 | Scaffold dependency audit reports transitive advisories. | Review upstream patches; do not apply a blind force upgrade to beta runtime dependencies. |
+| P2 | The dev/build toolchain retains transitive advisories, while `npm audit --omit=dev` reports zero production vulnerabilities after the controlled Next 16.3.2 upgrade. | Track Sites/vinext updates; do not force-upgrade the beta build stack independently. |
 | P2 | English is the only implemented UI language. | Add Traditional Chinese and Simplified Chinese before broader APAC beta. |
 
 ## Red-team challenges
