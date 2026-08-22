@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_ORIGIN ?? 'http://localhost:3000'),
+  metadataBase: new URL('https://concert-passport.w23a941922a7c.chatgpt.site'),
   title: 'Concert Passport — Never miss the moment',
   description:
     'Track every K-pop concert milestone across Asia, coordinate the journey, and keep every live memory.',
