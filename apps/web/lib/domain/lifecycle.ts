@@ -2,6 +2,10 @@ import type { ConcertJourney, Milestone } from './types';
 
 const ALERT_OFFSETS_MINUTES = [24 * 60, 120, 10, 0] as const;
 
+function stabilizeIntlWhitespace(value: string): string {
+  return value.replace(/\s+/gu, ' ').trim();
+}
+
 export function getNextMilestone(
   journey: ConcertJourney,
   now = new Date(),
@@ -46,7 +50,25 @@ export function formatVenueTime(
     hour12: false,
   })
     .format(new Date(iso))
-    .replace(',', ' ·');
+    .replace(',', ' ·')
+    .replace(/\s+/gu, ' ')
+    .trim();
+}
+
+export function formatTravelDateRange(
+  startsAt: string,
+  endsAt: string,
+  locale = 'en-GB',
+): string {
+  const formatter = new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Asia/Singapore',
+  });
+  const start = stabilizeIntlWhitespace(formatter.format(new Date(startsAt)));
+  const end = stabilizeIntlWhitespace(formatter.format(new Date(endsAt)));
+  return `${start} – ${end}`;
 }
 
 export function sumDistanceKm(values: Array<{ travelDistanceKm: number }>): number {

@@ -4,6 +4,7 @@ import test from 'node:test';
 import { demoJourneys } from '../lib/domain/demo.ts';
 import {
   createAlertSchedule,
+  formatTravelDateRange,
   formatVenueTime,
   getJourneyProgress,
   getNextMilestone,
@@ -35,6 +36,16 @@ test('formats an instant in the venue timezone without changing the instant', ()
     formatVenueTime('2026-12-14T12:00:00Z', 'Asia/Hong_Kong'),
     '14 Dec · 20:00',
   );
+});
+
+test('formats travel ranges with stable cross-runtime spacing', () => {
+  const label = formatTravelDateRange(
+    '2026-08-22T03:42:00Z',
+    '2027-02-18T03:42:00Z',
+  );
+
+  assert.equal(label, '22 Aug 2026 – 18 Feb 2027');
+  assert.equal(/[\u00a0\u2000-\u200b\u202f]/u.test(label), false);
 });
 
 test('calculates progress and lifetime distance from explicit records', () => {

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 import type { ConcertJourney, DiscoveredEvent, MarketCode } from '@/lib/domain/types';
-import { formatVenueTime, getNextMilestone } from '@/lib/domain/lifecycle';
+import { formatTravelDateRange, formatVenueTime, getNextMilestone } from '@/lib/domain/lifecycle';
 import { cityKey, marketKey, milestoneTitleKey } from '@/lib/i18n/domain';
 import { ConcertMap, type AtlasMapPoint } from './concert-map';
 import { usePreferences } from './preferences-provider';
@@ -53,16 +53,10 @@ export function AtlasExplorer({
   const travelWindow = useMemo(() => {
     const start = new Date(windowStartsAt);
     const end = new Date(start.getTime() + 180 * 86_400_000);
-    const formatter = new Intl.DateTimeFormat(dateLocale, {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      timeZone: 'Asia/Singapore',
-    });
     return {
       start: start.toISOString(),
       end: end.toISOString(),
-      label: `${formatter.format(start)} – ${formatter.format(end)}`,
+      label: formatTravelDateRange(start.toISOString(), end.toISOString(), dateLocale),
     };
   }, [dateLocale, windowStartsAt]);
 
