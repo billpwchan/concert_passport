@@ -1,120 +1,236 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
-import type { ConcertJourney, MarketCode } from '@/lib/domain/types';
+import { useCallback, useMemo, useState } from 'react';
+import type { ConcertJourney, DiscoveredEvent, MarketCode } from '@/lib/domain/types';
 import { formatVenueTime, getNextMilestone } from '@/lib/domain/lifecycle';
+import { cityKey, marketKey, milestoneTitleKey } from '@/lib/i18n/domain';
+import { ConcertMap, type AtlasMapPoint } from './concert-map';
+import { usePreferences } from './preferences-provider';
 
-const markets: Array<{ code: 'ALL' | MarketCode; label: string }> = [
-  { code: 'ALL', label: 'All Asia' },
-  { code: 'SG', label: 'Singapore' },
-  { code: 'HK', label: 'Hong Kong' },
-  { code: 'TW', label: 'Taipei' },
-  { code: 'TH', label: 'Bangkok' },
+const MARKET_OPTIONS: Array<'ALL' | MarketCode> = [
+  'ALL', 'SG', 'HK', 'TW', 'TH', 'KR', 'MY', 'PH', 'ID', 'VN', 'AU', 'JP',
 ];
 
-const mapPositions: Record<string, { x: number; y: number; code: string }> = {
-  Singapore: { x: 49, y: 78, code: 'SIN' },
-  'Hong Kong': { x: 67, y: 42, code: 'HKG' },
-  Taipei: { x: 72, y: 30, code: 'TPE' },
-  Bangkok: { x: 36, y: 62, code: 'BKK' },
+type DiscoveryPayload = {
+  events: DiscoveredEvent[];
+  errors: Array<{ provider: string; message: string }>;
 };
 
-export function AtlasExplorer({ journeys }: { journeys: ConcertJourney[] }) {
+type AtlasResult = {
+  id: string;
+  href: string;
+  external: boolean;
+  artist: string;
+  subtitle: string;
+  city: string;
+  market: string;
+  startsAt: string;
+  timezone?: string;
+  stage: string;
+  provider: string;
+  accent: string;
+  latitude?: number;
+  longitude?: number;
+};
+
+export function AtlasExplorer({
+  journeys,
+  windowStartsAt,
+}: {
+  journeys: ConcertJourney[];
+  windowStartsAt: string;
+}) {
+  const { dateLocale, t } = usePreferences();
   const [market, setMarket] = useState<'ALL' | MarketCode>('ALL');
   const [artist, setArtist] = useState('');
-  const visible = useMemo(
-    () =>
-      journeys.filter(
-        (journey) =>
-          (market === 'ALL' || journey.venue.market === market) &&
-          journey.artist.name.toLowerCase().includes(artist.toLowerCase()),
-      ),
-    [artist, journeys, market],
+  const [liveEvents, setLiveEvents] = useState<DiscoveredEvent[]>([]);
+  const [searched, setSearched] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [selectedId, setSelectedId] = useState<string>();
+
+  const travelWindow = useMemo(() => {
+    const start = new Date(windowStartsAt);
+    const end = new Date(start.getTime() + 180 * 86_400_000);
+    const formatter = new Intl.DateTimeFormat(dateLocale, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'Asia/Singapore',
+    });
+    return {
+      start: start.toISOString(),
+      end: end.toISOString(),
+      label: `${formatter.format(start)} – ${formatter.format(end)}`,
+    };
+  }, [dateLocale, windowStartsAt]);
+
+  const demoResults = useMemo<AtlasResult[]>(
+    () => journeys
+      .filter((journey) => market === 'ALL' || journey.venue.market === market)
+      .filter((journey) => journey.artist.name.toLowerCase().includes(artist.trim().toLowerCase()))
+      .map((journey) => {
+        const next = getNextMilestone(journey, new Date());
+        return {
+          id: `demo-${journey.id}`,
+          href: `/plans/${journey.slug}`,
+          external: false,
+          artist: journey.artist.name,
+          subtitle: journey.tourName,
+          city: journey.venue.city,
+          market: journey.venue.market,
+          startsAt: journey.performanceStartsAt,
+          timezone: journey.venue.timezone,
+          stage: next ? t(milestoneTitleKey(next.type)) : t('atlas.showConfirmed'),
+          provider: t('common.illustrative'),
+          accent: journey.artist.accent,
+          latitude: journey.venue.latitude,
+          longitude: journey.venue.longitude,
+        };
+      }),
+    [artist, journeys, market, t],
   );
 
+  const liveResults = useMemo<AtlasResult[]>(
+    () => liveEvents.map((event) => ({
+      id: `live-${event.provider}-${event.providerEventId}`,
+      href: event.officialUrl,
+      external: true,
+      artist: event.artist ?? (artist.trim() || event.name),
+      subtitle: event.name,
+      city: event.city ?? event.venue ?? event.countryCode ?? '—',
+      market: event.countryCode ?? market,
+      startsAt: event.startsAt,
+      timezone: event.timezone,
+      stage: t('atlas.liveListing'),
+      provider: event.provider === 'ticketmaster-discovery' ? 'Ticketmaster' : 'PredictHQ',
+      accent: event.provider === 'ticketmaster-discovery' ? '#4338ca' : '#18794e',
+      latitude: event.latitude,
+      longitude: event.longitude,
+    })),
+    [artist, liveEvents, market, t],
+  );
+
+  const visible = searched ? liveResults : demoResults;
+  const mapPoints = useMemo<AtlasMapPoint[]>(
+    () => visible
+      .filter((event) => Number.isFinite(event.latitude) && Number.isFinite(event.longitude))
+      .map((event) => ({
+        id: event.id,
+        latitude: event.latitude!,
+        longitude: event.longitude!,
+        artist: event.artist,
+        city: event.city,
+        accent: event.accent,
+      })),
+    [visible],
+  );
+
+  async function searchLive() {
+    const term = artist.trim();
+    if (term.length < 2) {
+      setSearchError(t('atlas.artistRequired'));
+      return;
+    }
+    setSearching(true);
+    setSearchError('');
+    const params = new URLSearchParams({
+      artist: term,
+      startDateTime: travelWindow.start,
+      endDateTime: travelWindow.end,
+    });
+    if (market !== 'ALL') params.set('countryCode', market);
+
+    try {
+      const response = await fetch(`/api/v1/discover?${params.toString()}`);
+      const payload = (await response.json()) as DiscoveryPayload & { error?: string };
+      if (!response.ok) throw new Error(payload.error ?? t('atlas.searchFailed'));
+      setLiveEvents(payload.events);
+      setSearched(true);
+      setSelectedId(payload.events[0] ? `live-${payload.events[0].provider}-${payload.events[0].providerEventId}` : undefined);
+      if (payload.errors.length && !payload.events.length) setSearchError(t('atlas.providersUnavailable'));
+    } catch (error) {
+      setSearchError(error instanceof Error ? error.message : t('atlas.searchFailed'));
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  const handleMapSelect = useCallback((id: string) => {
+    setSelectedId(id);
+    window.setTimeout(() => document.getElementById(`atlas-result-${id}`)?.focus({ preventScroll: true }), 0);
+  }, []);
+
   return (
-    <div className="atlas-layout">
-      <section className="atlas-map" aria-label="Concert destinations in Asia">
-        <div className="map-grid" aria-hidden="true" />
-        <div className="map-range">
-          <span>SEP</span><strong>22 AUG — 31 DEC 2026</strong><span>DEC</span>
-        </div>
-        <div className="home-node" style={{ left: '49%', top: '78%' }}>
-          <i /> <span>HOME · SIN</span>
-        </div>
-        {visible.map((journey) => {
-          const position = mapPositions[journey.venue.city];
-          if (!position) return null;
-          return (
-            <Link
-              className="map-event-node"
-              href={`/plans/${journey.slug}`}
-              style={{ left: `${position.x}%`, top: `${position.y}%`, '--node-accent': journey.artist.accent } as React.CSSProperties}
-              key={journey.id}
-              aria-label={`${journey.artist.name} in ${journey.venue.city}`}
-            >
-              <i /><span>{position.code}</span><strong>{journey.artist.name}</strong>
-            </Link>
-          );
-        })}
-        <div className="map-legend">
-          <span><i className="followed" /> Followed artist</span>
-          <span><i className="home" /> Home</span>
-          <small>Illustrative events · official-source adapters are ready for live credentials</small>
+    <div className="page-body atlas-page">
+      <section className="filter-bar" aria-label={t('atlas.marketLabel')}>
+        <label className="search-field">
+          <span>{t('atlas.searchLabel')}</span>
+          <input
+            value={artist}
+            onChange={(event) => { setArtist(event.target.value); setSearched(false); }}
+            onKeyDown={(event) => { if (event.key === 'Enter') void searchLive(); }}
+            placeholder={t('atlas.searchPlaceholder')}
+          />
+        </label>
+        <label className="select-field">
+          <span>{t('atlas.marketLabel')}</span>
+          <select value={market} onChange={(event) => { setMarket(event.target.value as typeof market); setSearched(false); }}>
+            {MARKET_OPTIONS.map((item) => <option value={item} key={item}>{t(marketKey(item))}</option>)}
+          </select>
+        </label>
+        <div className="date-filter"><span>{t('atlas.travelDates')}</span><strong>{travelWindow.label}</strong></div>
+        <div className="search-action-cell">
+          <button className="button-primary" type="button" onClick={() => void searchLive()} disabled={searching}>
+            {searching ? t('atlas.searching') : t('atlas.searchAction')}
+          </button>
         </div>
       </section>
+      <p className="atlas-search-status" aria-live="polite">{searchError}</p>
 
-      <aside className="atlas-results">
-        <div className="atlas-controls">
-          <label>
-            <span>ARTIST</span>
-            <input
-              value={artist}
-              onChange={(event) => setArtist(event.target.value)}
-              placeholder="Search followed artists"
-            />
-          </label>
-          <div className="market-tabs" aria-label="Filter by market">
-            {markets.map((item) => (
-              <button
-                className={market === item.code ? 'active' : ''}
-                type="button"
-                onClick={() => setMarket(item.code)}
-                key={item.code}
-              >
-                {item.label}
-              </button>
-            ))}
+      <div className="atlas-workspace">
+        <section className="atlas-map-shell" aria-label={t('atlas.title')}>
+          <ConcertMap points={mapPoints} selectedId={selectedId} onSelect={handleMapSelect} />
+          <div className="map-key">
+            <span><i className="artist" />{searched ? t('atlas.liveData') : t('atlas.savedPlans')}</span>
           </div>
-        </div>
+        </section>
 
-        <div className="atlas-result-heading">
-          <span>{visible.length} MATCHES</span>
-          <strong>Inside your travel window</strong>
-        </div>
-
-        <div className="atlas-cards">
-          {visible.map((journey) => {
-            const next = getNextMilestone(journey, new Date('2026-08-22T11:42:00+08:00'));
-            return (
-              <Link className="atlas-result-card" href={`/plans/${journey.slug}`} key={journey.id}>
-                <span className="result-accent" style={{ background: journey.artist.accent }} />
-                <div>
-                  <span>{journey.venue.city.toUpperCase()} · {journey.venue.market}</span>
-                  <strong>{journey.artist.name}</strong>
-                  <small>{journey.tourName}</small>
-                </div>
-                <div className="result-date">
-                  <strong>{formatVenueTime(journey.performanceStartsAt, journey.venue.timezone)}</strong>
-                  <span>{next?.title ?? 'Show confirmed'}</span>
-                </div>
-                <span className="result-arrow">↗</span>
-              </Link>
-            );
-          })}
-        </div>
-      </aside>
+        <aside className="atlas-results">
+          <div className="results-heading">
+            <div><span>{visible.length} {t('common.matches')}</span><h2>{searched ? t('atlas.liveResults') : t('atlas.savedInWindow')}</h2></div>
+          </div>
+          <div className="atlas-result-list">
+            {visible.map((event) => {
+              const translatedCity = cityKey(event.city);
+              const content = (
+                <>
+                  <span className="result-code">{event.market}</span>
+                  <span className="result-copy">
+                    <small>{translatedCity ? t(translatedCity) : event.city}</small>
+                    <strong>{event.artist}</strong>
+                    <span>{event.subtitle}</span>
+                  </span>
+                  <span className="result-time">
+                    <strong>{formatVenueTime(event.startsAt, event.timezone ?? 'UTC', dateLocale)}</strong>
+                    <small>{event.stage} · {event.provider}</small>
+                  </span>
+                  <span className="row-arrow" aria-hidden="true">↗</span>
+                </>
+              );
+              const className = `atlas-result-row${selectedId === event.id ? ' is-selected' : ''}`;
+              return event.external ? (
+                <a id={`atlas-result-${event.id}`} className={className} href={event.href} target="_blank" rel="noreferrer" onMouseEnter={() => setSelectedId(event.id)} key={event.id}>{content}</a>
+              ) : (
+                <Link id={`atlas-result-${event.id}`} className={className} href={event.href} onMouseEnter={() => setSelectedId(event.id)} key={event.id}>{content}</Link>
+              );
+            })}
+            {!visible.length ? <p className="empty-state">{searched ? t('atlas.noLiveResults') : t('common.noResults')}</p> : null}
+          </div>
+          <p className="result-note">{searched ? t('atlas.liveNote') : t('atlas.demoNote')}</p>
+        </aside>
+      </div>
     </div>
   );
 }

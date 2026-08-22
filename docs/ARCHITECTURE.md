@@ -9,7 +9,7 @@ official/licensed providers ──► source adapters ──► normalized event
 official verified links      ──► source registry ──► evidence boundary
                                               │
                                               ▼
-iOS app ◄──────────── API routes / auth / D1 state ────────────► Web app
+iOS app ◄────────── API routes / session / SQLite state ──────► Web app
    │                                                          │
 Swift lifecycle core                                  responsive product UI
 ```
@@ -18,19 +18,21 @@ The central object is a `ConcertJourney`, not a generic event card. A journey ow
 
 ## Web runtime
 
-`apps/web` is a Next-compatible TypeScript app built on the Sites capability runtime.
+`apps/web` is a standard Next.js 16 TypeScript app running on Node.js 22.
 
 - Server components render registry and journey data.
 - Client components own countdowns, filters, and optimistic task interactions.
-- Route handlers expose read discovery and sources plus authenticated user mutations.
-- ChatGPT auth headers are read only on the server; the dispatcher, not browser JavaScript, establishes identity.
-- D1 is accessed through Drizzle. User-state tables are bootstrapped idempotently at runtime so a newly provisioned site can accept writes without a manual local Wrangler step.
+- Route handlers expose discovery and sources plus browser-private user mutations.
+- A random `HttpOnly` first-party cookie isolates preview state; no identity credential is exposed to client JavaScript.
+- SQLite uses WAL mode and an explicit persistent volume. User-state tables are bootstrapped idempotently at runtime.
+- MapLibre GL JS renders the interactive Atlas using OpenFreeMap styles; the result list remains the accessible source of truth.
+- The production container exposes no host port and is reachable only through the existing Caddy gateway network.
 
-The checked-in Drizzle schema contains the wider normalized model. Runtime bootstrap is deliberately limited to the tables used by the current user-state vertical slice; production ingestion should apply checked-in migrations through the release process.
+Runtime persistence is deliberately limited to the tables used by the current user-state vertical slice. Production ingestion and multi-user identity require versioned migrations before the data pilot expands.
 
 ## Source boundary
 
-The adapter interface returns normalized `DiscoveredEvent` values and independent health states. An unconfigured adapter returns an empty result and `configuration_required`; it never substitutes sample data.
+The adapter interface returns normalized `DiscoveredEvent` values and independent health states. Ticketmaster and PredictHQ run independently through `Promise.allSettled`; one provider failure does not discard the other. An unconfigured adapter returns an empty result and `configuration_required`; it never substitutes sample data. Public search input is constrained, rate-limited, cached for ten minutes, and protected by a Ticketmaster daily request budget.
 
 The source registry is a policy artifact, not permission to scrape. It records market, tier, capability, official host, and partnership status. Event-level authorization still takes precedence: a known platform can host both official and unrelated content.
 
@@ -51,7 +53,7 @@ The source registry is a policy artifact, not permission to scrape. It records m
 - `Features` contains Today, Atlas, Plans/Journey, and Passport.
 - The core is also exposed as a Swift package so lifecycle semantics can run in CI without an iOS simulator.
 
-The current native client reads discovery and keeps illustrative plan interaction in memory. Production mobile mutations require a dedicated mobile session design; ChatGPT web dispatcher headers must not be imitated by the app.
+The current native client reads discovery and keeps illustrative plan interaction in memory. Production mobile mutations require a dedicated mobile account/session design; the browser preview cookie is not a mobile authentication protocol.
 
 ## Security and privacy boundary
 

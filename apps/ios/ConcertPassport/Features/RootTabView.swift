@@ -5,24 +5,24 @@ struct RootTabView: View {
         TabView {
             TodayView()
                 .tabItem {
-                    Label("Today", systemImage: "sparkle")
+                    Label(L10n.navToday, systemImage: "clock")
                 }
 
             AtlasView()
                 .tabItem {
-                    Label("Atlas", systemImage: "map")
+                    Label(L10n.navAtlas, systemImage: "map")
                 }
 
             PlansView()
                 .tabItem {
-                    Label("Plans", systemImage: "list.bullet.rectangle.portrait")
+                    Label(L10n.navPlans, systemImage: "list.bullet.rectangle.portrait")
                 }
 
             PassportView()
                 .tabItem {
-                    Label("Passport", systemImage: "airplane")
+                    Label(L10n.navPassport, systemImage: "book.closed")
                 }
         }
-        .toolbarBackground(PassportTheme.ink, for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
     }
 }

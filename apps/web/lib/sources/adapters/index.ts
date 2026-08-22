@@ -1,4 +1,5 @@
 import type { DiscoveredEvent, DiscoveryQuery } from '@/lib/domain/types';
+import { APAC_COUNTRY_CODES } from '@/lib/sources/query';
 import { predictHqAdapter } from './predicthq';
 import { ticketmasterAdapter } from './ticketmaster';
 
@@ -18,7 +19,11 @@ export async function discoverAcrossSources(
   const errors: Array<{ provider: string; message: string }> = [];
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') {
-      events.push(...result.value.events);
+      events.push(
+        ...result.value.events.filter(
+          (event) => !event.countryCode || APAC_COUNTRY_CODES.has(event.countryCode.toUpperCase()),
+        ),
+      );
     } else {
       errors.push({
         provider: eventSourceAdapters[index].id,

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import type { ConcertJourney } from '@/lib/domain/types';
 import { formatVenueTime, getJourneyProgress, getNextMilestone } from '@/lib/domain/lifecycle';
+import { cityKey, milestoneTitleKey } from '@/lib/i18n/domain';
+import { usePreferences } from './preferences-provider';
 
 function remainingLabel(targetIso: string, now: number): string {
   const remaining = Math.max(0, new Date(targetIso).getTime() - now);
@@ -14,8 +16,12 @@ function remainingLabel(targetIso: string, now: number): string {
 }
 
 export function TodayDashboard({ journeys }: { journeys: ConcertJourney[] }) {
+  const { dateLocale, t } = usePreferences();
   const primaryJourney = journeys[0];
-  const primaryMilestone = getNextMilestone(primaryJourney, new Date('2026-08-22T11:42:00+08:00'))!;
+  const primaryMilestone = getNextMilestone(
+    primaryJourney,
+    new Date('2026-08-22T11:42:00+08:00'),
+  )!;
   const [now, setNow] = useState(() => Date.now());
   const [completed, setCompleted] = useState(false);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'preview'>('idle');
@@ -46,146 +52,128 @@ export function TodayDashboard({ journeys }: { journeys: ConcertJourney[] }) {
     setSaveState(response.ok ? 'saved' : 'preview');
   }
 
+  const translatedCity = cityKey(primaryJourney.venue.city);
+  const progress = getJourneyProgress(primaryJourney);
+
   return (
-    <>
-      <div className="content-grid today-grid">
-        <div className="primary-column">
-          <section className={`next-action ${completed ? 'action-completed' : ''}`}>
-            <div className="action-topline">
-              <span className="verified-label"><i /> NEXT ACTION · VERIFIED</span>
-              <span className="preview-label">ILLUSTRATIVE TIMINGS</span>
-            </div>
+    <div className="page-body today-page">
+      <section className={`priority-action ${completed ? 'is-complete' : ''}`}>
+        <div className="priority-rail" aria-hidden="true" />
+        <div className="priority-content">
+          <div className="priority-meta">
+            <span className="status-label"><i />{t('home.nextAction')}</span>
+            <span>{t('home.verifiedWindow')} · {t('common.illustrative')}</span>
+          </div>
 
-            <div className="action-heading">
-              <div>
-                <p>{primaryJourney.artist.name} · {primaryJourney.tourName}</p>
-                <h2>{completed ? 'Registration marked complete' : primaryMilestone.title}</h2>
-              </div>
-              <span className="city-code">HKG</span>
+          <div className="priority-main">
+            <div className="priority-copy">
+              <p>{primaryJourney.artist.name} · {translatedCity ? t(translatedCity) : primaryJourney.venue.city}</p>
+              <h2>{completed ? t('home.registrationComplete') : t(milestoneTitleKey(primaryMilestone.type))}</h2>
+              <span>{primaryJourney.tourName} · {primaryJourney.venue.name}</span>
             </div>
-
-            <div className="countdown-block">
-              <div>
-                <span className="countdown-label">WINDOW CLOSES IN</span>
-                <strong className="countdown">{countdown}</strong>
-              </div>
-              <div className="deadline-meta">
-                <span>{formatVenueTime(primaryMilestone.endsAt!, primaryMilestone.timezone)}</span>
-                <small>Venue time · Asia/Hong Kong</small>
-              </div>
+            <div className="deadline-clock">
+              <span>{t('home.windowClosesIn')}</span>
+              <strong aria-live="off">{countdown}</strong>
+              <small>
+                {formatVenueTime(primaryMilestone.endsAt!, primaryMilestone.timezone, dateLocale)} · {t('common.venueTime')}
+              </small>
             </div>
+          </div>
 
-            <div className="action-buttons">
-              <Link className="primary-button" href={`/plans/${primaryJourney.slug}`}>
-                Review registration <span>↗</span>
-              </Link>
-              <button className="secondary-button" type="button" onClick={markCompleted}>
-                {completed ? 'Undo completion' : 'Mark completed'}
-              </button>
-            </div>
+          <div className="priority-actions">
+            <Link className="button-primary" href={`/plans/${primaryJourney.slug}`}>
+              {t('home.reviewRegistration')} <span aria-hidden="true">→</span>
+            </Link>
+            <button className="button-quiet" type="button" onClick={markCompleted}>
+              {completed ? t('common.undo') : t('common.markCompleted')}
+            </button>
+            <span className="save-feedback" aria-live="polite">
+              {saveState === 'saving' && t('common.saving')}
+              {saveState === 'saved' && t('common.saved')}
+              {saveState === 'preview' && t('common.previewSaved')}
+            </span>
+          </div>
 
-            <div className="source-line">
-              <span className="source-seal">✓</span>
-              <span>
-                {primaryJourney.sources.map((source) => source.name).join(' + ')}
-                <small>
-                  {saveState === 'saving' && 'Saving…'}
-                  {saveState === 'saved' && 'Saved to your protected journey'}
-                  {saveState === 'preview' && 'Preview updated · sign in to persist changes'}
-                  {saveState === 'idle' && 'Two first-party references in the source ledger'}
-                </small>
-              </span>
-              <button type="button" onClick={() => setSourcesOpen(!sourcesOpen)}>
-                {sourcesOpen ? 'Hide sources' : 'View sources'}
-              </button>
-            </div>
+          <div className="evidence-bar">
+            <span className="verification-seal" aria-hidden="true">✓</span>
+            <span>{t('home.evidenceCount', { count: primaryJourney.sources.length })}</span>
+            <span className="evidence-names">{primaryJourney.sources.map((source) => source.name).join(' · ')}</span>
+            <button type="button" onClick={() => setSourcesOpen(!sourcesOpen)} aria-expanded={sourcesOpen}>
+              {sourcesOpen ? t('common.hideSources') : t('common.viewSources')}
+            </button>
+          </div>
 
-            {sourcesOpen ? (
-              <div className="inline-sources">
-                {primaryJourney.sources.map((source) => (
-                  <a href={source.url} target="_blank" rel="noreferrer" key={source.id}>
-                    <span>{source.name}</span>
-                    <small>{source.host} · checked {formatVenueTime(source.checkedAt, primaryJourney.venue.timezone)}</small>
-                  </a>
-                ))}
-              </div>
-            ) : null}
-          </section>
-
-          <section className="section-block">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">COMING UP</p>
-                <h3>Your next windows</h3>
-              </div>
-              <Link href="/plans">View all plans <span>→</span></Link>
-            </div>
-            <div className="upcoming-list">
-              {journeys.slice(0, 4).map((journey) => {
-                const milestone = getNextMilestone(journey, new Date('2026-08-22T11:42:00+08:00'));
-                if (!milestone) return null;
-                return (
-                  <article className="upcoming-row" key={journey.id}>
-                    <time>{formatVenueTime(milestone.startsAt, milestone.timezone).split(' ·')[0]}</time>
-                    <span className="event-accent" style={{ background: journey.artist.accent }} />
-                    <div className="event-identity">
-                      <strong>{journey.artist.name}</strong>
-                      <span>{journey.venue.city.toUpperCase()}</span>
-                    </div>
-                    <div className="event-action">
-                      <span>{milestone.title}</span>
-                      <strong>{formatVenueTime(milestone.startsAt, milestone.timezone)}</strong>
-                    </div>
-                    <Link href={`/plans/${journey.slug}`} aria-label={`Open ${journey.artist.name} plan`}>↗</Link>
-                  </article>
-                );
-              })}
-            </div>
-          </section>
-        </div>
-
-        <aside className="context-column">
-          <section className="journey-card">
-            <div className="journey-head">
-              <div>
-                <p className="eyebrow">PROTECTED JOURNEY</p>
-                <h3>{primaryJourney.venue.city}</h3>
-                <span>{primaryJourney.venue.name} · {formatVenueTime(primaryJourney.performanceStartsAt, primaryJourney.venue.timezone)}</span>
-              </div>
-              <span className="journey-number">{String(getJourneyProgress(primaryJourney).complete).padStart(2, '0')}</span>
-            </div>
-
-            <div className="route-plot" aria-label="Singapore to Hong Kong route preview">
-              <span>SIN</span><span className="route-line"><i /></span><span>HKG</span>
-              <small>{primaryJourney.travelDistanceKm?.toLocaleString()} km</small>
-            </div>
-
-            <div className="timeline">
-              {primaryJourney.milestones.slice(0, 4).map((milestone) => (
-                <div className={`timeline-row ${milestone.state}`} key={milestone.id}>
-                  <span className="timeline-marker" />
-                  <div>
-                    <strong>{milestone.title}</strong>
-                    <span>{formatVenueTime(milestone.startsAt, milestone.timezone)}</span>
-                  </div>
-                </div>
+          {sourcesOpen ? (
+            <div className="evidence-list">
+              {primaryJourney.sources.map((source) => (
+                <a href={source.url} target="_blank" rel="noreferrer" key={source.id}>
+                  <span><strong>{source.name}</strong><small>{source.host}</small></span>
+                  <small>{formatVenueTime(source.checkedAt, primaryJourney.venue.timezone, dateLocale)} ↗</small>
+                </a>
               ))}
             </div>
-            <Link className="text-button" href={`/plans/${primaryJourney.slug}`}>Open full journey <span>→</span></Link>
-          </section>
+          ) : null}
+        </div>
+      </section>
 
-          <Link className="passport-teaser" href="/passport">
-            <div>
-              <p className="eyebrow">YOUR PASSPORT</p>
-              <strong>18</strong>
-              <span>shows across 7 cities</span>
-            </div>
-            <div className="stamp-preview">
-              <span>LIVE</span><strong>SEOUL</strong><small>2025 · 06 · 21</small>
-            </div>
+      <div className="today-columns">
+        <section className="content-section upcoming-section">
+          <div className="section-heading">
+            <div><span>{t('home.upcoming')}</span><h2>{t('home.nextWindows')}</h2></div>
+            <Link href="/plans">{t('common.viewAll')} <span aria-hidden="true">→</span></Link>
+          </div>
+          <div className="event-list">
+            {journeys.slice(0, 4).map((journey) => {
+              const milestone = getNextMilestone(journey, new Date('2026-08-22T11:42:00+08:00'));
+              if (!milestone) return null;
+              const translatedJourneyCity = cityKey(journey.venue.city);
+              return (
+                <Link className="event-row" href={`/plans/${journey.slug}`} key={journey.id}>
+                  <span className="event-date">
+                    {formatVenueTime(milestone.startsAt, milestone.timezone, dateLocale).split(' ·')[0]}
+                  </span>
+                  <span className="artist-swatch" style={{ '--artist-color': journey.artist.accent } as React.CSSProperties} />
+                  <span className="event-artist"><strong>{journey.artist.name}</strong><small>{journey.tourName}</small></span>
+                  <span className="event-place">{translatedJourneyCity ? t(translatedJourneyCity) : journey.venue.city}</span>
+                  <span className="event-milestone"><strong>{t(milestoneTitleKey(milestone.type))}</strong><small>{formatVenueTime(milestone.startsAt, milestone.timezone, dateLocale)}</small></span>
+                  <span className="row-arrow" aria-hidden="true">→</span>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        <aside className="journey-overview">
+          <div className="section-heading compact">
+            <div><span>{t('home.protectedJourney')}</span><h2>{translatedCity ? t(translatedCity) : primaryJourney.venue.city}</h2></div>
+            <span className="progress-fraction">{progress.complete}/{progress.total}</span>
+          </div>
+
+          <div className="route-lineup" aria-label="Singapore to Hong Kong">
+            <span>SIN</span><i><b style={{ width: `${Math.max(12, progress.complete / progress.total * 100)}%` }} /></i><span>HKG</span>
+          </div>
+          <dl className="journey-facts-compact">
+            <div><dt>{t('plans.performance')}</dt><dd>{formatVenueTime(primaryJourney.performanceStartsAt, primaryJourney.venue.timezone, dateLocale)}</dd></div>
+            <div><dt>{t('journey.venue')}</dt><dd>{primaryJourney.venue.name}</dd></div>
+          </dl>
+          <ol className="mini-lifecycle">
+            {primaryJourney.milestones.slice(0, 4).map((milestone) => (
+              <li className={milestone.state} key={milestone.id}>
+                <i />
+                <span><strong>{t(milestoneTitleKey(milestone.type))}</strong><small>{formatVenueTime(milestone.startsAt, milestone.timezone, dateLocale)}</small></span>
+              </li>
+            ))}
+          </ol>
+          <Link className="text-link" href={`/plans/${primaryJourney.slug}`}>{t('home.openJourney')} →</Link>
+
+          <Link className="passport-inline" href="/passport">
+            <span><small>{t('home.passportPrompt')}</small><strong>{t('home.showsAcrossCities', { shows: 18, cities: 7 })}</strong></span>
+            <span aria-hidden="true">→</span>
           </Link>
         </aside>
       </div>
-    </>
+
+      <p className="data-footnote">{t('home.deadlineNote')}</p>
+    </div>
   );
 }

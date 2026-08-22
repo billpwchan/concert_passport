@@ -20,6 +20,8 @@
 		A0000000000000000000000B /* AtlasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000B /* AtlasView.swift */; };
 		A0000000000000000000000C /* PassportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000C /* PassportView.swift */; };
 		A0000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0000000000000000000000F /* Assets.xcassets */; };
+		A0000000000000000000000E /* Localizations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000010 /* Localizations.swift */; };
+		A0000000000000000000000F /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000011 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +40,8 @@
 		B0000000000000000000000D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Resources/Info.plist; sourceTree = "<group>"; };
 		B0000000000000000000000E /* ConcertPassport.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ConcertPassport.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0000000000000000000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
+		B00000000000000000000010 /* Localizations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Design/Localizations.swift; sourceTree = "<group>"; };
+		B00000000000000000000011 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Resources/Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +73,7 @@
 				B00000000000000000000005 /* APIClient.swift */,
 				B00000000000000000000006 /* PassportModel.swift */,
 				B00000000000000000000007 /* PassportTheme.swift */,
+				B00000000000000000000010 /* Localizations.swift */,
 				B00000000000000000000008 /* RootTabView.swift */,
 				B00000000000000000000009 /* TodayView.swift */,
 				B0000000000000000000000A /* PlansView.swift */,
@@ -76,6 +81,7 @@
 				B0000000000000000000000C /* PassportView.swift */,
 				B0000000000000000000000D /* Info.plist */,
 				B0000000000000000000000F /* Assets.xcassets */,
+				B00000000000000000000011 /* Localizable.xcstrings */,
 			);
 			path = ConcertPassport;
 			sourceTree = "<group>";
@@ -129,6 +135,8 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				"zh-Hans",
+				"zh-Hant",
 				Base,
 			);
 			mainGroup = D00000000000000000000001;
@@ -147,6 +155,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A0000000000000000000000D /* Assets.xcassets in Resources */,
+				A0000000000000000000000F /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +173,7 @@
 				A00000000000000000000005 /* APIClient.swift in Sources */,
 				A00000000000000000000006 /* PassportModel.swift in Sources */,
 				A00000000000000000000007 /* PassportTheme.swift in Sources */,
+				A0000000000000000000000E /* Localizations.swift in Sources */,
 				A00000000000000000000008 /* RootTabView.swift in Sources */,
 				A00000000000000000000009 /* TodayView.swift in Sources */,
 				A0000000000000000000000A /* PlansView.swift in Sources */,

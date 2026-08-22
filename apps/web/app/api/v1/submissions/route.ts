@@ -1,12 +1,11 @@
-import { getChatGPTUser } from '@/app/chatgpt-auth';
 import { submitSource } from '@/db/repository';
+import { getPrivateSession } from '@/lib/server/session';
 import { isVerifiedOfficialHost } from '@/lib/sources/registry';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request): Promise<Response> {
-  const user = await getChatGPTUser();
-  if (!user) return Response.json({ error: 'Authentication required' }, { status: 401 });
+  const session = getPrivateSession(request);
 
   const body = (await request.json()) as { url?: string };
   let sourceUrl: URL;
@@ -20,12 +19,14 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const id = await submitSource({
-    user: { userId: user.userId, email: user.email, displayName: user.displayName },
+    user: session.user,
     url: sourceUrl.toString(),
     host: sourceUrl.hostname,
   });
-  return Response.json(
+  const response = Response.json(
     { id, status: 'pending', knownOfficialHost: isVerifiedOfficialHost(sourceUrl.hostname) },
     { status: 201 },
   );
+  if (session.setCookie) response.headers.set('set-cookie', session.setCookie);
+  return response;
 }

@@ -1,7 +1,30 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { ConnectorHealth, SourceChannel } from '@/lib/domain/types';
+import type { ConnectorHealth, MarketCode, SourceChannel } from '@/lib/domain/types';
+import type { MessageKey } from '@/lib/i18n';
+import {
+  sourceCapabilityKey,
+  sourceCategoryKey,
+  sourceStatusKey,
+} from '@/lib/i18n/domain';
+import { usePreferences } from './preferences-provider';
+
+const markets: Array<'ALL' | MarketCode> = ['ALL', 'SG', 'HK', 'TW', 'TH', 'KR', 'MY', 'PH', 'ID', 'VN', 'JP', 'AU'];
+const categories: Array<'ALL' | SourceChannel['category']> = [
+  'ALL',
+  'fan_platform',
+  'promoter',
+  'ticketing',
+  'event_api',
+  'artist_identity',
+];
+
+const connectorStatusKeys: Record<ConnectorHealth['status'], MessageKey> = {
+  connected: 'sources.connected',
+  configuration_required: 'sources.configurationRequired',
+  partnership_required: 'sources.partnershipRequired',
+};
 
 export function SourceDirectory({
   sources,
@@ -10,89 +33,133 @@ export function SourceDirectory({
   sources: SourceChannel[];
   connectors: ConnectorHealth[];
 }) {
-  const [market, setMarket] = useState('ALL');
-  const [category, setCategory] = useState('ALL');
+  const { t } = usePreferences();
+  const [market, setMarket] = useState<'ALL' | MarketCode>('ALL');
+  const [category, setCategory] = useState<'ALL' | SourceChannel['category']>('ALL');
   const [submissionUrl, setSubmissionUrl] = useState('');
-  const [submissionState, setSubmissionState] = useState('');
+  const [submissionState, setSubmissionState] = useState<MessageKey | null>(null);
+  const marketCount = new Set(sources.flatMap((source) => source.markets)).size;
   const visible = useMemo(
     () => sources.filter((source) =>
-      (market === 'ALL' || source.markets.includes(market as never)) &&
+      (market === 'ALL' || source.markets.includes(market)) &&
       (category === 'ALL' || source.category === category)),
     [category, market, sources],
   );
 
   async function submitOfficialLink(event: React.FormEvent) {
     event.preventDefault();
-    setSubmissionState('Submitting…');
+    setSubmissionState('sources.submitting');
     const response = await fetch('/api/v1/submissions', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ url: submissionUrl }),
     });
-    setSubmissionState(response.ok ? 'Added to the verification queue' : 'Sign in to submit an official link');
+    setSubmissionState(response.ok ? 'sources.queued' : 'sources.signInRequired');
     if (response.ok) setSubmissionUrl('');
   }
 
   return (
-    <>
-      <section className="connector-strip">
+    <div className="page-body sources-page">
+      <section className="connector-strip" aria-label={t('sources.title')}>
         {connectors.map((connector) => (
-          <article key={connector.id}>
-            <i className={connector.status} />
-            <div><strong>{connector.name}</strong><span>{connector.detail}</span></div>
-          </article>
+          <div className="connector-item" key={connector.id}>
+            <i className={connector.status} aria-hidden="true" />
+            <span><strong>{connector.name}</strong><small>{t(connectorStatusKeys[connector.status])}</small></span>
+          </div>
         ))}
-        <article>
-          <i className="connected" />
-          <div><strong>Official link registry</strong><span>{sources.length} curated channels across 9 markets</span></div>
-        </article>
+        <div className="connector-item registry">
+          <i className="connected" aria-hidden="true" />
+          <span>
+            <strong>{t('sources.officialRegistry')}</strong>
+            <small>{t('sources.acrossMarkets', { channels: sources.length, markets: marketCount })}</small>
+          </span>
+        </div>
       </section>
 
-      <section className="source-workspace">
-        <aside className="source-filters">
-          <p className="eyebrow">MARKET</p>
-          {['ALL', 'SG', 'HK', 'TW', 'TH', 'KR', 'MY', 'PH', 'ID', 'AU'].map((item) => (
-            <button className={market === item ? 'active' : ''} onClick={() => setMarket(item)} key={item}>{item}</button>
-          ))}
-          <p className="eyebrow category-label">CHANNEL</p>
-          {['ALL', 'fan_platform', 'promoter', 'ticketing', 'event_api', 'artist_identity'].map((item) => (
-            <button className={category === item ? 'active' : ''} onClick={() => setCategory(item)} key={item}>{item.replaceAll('_', ' ')}</button>
-          ))}
-        </aside>
+      <section className="source-filters" aria-label={t('sources.officialRegistry')}>
+        <div className="filter-group">
+          <span>{t('sources.market')}</span>
+          <div>
+            {markets.map((item) => (
+              <button
+                className={market === item ? 'active' : ''}
+                type="button"
+                onClick={() => setMarket(item)}
+                aria-pressed={market === item}
+                key={item}
+              >
+                {item === 'ALL' ? t('common.allMarkets') : item}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="filter-group channel-filter">
+          <span>{t('sources.channel')}</span>
+          <div>
+            {categories.map((item) => (
+              <button
+                className={category === item ? 'active' : ''}
+                type="button"
+                onClick={() => setCategory(item)}
+                aria-pressed={category === item}
+                key={item}
+              >
+                {item === 'ALL' ? t('sources.allChannels') : t(sourceCategoryKey(item))}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
-        <div className="source-directory">
-          <div className="source-directory-head"><span>{visible.length} CHANNELS</span><strong>Curated K-pop information coverage</strong></div>
+      <div className="source-layout">
+        <section className="source-directory">
+          <div className="directory-caption">
+            <span>{t('sources.curatedCount', { count: visible.length })}</span>
+            <strong>{t('sources.officialRegistry')}</strong>
+          </div>
+          <div className="source-table-head" aria-hidden="true">
+            <span />
+            <span>{t('sources.tableChannel')}</span>
+            <span>{t('sources.tableMarkets')}</span>
+            <span>{t('sources.tableCoverage')}</span>
+            <span>{t('sources.tableAccess')}</span>
+            <span />
+          </div>
           <div className="source-table">
             {visible.map((source) => (
               <a href={source.url} target="_blank" rel="noreferrer" className="source-row" key={source.id}>
                 <span className={`source-tier tier-${source.tier}`}>T{source.tier}</span>
-                <div><strong>{source.name}</strong><span>{source.host}</span></div>
-                <div className="source-markets">{source.markets.join(' · ')}</div>
-                <div className="source-capabilities">{source.capabilities.join(' · ')}</div>
-                <span className={`source-status ${source.status}`}>{source.status.replaceAll('_', ' ')}</span>
-                <span className="source-open">↗</span>
+                <span className="source-identity"><strong>{source.name}</strong><small>{source.host}</small></span>
+                <span className="source-markets">{source.markets.join(' · ')}</span>
+                <span className="source-capabilities">{source.capabilities.map((item) => t(sourceCapabilityKey(item))).join(' · ')}</span>
+                <span className={`source-status ${source.status}`}>{t(sourceStatusKey(source.status))}</span>
+                <span className="row-arrow" aria-hidden="true">↗</span>
               </a>
             ))}
+            {!visible.length ? <p className="empty-state">{t('common.noResults')}</p> : null}
           </div>
-        </div>
+        </section>
 
-        <aside className="submission-card">
-          <p className="eyebrow">MISSING A NOTICE?</p>
-          <h3>Send the official link.</h3>
-          <p>We verify the host, extract the lifecycle facts, and keep the source attached to every deadline.</p>
+        <aside className="submission-panel">
+          <span className="section-label">{t('sources.missingNotice')}</span>
+          <h2>{t('sources.sendLink')}</h2>
+          <p>{t('sources.submitDescription')}</p>
           <form onSubmit={submitOfficialLink}>
-            <input
-              type="url"
-              required
-              placeholder="https://official-source.com/…"
-              value={submissionUrl}
-              onChange={(event) => setSubmissionUrl(event.target.value)}
-            />
-            <button type="submit">Submit for verification</button>
+            <label>
+              <span className="sr-only">URL</span>
+              <input
+                type="url"
+                required
+                placeholder={t('sources.urlPlaceholder')}
+                value={submissionUrl}
+                onChange={(event) => setSubmissionUrl(event.target.value)}
+              />
+            </label>
+            <button className="button-primary" type="submit">{t('sources.submit')}</button>
           </form>
-          <small>{submissionState || 'No social screenshots become critical alerts without review.'}</small>
+          <small aria-live="polite">{submissionState ? t(submissionState) : t('sources.reviewNote')}</small>
         </aside>
-      </section>
-    </>
+      </div>
+    </div>
   );
 }

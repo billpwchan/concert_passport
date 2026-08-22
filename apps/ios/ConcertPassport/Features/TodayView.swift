@@ -14,21 +14,25 @@ struct TodayView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 32) {
                     pageHeader
 
                     if let next {
                         deadlineCard(journey: next.journey, milestone: next.milestone)
                     }
 
-                    VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 0) {
                         HStack {
-                            Text("Protected journeys")
+                            Text(L10n.protectedJourneys)
                                 .font(.title3.weight(.semibold))
                             Spacer()
-                            Text("Illustrative")
+                            Text(L10n.illustrative)
                                 .font(.caption.weight(.medium))
                                 .foregroundStyle(PassportTheme.muted)
+                        }
+                        .padding(.bottom, 14)
+                        .overlay(alignment: .bottom) {
+                            Rectangle().fill(PassportTheme.strongLine).frame(height: 1)
                         }
 
                         ForEach(model.journeys) { journey in
@@ -47,10 +51,10 @@ struct TodayView: View {
 
     private var pageHeader: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Eyebrow(text: "Saturday · Singapore")
-            Text("Nothing important\nshould slip past you.")
-                .font(.system(size: 36, weight: .semibold, design: .rounded))
-                .tracking(-1.1)
+            Eyebrow(text: L10n.todayEyebrow)
+            Text(L10n.todayTitle)
+                .font(.system(size: 38, weight: .semibold))
+                .tracking(-1.3)
                 .foregroundStyle(PassportTheme.text)
         }
     }
@@ -62,7 +66,7 @@ struct TodayView: View {
         PassportCard {
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
-                    Label("Action now", systemImage: "bolt.fill")
+                    Label(L10n.actionNow, systemImage: "clock.badge.exclamationmark")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(PassportTheme.amber)
                     Spacer()
@@ -75,7 +79,7 @@ struct TodayView: View {
                     Text(journey.artist.name)
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(PassportTheme.violet)
-                    Text(milestone.title)
+                    Text(L10n.milestoneTitle(milestone.kind))
                         .font(.title2.weight(.semibold))
                         .foregroundStyle(PassportTheme.text)
                     Text(milestone.detail)
@@ -97,7 +101,7 @@ struct TodayView: View {
                             milestoneID: milestone.id
                         )
                     } label: {
-                        Label("Mark done", systemImage: "checkmark")
+                        Label(L10n.markDone, systemImage: "checkmark")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
@@ -108,25 +112,22 @@ struct TodayView: View {
                                 .frame(width: 46, height: 46)
                         }
                         .buttonStyle(.bordered)
-                        .accessibilityLabel("Open verified official source")
+                        .accessibilityLabel(L10n.openVerifiedSource)
                     }
                 }
             }
+        }
+        .overlay(alignment: .leading) {
+            Rectangle().fill(PassportTheme.amber).frame(width: 3)
         }
     }
 
     private func journeyStrip(_ journey: ConcertJourney) -> some View {
         let progress = JourneyLifecycle.progress(in: journey)
-        return PassportCard {
-            HStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .fill(Color(hex: journey.artist.accentHex).opacity(0.16))
-                    Text(journey.venue.market)
-                        .font(.caption.monospaced().weight(.bold))
-                        .foregroundStyle(Color(hex: journey.artist.accentHex))
-                }
-                .frame(width: 52, height: 52)
+        return HStack(spacing: 14) {
+                Rectangle()
+                    .fill(Color(hex: journey.artist.accentHex))
+                    .frame(width: 6, height: 38)
 
                 VStack(alignment: .leading, spacing: 5) {
                     Text(journey.artist.name)
@@ -141,7 +142,10 @@ struct TodayView: View {
                 Text("\(progress.complete)/\(progress.total)")
                     .font(.subheadline.monospacedDigit().weight(.semibold))
                     .foregroundStyle(PassportTheme.muted)
-            }
+        }
+        .padding(.vertical, 17)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(PassportTheme.line).frame(height: 0.5)
         }
     }
 }
@@ -160,7 +164,7 @@ private struct CountdownLine: View {
             Text(String(format: "%02d:%02d:%02d", parts.hours, parts.minutes, parts.seconds))
                 .font(.system(size: 30, weight: .semibold, design: .monospaced))
                 .contentTransition(.numericText())
-            Text("remaining")
+            Text(L10n.remaining)
                 .font(.caption)
                 .foregroundStyle(PassportTheme.muted)
         }

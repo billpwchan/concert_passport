@@ -1,6 +1,6 @@
 # Design Direction
 
-**Status:** Proposed visual and interaction system
+**Status:** Implemented cross-platform visual and interaction system · 2026-08-22
 **Design standard:** Native, restrained, legible under stress, memorable after the show
 
 ## 1. Creative thesis
@@ -49,26 +49,24 @@ The product speaks like the most organized friend in the ticket group: calm, cur
 
 Avoid “guaranteed,” “we secured your ticket,” or language that implies an actual personal relationship with an artist.
 
-## 3. Visual concept: Midnight Passport
+## 3. Visual concept: Editorial Operations
 
-The base environment is a deep midnight field: the moment after venue lights fall and before the first note. Operational surfaces are crisp and luminous. Completed journeys move into warm paper, ink, foil, embossing, and stamp textures.
+The product is an editorial travel record with the precision of an operations console. Time, location, lifecycle state, and source authority create the composition. Light appearance uses warm paper rather than sterile white; dark appearance uses near-black ink rather than neon spectacle. The design is recognizable without depending on artist imagery, gradients, or a collage of floating cards.
 
 ### Color foundations
 
 | Token | Proposed value | Role |
 |---|---:|---|
-| `night-950` | `#08090D` | Primary dark canvas |
-| `night-900` | `#101218` | Elevated dark surface |
-| `night-800` | `#191C24` | Secondary surface |
-| `paper-50` | `#F7F3EA` | Passport/light canvas |
-| `paper-100` | `#EFE8DA` | Warm secondary canvas |
-| `ink-950` | `#161412` | Text on paper |
-| `fog-400` | `#9A9DA8` | Secondary dark-mode text |
-| `pulse-500` | `#7C63FF` | Primary brand action and route light |
-| `afterglow-500` | `#FF5E75` | Emotional highlight, not every CTA |
-| `signal-amber` | `#FFB547` | Waiting, lottery, needs attention |
-| `signal-cyan` | `#41D9D0` | Verified/ready/confirmed |
-| `signal-red` | `#FF4D55` | Expiring, failed, cancelled |
+| `paper` | `#F3F1EB` | Light canvas |
+| `surface` | `#FBFAF7` | Light operational surface |
+| `ink` | `#151515` | Light-mode primary text |
+| `night` | `#10110F` | Dark canvas |
+| `night-surface` | `#161714` | Dark operational surface |
+| `night-ink` | `#F1EFE8` | Dark-mode primary text |
+| `accent` | `#4338CA` / `#9C96FF` | Selected state, route, primary action |
+| `signal-amber` | adaptive brown/amber | Waiting and needs attention |
+| `signal-green` | adaptive green | Verified, ready, completed |
+| `line` | adaptive neutral hairline | Structural division |
 
 Values are starting points for visual prototyping, not production tokens. Every semantic pair must pass contrast testing in both appearance modes.
 
@@ -77,7 +75,7 @@ Values are starting points for visual prototyping, not production tokens. Every 
 - Use brand violet for selected state, navigation, and routes.
 - Reserve red for real danger or loss of opportunity; never use it to manufacture urgency.
 - A single performance may inherit a restrained accent derived from licensed tour art, but operational status colors never change meaning.
-- Paper mode appears within Passport and share artifacts, not as a disconnected global light theme.
+- Both light and dark are complete product appearances, not page-specific skins.
 - Maps stay desaturated so time/status/route layers remain dominant.
 
 ## 4. Typography
@@ -85,7 +83,7 @@ Values are starting points for visual prototyping, not production tokens. Every 
 ### Interface
 
 - **iOS:** San Francisco system family for native metrics, accessibility, and Dynamic Type.
-- **Web:** Inter Variable or a comparably neutral variable grotesk after performance and multilingual review.
+- **Web:** the platform UI stack (SF Pro/Segoe UI) with PingFang SC/TC and system CJK fallbacks. No downloaded display face is required for the product to feel branded.
 - **CJK:** PingFang on Apple platforms; Noto Sans CJK / Source Han Sans as web fallback.
 
 ### Editorial moments
@@ -111,11 +109,11 @@ The hierarchy must remain obvious in screenshots, Dynamic Type, and notification
 
 ## 5. Shape, material, and elevation
 
-- Use a 12–16 pt corner radius for actionable cards; avoid an interface made entirely of floating pills.
-- Hairline rules and tonal surface shifts create most hierarchy.
+- Use 2–7 pt radii only where a control or surface needs a physical edge. Collections are rows, tables, ledgers, and rails rather than repeated cards.
+- Hairline rules, alignment, whitespace, and restrained tonal shifts create most hierarchy.
 - Shadows are rare on dark operational screens and soft on paper artifacts.
 - Ticket/perforation metaphors are reserved for actual ticket-path or Passport artifacts.
-- Glass blur is used only when spatially justified over a map or moving backdrop.
+- Glass blur is reserved for sticky navigation where content passes underneath it.
 - The primary CTA should be one obvious full-width or anchored control, not several competing gradient buttons.
 - Status chips use icon + text + color; color alone is never the signal.
 
@@ -214,11 +212,11 @@ The page should answer “what is next, why, where did this come from, and what 
 
 ### Screen C: Atlas
 
-The upper two-thirds is a dark, quiet map with glowing route and event points. A time ribbon pins the selected period. The lower sheet lists the best matches for a planned trip or selected artist. A multi-city compare mode turns the map into a decision surface rather than decoration.
+The upper region is a quiet coordinate field with restrained route and event points. A date and market toolbar pins the selected period. The adjacent or lower ledger lists the best matches for a planned trip or selected artist. A multi-city compare mode turns the map into a decision surface rather than decoration.
 
 ### Screen D: Passport
 
-The opening state is a warm paper identity page laid over the dark product canvas:
+The opening state is a travel-record identity ledger that adapts to light and dark appearance:
 
 - shows attended;
 - artists seen;

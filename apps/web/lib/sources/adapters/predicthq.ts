@@ -1,6 +1,7 @@
-import { env } from 'cloudflare:workers';
 import type { DiscoveredEvent, DiscoveryQuery } from '@/lib/domain/types';
 import type { EventSourceAdapter } from './types';
+
+const APAC_COUNTRIES = 'AU,HK,ID,JP,KR,MY,NZ,PH,SG,TH,TW,VN';
 
 type PredictHqResponse = {
   results?: Array<{
@@ -11,11 +12,13 @@ type PredictHqResponse = {
     description?: string;
     entities?: Array<{ name: string; type: string }>;
     location?: [number, number];
+    country?: string;
+    geo?: { geometry?: { coordinates?: [number, number]; type?: string } };
   }>;
 };
 
 function accessToken(): string | undefined {
-  return (env as unknown as { PREDICTHQ_ACCESS_TOKEN?: string }).PREDICTHQ_ACCESS_TOKEN;
+  return process.env.PREDICTHQ_ACCESS_TOKEN;
 }
 
 export const predictHqAdapter: EventSourceAdapter = {
@@ -37,24 +40,36 @@ export const predictHqAdapter: EventSourceAdapter = {
 
     const params = new URLSearchParams({ category: 'concerts', limit: '50' });
     if (query.artist) params.set('q', query.artist);
-    if (query.startDateTime) params.set('active.gte', query.startDateTime);
-    if (query.endDateTime) params.set('active.lte', query.endDateTime);
+    params.set('country', query.countryCode ?? APAC_COUNTRIES);
+    if (query.startDateTime) params.set('start.gte', query.startDateTime);
+    if (query.endDateTime) params.set('start.lte', query.endDateTime);
+    params.set('sort', 'start');
 
     const response = await fetch(`https://api.predicthq.com/v1/events/?${params}`, {
       headers: { accept: 'application/json', authorization: `Bearer ${token}` },
+      cache: 'no-store',
+      signal: AbortSignal.timeout(8_000),
     });
     if (!response.ok) throw new Error(`PredictHQ responded ${response.status}`);
 
     const data = (await response.json()) as PredictHqResponse;
-    return (data.results ?? []).map((event) => ({
-      provider: this.id,
-      providerEventId: event.id,
-      name: event.title,
-      artist: event.entities?.find((entity) => entity.type === 'person')?.name,
-      startsAt: event.start,
-      timezone: event.timezone,
-      officialUrl: `https://www.predicthq.com/events/${event.id}`,
-      confidence: 'reported',
-    }));
+    return (data.results ?? []).map((event) => {
+      const coordinates = event.geo?.geometry?.coordinates ?? event.location;
+      const venue = event.entities?.find((entity) => entity.type === 'venue');
+      return {
+        provider: this.id,
+        providerEventId: event.id,
+        name: event.title,
+        artist: event.entities?.find((entity) => entity.type === 'person')?.name,
+        startsAt: event.start,
+        timezone: event.timezone,
+        venue: venue?.name,
+        countryCode: event.country,
+        longitude: coordinates?.[0],
+        latitude: coordinates?.[1],
+        officialUrl: `https://www.predicthq.com/events/${event.id}`,
+        confidence: 'reported',
+      } satisfies DiscoveredEvent;
+    });
   },
 };

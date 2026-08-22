@@ -2,81 +2,92 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { localeOptions, type MessageKey } from '@/lib/i18n';
+import { usePreferences } from './preferences-provider';
 
 type AppFrameProps = {
   children: React.ReactNode;
-  user: { displayName: string; email: string } | null;
 };
 
-const navItems = [
-  { href: '/', label: 'Today', index: '01' },
-  { href: '/atlas', label: 'Atlas', index: '02' },
-  { href: '/plans', label: 'Plans', index: '03' },
-  { href: '/passport', label: 'Passport', index: '04' },
-  { href: '/sources', label: 'Sources', index: '05' },
+const navItems: Array<{ href: string; labelKey: MessageKey }> = [
+  { href: '/', labelKey: 'nav.today' },
+  { href: '/atlas', labelKey: 'nav.atlas' },
+  { href: '/plans', labelKey: 'nav.plans' },
+  { href: '/passport', labelKey: 'nav.passport' },
+  { href: '/sources', labelKey: 'nav.sources' },
 ];
 
-export function AppFrame({ children, user }: AppFrameProps) {
+export function AppFrame({ children }: AppFrameProps) {
   const pathname = usePathname();
+  const { locale, setLocale, theme, setTheme, t } = usePreferences();
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
-  const initial = (user?.displayName ?? 'Guest').trim().charAt(0).toUpperCase();
 
   return (
-    <main className="app-shell">
-      <aside className="side-rail" aria-label="Primary navigation">
-        <Link className="brand-mark" href="/" aria-label="Concert Passport home">
-          <span>CP</span>
-        </Link>
-        <nav className="rail-nav">
-          {navItems.map((item) => (
-            <Link
-              className={`rail-link ${isActive(item.href) ? 'active' : ''}`}
-              href={item.href}
-              aria-current={isActive(item.href) ? 'page' : undefined}
-              key={item.href}
+    <div className="app-shell">
+      <header className="global-header">
+        <div className="global-header-inner">
+          <Link className="wordmark" href="/" aria-label={t('brand.name')}>
+            <span className="wordmark-symbol" aria-hidden="true"><i /></span>
+            <span><strong>{t('brand.name')}</strong><small>{t('brand.product')}</small></span>
+          </Link>
+
+          <nav className="desktop-nav" aria-label={t('nav.primary')}>
+            {navItems.map((item) => (
+              <Link
+                className={isActive(item.href) ? 'active' : ''}
+                href={item.href}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+                key={item.href}
+              >
+                {t(item.labelKey)}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="header-actions">
+            <label className="language-control">
+              <span className="sr-only">{t('preferences.language')}</span>
+              <select
+                value={locale}
+                onChange={(event) => setLocale(event.target.value as typeof locale)}
+                aria-label={t('preferences.language')}
+              >
+                {localeOptions.map((option) => (
+                  <option value={option.value} key={option.value}>{t(option.labelKey)}</option>
+                ))}
+              </select>
+            </label>
+
+            <button
+              className="theme-control"
+              type="button"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              aria-label={theme === 'dark' ? t('preferences.toLight') : t('preferences.toDark')}
+              title={theme === 'dark' ? t('preferences.light') : t('preferences.dark')}
             >
-              <span className="rail-icon">{item.index}</span>
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
-        <div className="rail-foot">
-          <span className="status-dot" />
-          <span>Source ledger online</span>
-        </div>
-      </aside>
+              <span className={`theme-glyph ${theme}`} aria-hidden="true" />
+            </button>
 
-      <section className="workspace">
-        <div className="global-account">
-          <span className="preview-mode">PRODUCT PREVIEW</span>
-          {user ? (
-            <>
-              <span className="account-name">{user.displayName}</span>
-              <a className="avatar" href="/signout-with-chatgpt?return_to=/" aria-label="Sign out">
-                {initial}
-              </a>
-            </>
-          ) : (
-            <a className="sign-in-link" href="/signin-with-chatgpt?return_to=/">
-              Sign in to save
-            </a>
-          )}
+            <span className="private-beta-label">{t('account.privateBeta')}</span>
+          </div>
         </div>
-        {children}
-      </section>
+      </header>
 
-      <nav className="mobile-nav" aria-label="Mobile navigation">
-        {navItems.slice(0, 4).map((item) => (
+      <main className="workspace">{children}</main>
+
+      <nav className="mobile-nav" aria-label={t('nav.primary')}>
+        {navItems.map((item) => (
           <Link
             className={isActive(item.href) ? 'active' : ''}
             href={item.href}
+            aria-current={isActive(item.href) ? 'page' : undefined}
             key={item.href}
           >
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         ))}
       </nav>
-    </main>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
-import { getChatGPTUser } from '@/app/chatgpt-auth';
 import { setMilestoneState } from '@/db/repository';
+import { getPrivateSession } from '@/lib/server/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,8 +7,7 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ journeyId: string; milestoneId: string }> },
 ): Promise<Response> {
-  const user = await getChatGPTUser();
-  if (!user) return Response.json({ error: 'Authentication required' }, { status: 401 });
+  const session = getPrivateSession(request);
 
   const body = (await request.json()) as { state?: string };
   if (body.state !== 'todo' && body.state !== 'completed' && body.state !== 'skipped') {
@@ -17,11 +16,13 @@ export async function PATCH(
 
   const { journeyId, milestoneId } = await context.params;
   await setMilestoneState({
-    user: { userId: user.userId, email: user.email, displayName: user.displayName },
+    user: session.user,
     journeyId,
     milestoneId,
     state: body.state,
   });
 
-  return Response.json({ journeyId, milestoneId, state: body.state });
+  const response = Response.json({ journeyId, milestoneId, state: body.state });
+  if (session.setCookie) response.headers.set('set-cookie', session.setCookie);
+  return response;
 }

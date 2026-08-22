@@ -273,3 +273,25 @@ Possible pivots:
 - Accessibility audit completed in all launch languages.
 - Incident response has an owner, severity system, user communication template, and rollback path.
 - Every launch claim can be supported without the word “guarantee.”
+
+## 12. Interface-system audit · 2026-08-22
+
+### Failure patterns removed
+
+- repeated large-radius cards that gave unrelated content equal importance;
+- forced dark mode, purple glow, and rounded display typography that read as a generic AI dashboard;
+- numbered/sidebar navigation that consumed attention without helping ticket tasks;
+- marketing-style headlines without a corresponding next action;
+- raw English strings inside localized routes;
+- a tablet breakpoint where desktop navigation disappeared before mobile navigation appeared.
+
+### Current design gates
+
+- The next critical action must be identifiable before scrolling.
+- Every collection chooses one native structure: table, ledger, ordered rail, or map/result pair.
+- Light and dark themes share semantic hierarchy and state meaning.
+- English, Simplified Chinese, and Traditional Chinese must render from controlled catalogs.
+- Artist accents cannot override operational status colors.
+- Decorative stamp geometry is allowed only in Passport; ticket execution screens remain restrained.
+- A screen must remain usable without glow, shadows, imagery, motion, or color alone.
+- Desktop, tablet, and 390 px mobile layouts must retain primary navigation and avoid horizontal overflow.

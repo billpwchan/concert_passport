@@ -1,19 +1,32 @@
+'use client';
+
+import type { MessageKey, MessageValues } from '@/lib/i18n';
+import { usePreferences } from './preferences-provider';
+
 type PageHeaderProps = {
-  eyebrow: string;
-  title: string;
-  description?: string;
-  side?: React.ReactNode;
+  eyebrowKey: MessageKey;
+  titleKey: MessageKey;
+  descriptionKey?: MessageKey;
+  titleValues?: MessageValues;
+  meta?: React.ReactNode;
 };
 
-export function PageHeader({ eyebrow, title, description, side }: PageHeaderProps) {
+export function PageHeader({
+  eyebrowKey,
+  titleKey,
+  descriptionKey,
+  titleValues,
+  meta,
+}: PageHeaderProps) {
+  const { t } = usePreferences();
   return (
-    <header className="topbar page-topbar">
-      <div>
-        <p className="eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
-        {description ? <p className="page-description">{description}</p> : null}
+    <header className="page-header">
+      <div className="page-header-copy">
+        <p className="section-label">{t(eyebrowKey)}</p>
+        <h1>{t(titleKey, titleValues)}</h1>
+        {descriptionKey ? <p className="page-description">{t(descriptionKey)}</p> : null}
       </div>
-      {side ? <div className="page-header-side">{side}</div> : null}
+      {meta ? <div className="page-header-meta">{meta}</div> : null}
     </header>
   );
 }

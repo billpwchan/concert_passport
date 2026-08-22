@@ -1,21 +1,15 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
-import { getChatGPTUser } from './chatgpt-auth';
+import { cookies, headers } from 'next/headers';
 import { AppFrame } from '@/components/app-frame';
+import { PreferencesProvider } from '@/components/preferences-provider';
+import { normalizeLocale, type ThemePreference } from '@/lib/i18n';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
-
 export const metadata: Metadata = {
-  metadataBase: new URL('https://concert-passport.w23a941922a7c.chatgpt.site'),
+  metadataBase: new URL(
+    process.env.CONCERT_PASSPORT_SITE_URL ?? 'https://concert-passport.52-198-144-26.sslip.io',
+  ),
   title: 'Concert Passport — Never miss the moment',
   description:
     'Track every K-pop concert milestone across Asia, coordinate the journey, and keep every live memory.',
@@ -37,15 +31,19 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getChatGPTUser();
+  const [cookieStore, requestHeaders] = await Promise.all([cookies(), headers()]);
+  const preferredLocale =
+    cookieStore.get('cp_locale')?.value ?? requestHeaders.get('accept-language')?.split(',')[0];
+  const initialLocale = normalizeLocale(preferredLocale);
+  const storedTheme = cookieStore.get('cp_theme')?.value;
+  const initialTheme: ThemePreference = storedTheme === 'dark' ? 'dark' : 'light';
+
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AppFrame
-          user={user ? { displayName: user.displayName, email: user.email } : null}
-        >
-          {children}
-        </AppFrame>
+    <html lang={initialLocale} data-theme={initialTheme} suppressHydrationWarning>
+      <body>
+        <PreferencesProvider initialLocale={initialLocale} initialTheme={initialTheme}>
+          <AppFrame>{children}</AppFrame>
+        </PreferencesProvider>
       </body>
     </html>
   );

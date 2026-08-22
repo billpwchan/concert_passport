@@ -14,10 +14,9 @@ export default function SourcesPage() {
   return (
     <>
       <PageHeader
-        eyebrow="SOURCE NETWORK"
-        title="Broad coverage. Narrow standards."
-        description="We combine official fan notices, promoters, primary ticket sellers, and licensed APIs — while keeping the evidence attached to every deadline."
-        side={<div className="source-count"><strong>{sourceRegistry.length}</strong><span>curated channels</span></div>}
+        eyebrowKey="sources.eyebrow"
+        titleKey="sources.title"
+        descriptionKey="sources.description"
       />
       <SourceDirectory
         sources={sourceRegistry}

@@ -6,7 +6,7 @@ struct PlansView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(spacing: 14) {
+                LazyVStack(spacing: 0) {
                     ForEach(model.journeys) { journey in
                         NavigationLink(value: journey) {
                             JourneyRow(journey: journey)
@@ -14,10 +14,11 @@ struct PlansView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(18)
+                .padding(.horizontal, 18)
+                .padding(.bottom, 32)
             }
             .background(PassportTheme.ink.ignoresSafeArea())
-            .navigationTitle("Plans")
+            .navigationTitle(L10n.plansTitle)
             .navigationDestination(for: ConcertJourney.self) { journey in
                 JourneyDetailView(journeyID: journey.id)
             }
@@ -30,37 +31,37 @@ private struct JourneyRow: View {
 
     var body: some View {
         let next = JourneyLifecycle.nextMilestone(in: journey)
-        PassportCard {
-            VStack(alignment: .leading, spacing: 18) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Eyebrow(text: journey.venue.city)
-                        Text(journey.artist.name)
-                            .font(.title2.weight(.semibold))
-                        Text(journey.tourName)
-                            .font(.subheadline)
-                            .foregroundStyle(PassportTheme.muted)
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right")
+        VStack(alignment: .leading, spacing: 15) {
+            HStack(alignment: .top) {
+                Rectangle()
+                    .fill(Color(hex: journey.artist.accentHex))
+                    .frame(width: 6, height: 42)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(journey.artist.name)
+                        .font(.title3.weight(.semibold))
+                    Text("\(journey.venue.city) · \(journey.tourName)")
+                        .font(.subheadline)
                         .foregroundStyle(PassportTheme.muted)
                 }
-
-                Divider().overlay(PassportTheme.line)
-
-                HStack {
-                    Label(
-                        journey.performanceStartsAt.venueLabel(
-                            timeZoneIdentifier: journey.venue.timeZoneIdentifier
-                        ),
-                        systemImage: "calendar"
-                    )
-                    Spacer()
-                    Text(next?.title ?? "Journey complete")
-                        .foregroundStyle(next == nil ? PassportTheme.mint : PassportTheme.amber)
-                }
-                .font(.caption.weight(.medium))
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(PassportTheme.faint)
             }
+
+            HStack(alignment: .firstTextBaseline) {
+                Text(journey.performanceStartsAt.venueLabel(
+                    timeZoneIdentifier: journey.venue.timeZoneIdentifier
+                ))
+                Spacer()
+                Text(next.map { L10n.milestoneTitle($0.kind) } ?? L10n.journeyComplete)
+                    .foregroundStyle(next == nil ? PassportTheme.mint : PassportTheme.amber)
+            }
+            .font(.caption.weight(.medium))
+        }
+        .padding(.vertical, 19)
+        .overlay(alignment: .top) {
+            Rectangle().fill(PassportTheme.line).frame(height: 0.5)
         }
     }
 }
@@ -80,13 +81,13 @@ private struct JourneyDetailView: View {
                     VStack(alignment: .leading, spacing: 7) {
                         Eyebrow(text: "\(journey.venue.city) · \(journey.venue.market)")
                         Text(journey.artist.name)
-                            .font(.system(size: 38, weight: .semibold, design: .rounded))
+                            .font(.system(size: 42, weight: .semibold))
                         Text("\(journey.tourName) · \(journey.venue.name)")
                             .foregroundStyle(PassportTheme.muted)
                     }
 
                     if journey.isIllustrative {
-                        Label("Illustrative timeline — not a live ticket notice", systemImage: "info.circle")
+                        Label(L10n.illustrativeTimeline, systemImage: "info.circle")
                             .font(.caption.weight(.medium))
                             .foregroundStyle(PassportTheme.amber)
                     }
@@ -106,7 +107,7 @@ private struct JourneyDetailView: View {
             }
         }
         .background(PassportTheme.ink.ignoresSafeArea())
-        .navigationTitle("Journey")
+        .navigationTitle(L10n.journeyTitle)
         .navigationBarTitleDisplayMode(.inline)
     }
 }
@@ -134,7 +135,7 @@ private struct MilestoneRow: View {
             }
 
             VStack(alignment: .leading, spacing: 5) {
-                Text(milestone.title)
+                Text(L10n.milestoneTitle(milestone.kind))
                     .font(.headline)
                 Text(milestone.startsAt.venueLabel(timeZoneIdentifier: milestone.timeZoneIdentifier))
                     .font(.caption.monospacedDigit())

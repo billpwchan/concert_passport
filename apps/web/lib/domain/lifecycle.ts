@@ -32,8 +32,12 @@ export function createAlertSchedule(milestone: Milestone): string[] {
   );
 }
 
-export function formatVenueTime(iso: string, timezone: string): string {
-  return new Intl.DateTimeFormat('en-GB', {
+export function formatVenueTime(
+  iso: string,
+  timezone: string,
+  locale = 'en-GB',
+): string {
+  return new Intl.DateTimeFormat(locale, {
     timeZone: timezone,
     day: '2-digit',
     month: 'short',

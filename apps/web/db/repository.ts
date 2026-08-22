@@ -1,7 +1,4 @@
-import { and, eq } from 'drizzle-orm';
-import { env } from 'cloudflare:workers';
 import { getDb } from './index';
-import { planMilestoneStates, profiles, sourceSubmissions } from './schema';
 
 type UserIdentity = {
   userId: string;
@@ -9,64 +6,16 @@ type UserIdentity = {
   displayName: string;
 };
 
-let initialization: Promise<unknown> | undefined;
-
-function ensureUserStateSchema(): Promise<unknown> {
-  if (initialization) return initialization;
-  const d1 = env.DB;
-  initialization = d1.batch([
-    d1.prepare(`CREATE TABLE IF NOT EXISTS profiles (
-      user_id TEXT PRIMARY KEY NOT NULL,
-      email TEXT NOT NULL,
-      display_name TEXT NOT NULL,
-      home_timezone TEXT NOT NULL DEFAULT 'Asia/Singapore',
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    )`),
-    d1.prepare(`CREATE TABLE IF NOT EXISTS plan_milestone_states (
-      user_id TEXT NOT NULL,
-      journey_id TEXT NOT NULL,
-      milestone_id TEXT NOT NULL,
-      state TEXT NOT NULL DEFAULT 'todo',
-      completed_at INTEGER,
-      updated_at INTEGER NOT NULL,
-      PRIMARY KEY (user_id, journey_id, milestone_id),
-      FOREIGN KEY (user_id) REFERENCES profiles(user_id)
-    )`),
-    d1.prepare(`CREATE INDEX IF NOT EXISTS idx_plan_states_user_journey
-      ON plan_milestone_states(user_id, journey_id)`),
-    d1.prepare(`CREATE TABLE IF NOT EXISTS source_submissions (
-      id TEXT PRIMARY KEY NOT NULL,
-      user_id TEXT NOT NULL,
-      url TEXT NOT NULL,
-      host TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'pending',
-      submitted_at INTEGER NOT NULL,
-      FOREIGN KEY (user_id) REFERENCES profiles(user_id)
-    )`),
-    d1.prepare(`CREATE INDEX IF NOT EXISTS idx_source_submissions_status_date
-      ON source_submissions(status, submitted_at)`),
-  ]);
-  return initialization;
-}
-
 export async function upsertProfile(user: UserIdentity): Promise<void> {
-  await ensureUserStateSchema();
-  const now = new Date();
-  await getDb()
-    .insert(profiles)
-    .values({
-      userId: user.userId,
-      email: user.email,
-      displayName: user.displayName,
-      homeTimezone: 'Asia/Singapore',
-      createdAt: now,
-      updatedAt: now,
-    })
-    .onConflictDoUpdate({
-      target: profiles.userId,
-      set: { email: user.email, displayName: user.displayName, updatedAt: now },
-    });
+  const now = Date.now();
+  getDb().prepare(`
+    INSERT INTO profiles (user_id, email, display_name, home_timezone, created_at, updated_at)
+    VALUES (?, ?, ?, 'Asia/Singapore', ?, ?)
+    ON CONFLICT(user_id) DO UPDATE SET
+      email = excluded.email,
+      display_name = excluded.display_name,
+      updated_at = excluded.updated_at
+  `).run(user.userId, user.email, user.displayName, now, now);
 }
 
 export async function setMilestoneState(input: {
@@ -76,42 +25,31 @@ export async function setMilestoneState(input: {
   state: 'todo' | 'completed' | 'skipped';
 }): Promise<void> {
   await upsertProfile(input.user);
-  const now = new Date();
-  await getDb()
-    .insert(planMilestoneStates)
-    .values({
-      userId: input.user.userId,
-      journeyId: input.journeyId,
-      milestoneId: input.milestoneId,
-      state: input.state,
-      completedAt: input.state === 'completed' ? now : null,
-      updatedAt: now,
-    })
-    .onConflictDoUpdate({
-      target: [
-        planMilestoneStates.userId,
-        planMilestoneStates.journeyId,
-        planMilestoneStates.milestoneId,
-      ],
-      set: {
-        state: input.state,
-        completedAt: input.state === 'completed' ? now : null,
-        updatedAt: now,
-      },
-    });
+  const now = Date.now();
+  getDb().prepare(`
+    INSERT INTO plan_milestone_states
+      (user_id, journey_id, milestone_id, state, completed_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(user_id, journey_id, milestone_id) DO UPDATE SET
+      state = excluded.state,
+      completed_at = excluded.completed_at,
+      updated_at = excluded.updated_at
+  `).run(
+    input.user.userId,
+    input.journeyId,
+    input.milestoneId,
+    input.state,
+    input.state === 'completed' ? now : null,
+    now,
+  );
 }
 
 export async function getMilestoneStates(userId: string, journeyId: string) {
-  await ensureUserStateSchema();
-  return getDb()
-    .select()
-    .from(planMilestoneStates)
-    .where(
-      and(
-        eq(planMilestoneStates.userId, userId),
-        eq(planMilestoneStates.journeyId, journeyId),
-      ),
-    );
+  return getDb().prepare(`
+    SELECT milestone_id AS milestoneId, state, completed_at AS completedAt, updated_at AS updatedAt
+    FROM plan_milestone_states
+    WHERE user_id = ? AND journey_id = ?
+  `).all(userId, journeyId);
 }
 
 export async function submitSource(input: {
@@ -119,16 +57,11 @@ export async function submitSource(input: {
   url: string;
   host: string;
 }): Promise<string> {
-  await ensureUserStateSchema();
   await upsertProfile(input.user);
   const id = crypto.randomUUID();
-  await getDb().insert(sourceSubmissions).values({
-    id,
-    userId: input.user.userId,
-    url: input.url,
-    host: input.host,
-    status: 'pending',
-    submittedAt: new Date(),
-  });
+  getDb().prepare(`
+    INSERT INTO source_submissions (id, user_id, url, host, status, submitted_at)
+    VALUES (?, ?, ?, ?, 'pending', ?)
+  `).run(id, input.user.userId, input.url, input.host, Date.now());
   return id;
 }

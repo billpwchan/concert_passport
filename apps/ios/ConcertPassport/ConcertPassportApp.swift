@@ -8,7 +8,6 @@ struct ConcertPassportApp: App {
         WindowGroup {
             RootTabView()
                 .environment(model)
-                .preferredColorScheme(.dark)
                 .tint(PassportTheme.violet)
         }
     }

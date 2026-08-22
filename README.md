@@ -5,8 +5,9 @@ Concert Passport is a K-pop concert journey operating system for Asia-Pacific fa
 This repository now contains a working vertical slice rather than a concept-only prototype:
 
 - a premium responsive web product with Today, Atlas, Plans, Journey, Passport, and Sources;
-- ChatGPT account handoff and durable Cloudflare D1 user state;
-- live adapter boundaries for Ticketmaster Discovery and PredictHQ;
+- English, Simplified Chinese, and Traditional Chinese content systems plus adaptive light/dark appearances on Web and iOS;
+- private first-party browser sessions and durable SQLite user state;
+- live Ticketmaster Discovery and PredictHQ aggregation with validation, caching, and quota protection;
 - a curated official-source registry across 11 Asia-Pacific markets;
 - a native SwiftUI + MapKit iOS app and independently tested Swift lifecycle core;
 - product research, design direction, commercial model, source policy, and red-team gates.
@@ -22,9 +23,10 @@ The initial catalog is K-pop only. Japan is included as a K-pop touring market; 
 ## Workspace
 
 ```text
-apps/web   Next-compatible Sites app, API routes, D1 schema, source adapters
+apps/web   Next.js app, API routes, SQLite state, MapLibre and source adapters
 apps/ios   Native SwiftUI app, Xcode project, Swift package and tests
 docs       Product, research, architecture, operations and audit records
+deploy     Isolated Docker Compose and Caddy configuration for the Lightsail host
 ```
 
 ## Run the web app
@@ -38,7 +40,9 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open `http://localhost:3000`. The Sites development runtime provides a local test identity and local D1 binding.
+Open `http://localhost:3000`. The web app creates a private, first-party browser
+session and stores local state in `apps/web/data/concert-passport.sqlite` unless
+`CONCERT_PASSPORT_DB_PATH` is set.
 
 Quality commands:
 
@@ -50,6 +54,10 @@ npm run build
 ```
 
 Set `TICKETMASTER_API_KEY` and/or `PREDICTHQ_ACCESS_TOKEN` to activate the included live discovery adapters. Provider access and commercial use remain subject to their contracts and terms.
+
+The production web app is self-hosted as an isolated Docker service behind the
+existing Caddy gateway. See [`deploy/README.md`](deploy/README.md). No Sites or
+Cloudflare runtime is required.
 
 ## Run the iOS app
 
@@ -67,6 +75,7 @@ swift test
 - [Product blueprint](docs/PRODUCT_BLUEPRINT.md)
 - [Research and evidence](docs/RESEARCH.md)
 - [Design direction](docs/DESIGN_DIRECTION.md)
+- [Localization and content system](docs/LOCALIZATION.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [API contract](docs/API.md)
 - [Source operations](docs/SOURCE_OPERATIONS.md)

@@ -138,6 +138,8 @@ export type DiscoveredEvent = {
   venue?: string;
   city?: string;
   countryCode?: string;
+  latitude?: number;
+  longitude?: number;
   officialUrl: string;
   confidence: Confidence;
 };

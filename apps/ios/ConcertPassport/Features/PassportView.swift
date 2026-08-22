@@ -16,10 +16,10 @@ struct PassportView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Eyebrow(text: "Concert Passport")
-                        Text("Every city left\na mark.")
-                            .font(.system(size: 38, weight: .semibold, design: .rounded))
-                            .tracking(-1.1)
+                        Eyebrow(text: L10n.passportEyebrow)
+                        Text(L10n.passportTitle)
+                            .font(.system(size: 38, weight: .semibold))
+                            .tracking(-1.3)
                     }
 
                     statsGrid
@@ -29,7 +29,7 @@ struct PassportView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 14) {
-                        Text("Stamps")
+                        Text(L10n.stamps)
                             .font(.title3.weight(.semibold))
 
                         LazyVGrid(
@@ -42,7 +42,7 @@ struct PassportView: View {
                         }
                     }
 
-                    Text("Distances shown are entered journey distances in illustrative records.")
+                    Text(L10n.distanceNote)
                         .font(.caption)
                         .foregroundStyle(PassportTheme.muted)
                 }
@@ -56,29 +56,42 @@ struct PassportView: View {
 
     private var statsGrid: some View {
         HStack(spacing: 10) {
-            PassportStat(value: "\(model.stamps.count)", label: "shows")
-            PassportStat(value: "\(Set(model.stamps.map(\.city)).count)", label: "cities")
-            PassportStat(value: distance.formatted(), label: "km")
+            PassportStat(value: "\(model.stamps.count)", label: L10n.shows)
+            Divider()
+            PassportStat(value: "\(Set(model.stamps.map(\.city)).count)", label: L10n.cities)
+            Divider()
+            PassportStat(value: distance.formatted(), label: L10n.distance)
+        }
+        .padding(.vertical, 16)
+        .overlay(alignment: .top) {
+            Rectangle().fill(PassportTheme.strongLine).frame(height: 1)
+        }
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(PassportTheme.line).frame(height: 0.5)
         }
     }
 
     private func relationshipCard(_ stamp: PassportStamp) -> some View {
-        PassportCard {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: "sparkles")
-                        .foregroundStyle(PassportTheme.violet)
-                    Spacer()
-                    Text("MEMORY 001")
-                        .font(.caption2.monospaced().weight(.bold))
-                        .foregroundStyle(PassportTheme.muted)
-                }
-                Text("You first met \(stamp.artist.name)\nin \(stamp.city).")
-                    .font(.title2.weight(.semibold))
-                Text(stamp.attendedAt.formatted(date: .long, time: .omitted))
-                    .font(.subheadline)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Eyebrow(text: L10n.firstMemory)
+                Spacer()
+                Text("001")
+                    .font(.caption2.monospaced().weight(.semibold))
                     .foregroundStyle(PassportTheme.muted)
             }
+            Text(L10n.firstSaw(artist: stamp.artist.name, city: stamp.city))
+                .font(.title2.weight(.semibold))
+            Text(stamp.attendedAt.formatted(date: .long, time: .omitted))
+                .font(.subheadline)
+                .foregroundStyle(PassportTheme.muted)
+        }
+        .padding(.vertical, 20)
+        .overlay(alignment: .top) {
+            Rectangle().fill(PassportTheme.strongLine).frame(height: 1)
+        }
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(PassportTheme.line).frame(height: 0.5)
         }
     }
 }
@@ -98,10 +111,7 @@ private struct PassportStat: View {
                 .tracking(1)
                 .foregroundStyle(PassportTheme.muted)
         }
-        .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(PassportTheme.panel)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }
 
@@ -143,9 +153,7 @@ private struct StampView: View {
                     .lineLimit(1)
             }
         }
-        .padding(14)
+        .padding(.vertical, 14)
         .frame(maxWidth: .infinity)
-        .background(PassportTheme.panel)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 }

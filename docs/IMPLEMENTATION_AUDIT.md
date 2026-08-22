@@ -1,7 +1,7 @@
 # Implementation Audit
 
 **Audit date:** 2026-08-22
-**Scope:** current web vertical slice, source layer, D1 user state, native iOS foundation, tests, and release posture.
+**Scope:** self-hosted web vertical slice, live source layer, SQLite user state, native iOS foundation, tests, and release posture.
 
 ## Verdict
 
@@ -10,12 +10,16 @@ The repository now proves the product interaction model and cross-platform techn
 ## What passed
 
 - Web routes compile with strict TypeScript and lint cleanly.
-- Lifecycle, time formatting, alert offsets, source uniqueness, market coverage, and host lookalikes have automated tests.
-- Authenticated milestone and source-submission writes were exercised against local D1.
-- Unconfigured live adapters return empty data with transparent health states.
+- Lifecycle, persisted journey state, time formatting, alert offsets, source uniqueness, market coverage, and host lookalikes have automated tests.
+- Milestone writes were exercised end-to-end in production: complete, reload, undo, and reload all returned the expected state from SQLite.
+- Ticketmaster and PredictHQ adapters are configured server-side; unconfigured environments still return empty data with transparent health states.
+- Region-wide discovery is restricted to the declared APAC markets, and market-specific live queries expose an honest empty state instead of fallback data.
+- The CSS placeholder map was replaced by a responsive MapLibre/OpenFreeMap implementation with zoom, pan, marker selection, and accessible list linkage.
+- English, Simplified Chinese, and Traditional Chinese plus light/dark appearances were exercised in-browser.
 - Default UI records are labeled illustrative.
 - Swift lifecycle tests pass and the native app compiles for a generic iOS device without signing.
 - App Icon, launch color, responsive web metadata, and social preview assets are repository-owned.
+- The HTTPS production deployment is isolated behind the existing Caddy gateway; its app container and all pre-existing project containers remained healthy after release.
 - No queue bot, purchase automation, seller credential, payment, ticket barcode, or resale capability exists.
 
 ## Findings
@@ -23,13 +27,13 @@ The repository now proves the product interaction model and cross-platform techn
 | Severity | Finding | Disposition |
 |---|---|---|
 | P0 | No production notification scheduler or delivery audit exists. | Blocks any reliability promise; next major workstream. |
-| P0 | Provider keys/contracts and editorial verification operation are not provisioned. | Hosted discovery is transparent but incomplete; pilot must narrow declared catalog. |
+| P0 | API access is configured, but contractual coverage and editorial verification operations are not complete. | Pilot must narrow its declared catalog and keep event-level review. |
 | P1 | Mobile write authentication is not designed; native state is currently in-memory. | Keep iOS mutations local until a supported mobile session/token flow is implemented. |
-| P1 | Runtime D1 bootstrap covers current user-state tables, not the full normalized ingestion schema. | Apply checked-in migrations in the ingestion/release environment before enabling it. |
+| P1 | Browser-cookie preview state is not recoverable across devices and is not a production account system. | Add Apple/OAuth identity, recovery, export, and deletion before public accounts. |
 | P1 | Event-level seller authorization still requires editorial review even for known hosts. | Submission API correctly remains `pending`; build reviewer tooling next. |
 | P1 | No privacy-safe public share renderer, export, or deletion flow exists yet. | Do not expose public Passport pages before structural redaction is implemented. |
-| P2 | The dev/build toolchain retains transitive advisories, while `npm audit --omit=dev` reports zero production vulnerabilities after the controlled Next 16.3.2 upgrade. | Track Sites/vinext updates; do not force-upgrade the beta build stack independently. |
-| P2 | English is the only implemented UI language. | Add Traditional Chinese and Simplified Chinese before broader APAC beta. |
+| P2 | A single-container in-memory discovery cache and limiter reset on deploy. | Suitable for the controlled pilot; move quota accounting to shared storage before horizontal scaling. |
+| P2 | CSP currently permits inline Next.js hydration scripts. | Introduce request nonces before a wider public launch if the framework path remains stable. |
 
 ## Red-team challenges
 

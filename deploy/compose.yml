@@ -1,0 +1,38 @@
+name: concert-passport
+
+services:
+  app:
+    image: concert-passport-app:latest
+    container_name: concert-passport-app
+    build:
+      context: ../apps/web
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    init: true
+    env_file:
+      - /opt/concert-passport/shared/app.env
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+    expose:
+      - "3000"
+    volumes:
+      - /opt/concert-passport/data:/data
+      - /opt/concert-passport/cache:/app/.next/cache
+    networks:
+      - gateway
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 640m
+    cpus: 1.25
+
+networks:
+  gateway:
+    name: jchart_gateway
+    external: true
