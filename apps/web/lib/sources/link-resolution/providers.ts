@@ -88,7 +88,11 @@ async function searxngCandidates(event: ResolvableEvent): Promise<EventLinkCandi
   url.searchParams.set('q', searchPhrase(event));
   url.searchParams.set('format', 'json');
   url.searchParams.set('language', 'all');
-  const response = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(10_000) });
+  const response = await fetch(url, {
+    cache: 'no-store',
+    headers: { 'x-real-ip': '127.0.0.1' },
+    signal: AbortSignal.timeout(10_000),
+  });
   if (!response.ok) throw new Error(`SearXNG responded ${response.status}`);
   const data = await response.json() as { results?: SearchHit[] };
   return candidatesFromSearch(data.results ?? [], 'searxng');

@@ -15,6 +15,7 @@ services:
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
       PORT: 3000
+      SEARXNG_URL: http://concert-passport-searxng:8080
     expose:
       - "3000"
     volumes:
@@ -22,6 +23,7 @@ services:
       - /opt/concert-passport/cache:/app/.next/cache
     networks:
       - gateway
+      - discovery
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=64m
@@ -42,11 +44,13 @@ services:
       disable: true
     env_file:
       - /opt/concert-passport/shared/app.env
+    environment:
+      SEARXNG_URL: http://concert-passport-searxng:8080
     depends_on:
       app:
         condition: service_healthy
     networks:
-      - gateway
+      - discovery
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=16m
@@ -57,7 +61,43 @@ services:
     mem_limit: 96m
     cpus: 0.15
 
+  search:
+    image: docker.io/searxng/searxng@sha256:11a9b34cdc0b1ec2b991470a2762ecb5a1a531898289fb51dcd015260450729e
+    container_name: concert-passport-searxng
+    restart: unless-stopped
+    init: true
+    env_file:
+      - /opt/concert-passport/shared/searxng.env
+    environment:
+      SEARXNG_BASE_URL: http://concert-passport-searxng:8080/
+    healthcheck:
+      test: ["CMD", "wget", "--header=X-Real-IP: 127.0.0.1", "-qO", "/dev/null", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    expose:
+      - "8080"
+    volumes:
+      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+    networks:
+      - discovery
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+      - /var/cache/searxng:rw,noexec,nosuid,size=32m
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 192m
+    cpus: 0.25
+
 networks:
   gateway:
     name: jchart_gateway
     external: true
+  discovery:
+    name: concert_passport_discovery
+    driver: bridge

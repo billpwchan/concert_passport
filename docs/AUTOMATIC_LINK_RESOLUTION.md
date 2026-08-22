@@ -4,7 +4,7 @@ Concert Passport treats event discovery and official ticket resolution as two se
 
 ## Resolution pipeline
 
-1. **Discover candidates** from Ticketmaster Discovery, maintained official tour entry points, trusted seller/promoter catalogs, and—when configured—Brave Search or a private SearXNG instance.
+1. **Discover candidates** from Ticketmaster Discovery, maintained official tour entry points, trusted seller/promoter catalogs, the bundled private SearXNG service, and optionally Brave Search.
 2. **Restrict authority** to exact HTTPS domains in the source registry. Subdomains are accepted; lookalike suffixes, credentials in URLs, protocol downgrades and redirects to untrusted hosts are rejected.
 3. **Inspect pages** for Schema.org `Event`, `Offer.url`, `Offer.validFrom`, canonical URLs and page identity. Responses are time- and size-bounded and stored only as a content hash plus normalized evidence.
 4. **Match deterministically** on canonical artist identity, venue-local date, country, venue and event title. Authority contributes to the score but cannot replace artist and date identity.
@@ -30,4 +30,4 @@ Concert Passport treats event discovery and official ticket resolution as two se
 
 ## Expansion path
 
-New markets are added as source policies and adapters, not frontend conditionals. Prefer seller APIs and structured feeds. Where no API exists, add an official catalog entry point and let the same page inspector and evidence scorer resolve leaf pages. Brave/SearXNG are discovery helpers only; their ranking never counts as verification evidence.
+New markets are added as source policies and adapters, not frontend conditionals. Prefer seller APIs and structured feeds. Where no API exists, the private search layer discovers official leaf pages from the trusted-domain registry and the same page inspector and evidence scorer validates them. Maintained official entry points remain deterministic bootstrap evidence, not an operations queue. Brave/SearXNG ranking never counts as verification evidence.
