@@ -17,7 +17,7 @@
 - 新增无第三方依赖的仓库链接/锚点/素材与元信息检查，并以回归测试验证检查器。
 - CI 最小权限、Action commit 固定、取消重复运行、临时数据库构建；配置 Dependabot 分组更新建议。
 - 扩展私人数据库、凭证和日志的忽略规则；上游仅保留 main，保留依赖漏洞告警与自动安全修复，关闭自动创建常规版本更新 PR。
-- 修复 Next.js、MapLibre、sharp、js-yaml 与 brace-expansion 已报告的依赖漏洞；适配 MapLibre 6 的 ESM 模块导出。
+- 修复 Next.js、MapLibre、sharp、js-yaml 与 brace-expansion 已报告的依赖漏洞；适配 MapLibre 6 的 ESM 模块导出与版本化 worker 资源，保留其上游许可证并加入回归测试。
 - 明确 Web 的 Turbopack 根目录，避免根级工具锁文件干扰；Docker 保留项目许可证和已安装依赖的许可/notice 文本。
 
 ## 2026-09-30 · 现有产品交付基线

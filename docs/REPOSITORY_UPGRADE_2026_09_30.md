@@ -35,7 +35,7 @@ README 采用本地渲染完成视觉验收。GitHub 原生 callout / Mermaid �
 
 ## 后续公开与单主分支整理
 
-维护者公开仓库并授权整理全部分支后，将已报告的 Next.js、MapLibre、sharp、js-yaml 和 brace-expansion 依赖修复纳入交付。MapLibre 升到 6.4.1，并适配 ESM 模块导出；Next.js 升到 16.3.3。新锁文件重新安装后，根目录完整检查再次通过，包含 116 项 Web 测试、10 项仓库测试、lint、typecheck 与生产构建；`npm audit` 包含开发依赖，报告 0 项漏洞。
+维护者公开仓库并授权整理全部分支后，将已报告的 Next.js、MapLibre、sharp、js-yaml 和 brace-expansion 依赖修复纳入交付。MapLibre 升到 6.4.1，并适配 ESM 模块导出和自托管版本化 worker / 共享模块；静态资源保留上游 LICENSE，新增两项回归测试。开发与生产构建均经浏览器确认底图、六个演示场次标记和缩放控件正常，控制台无错误；Next.js 升到 16.3.3。新锁文件重新安装并修复 worker 资源后，根目录完整检查再次通过，包含 118 项 Web 测试、10 项仓库测试、lint、typecheck 与生产构建；`npm audit` 包含开发依赖，报告 0 项漏洞。
 
 CI 改用官方稳定的 checkout 7.0.1 / setup-node 7.0.0 完整 SHA 与 Node 24 Action 运行时；应用仍按 `.nvmrc` 使用 Node 22。公开仓库的 secret scanning 和 push protection 已启用。按维护者选择保留自动安全修复与漏洞告警，常规版本更新 PR 的创建上限设为 0。当前上游只保留 main；以后自动安全修复仍可能创建临时分支。
 

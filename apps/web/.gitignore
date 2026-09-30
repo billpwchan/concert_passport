@@ -41,3 +41,4 @@ next-env.d.ts
 
 # Generated during container builds; actual license sources stay installed upstream.
 THIRD_PARTY_LICENSES.txt
+/public/generated/maplibre/

@@ -42,6 +42,7 @@ export function ConcertMap({
     void import('maplibre-gl').then((module) => {
       if (cancelled || !containerRef.current) return;
       const maplibregl = module;
+      maplibregl.setWorkerUrl(`/generated/maplibre/${maplibregl.getVersion()}/maplibre-gl-worker.mjs`);
       const map = new maplibregl.Map({
         container: containerRef.current,
         style: `https://tiles.openfreemap.org/styles/${initialThemeRef.current === 'dark' ? 'dark' : 'positron'}`,

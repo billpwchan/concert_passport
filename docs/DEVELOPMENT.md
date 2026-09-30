@@ -27,6 +27,8 @@ npm run demo
 | `npm run check` | 仓库检查、检查器测试与全部 Web 检查 |
 | `npm run audit:sources` | 需要公网的隔离官方来源采集审计 |
 
+`dev`、`demo` 和 `build` 的 npm hook 会从安装的 MapLibre 包生成版本化地图 worker、共享模块及原始 LICENSE。生成目录 `apps/web/public/generated/maplibre/` 不进入 Git；Docker 构建重新生成并随 `public` 目录分发。这样保留 worker 的相对 ESM 导入，避免 Turbopack 为资源改名后出现「控件可见、地图无法加载」的问题。直接运行 `next` CLI 时，先执行 `node scripts/prepare-map-worker.mjs`（Web 工作目录）。
+
 ## 配置与数据隔离
 
 完整示例见 [Web 环境模板](../apps/web/.env.example)。Next 读取 `apps/web/.env.local`；独立 worker 使用 Node `--env-file`，不会自动读取 Next 的配置文件。

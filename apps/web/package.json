@@ -14,7 +14,10 @@
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "audit:sources": "node --experimental-strip-types scripts/audit-official-sources.mjs",
     "demo": "node --experimental-strip-types scripts/demo.mjs",
-    "check": "npm test && npm run lint && npm run typecheck && npm run build"
+    "check": "npm test && npm run lint && npm run typecheck && npm run build",
+    "predev": "node scripts/prepare-map-worker.mjs",
+    "prebuild": "node scripts/prepare-map-worker.mjs",
+    "predemo": "node scripts/prepare-map-worker.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",
