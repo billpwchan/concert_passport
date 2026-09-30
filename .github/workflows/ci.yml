@@ -36,8 +36,6 @@ jobs:
     env:
       NEXT_TELEMETRY_DISABLED: '1'
       CONCERT_PASSPORT_DATA_MODE: official
-      CONCERT_PASSPORT_DB_PATH: ${{ runner.temp }}/concert-passport-ci.sqlite
-      CONCERT_PASSPORT_MEDIA_CACHE_PATH: ${{ runner.temp }}/concert-passport-media
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 (resolved 2026-09-30)
         with:
@@ -47,6 +45,11 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
+      - name: Configure isolated CI data
+        run: |
+          printf '%s\n' \
+            "CONCERT_PASSPORT_DB_PATH=$RUNNER_TEMP/concert-passport-ci.sqlite" \
+            "CONCERT_PASSPORT_MEDIA_CACHE_PATH=$RUNNER_TEMP/concert-passport-media" >> "$GITHUB_ENV"
       - run: npm ci
       - run: npm test
       - run: npm run lint
