@@ -4,7 +4,7 @@
 
 ## 仓库展示信息
 
-可直接使用的结构化资料在 [repository-meta.json](../.github/repository-meta.json)。它是维护者建议配置，不会自动修改 GitHub 设置。
+可直接使用的结构化资料在 [repository-meta.json](../.github/repository-meta.json)。2026-09-30 已将其中的简介、主页与 11 个 Topics 同步到 GitHub；此文件本身不会自动修改设置。
 
 **中文一句话：** 面向亚太 K-pop 观众的演出发现与私人现场档案：无商业 API key、官方来源可追溯、五种语言、可自部署。
 
@@ -12,7 +12,7 @@
 
 建议 Topics 围绕真实用途与技术：`kpop`、`concerts`、`concert-discovery`、`self-hosted`、`nextjs`、`react`、`typescript`、`sqlite`、`swiftui`、`maplibre`、`open-source`。不添加与项目无关的热词。
 
-README 的 CI 徽章目前静态说明检查范围，不伪装成远端检查已通过；公开且远端 CI 运行后，可改为 `ci.yml` 的动态状态徽章。
+仓库已由维护者设为 public。README 使用 `main` 分支 `ci.yml` 的真实动态状态徽章，点击可查看 Web、Swift 核心与仓库检查。
 
 GitHub 社交预览可直接上传本轮制作的 **[1280×640 PNG](assets/social-preview.png)**，其[可编辑 SVG 源文件](assets/social-preview.svg)也已保留。需要展示实际产品时可使用[真实首页截图](assets/home-desktop.png)。README 使用[原创 SVG 封面](assets/readme-hero.svg)，适合仓库内展示；第三方摄影的授权边界继续适用。
 
@@ -36,7 +36,7 @@ GitHub 社交预览可直接上传本轮制作的 **[1280×640 PNG](assets/socia
 
 ## 公开前的具体检查
 
-2026-09-30 只读检查时，远端仓库为 **private**，About / homepage / Topics 为空。README 和许可证文件进入远端后，GitHub 才会识别相应内容；本地修改不会自动改变仓库可见性或元数据。
+2026-09-30，维护者已将仓库设为 **public**，About / homepage / Topics 已同步。下列步骤用于持续审查公开资料；远端代码与 CI 状态以主分支及 Actions 为准。
 
 1. 整理本次要发布的提交，保留其他未提交工作；候选经过本地检查与远端 CI。
 2. 检查当前文件和 Git 历史中的 `.env`、密钥、用户数据、备份和私人路径；有泄露先轮换凭证并处理历史。

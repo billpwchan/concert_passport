@@ -10,7 +10,7 @@ Source-aware concert discovery and a private live-music journal for APAC K-pop f
 
 [Live app](https://concert-passport.52-198-144-26.sslip.io) · [中文](README.md) · [Run locally](#run-locally) · [Contribute](CONTRIBUTING.md)
 
-[![CI](https://img.shields.io/badge/CI-Web_%2B_Swift_%2B_Repo-17271e?logo=githubactions&logoColor=d5ff70)](https://github.com/billpwchan/concert_passport/actions/workflows/ci.yml)
+[![CI](https://github.com/billpwchan/concert_passport/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/billpwchan/concert_passport/actions/workflows/ci.yml)
 [![MIT](https://img.shields.io/badge/license-MIT-d5ff70?labelColor=17271e)](LICENSE)
 ![API keys optional](https://img.shields.io/badge/API_keys-optional-d5ff70?labelColor=17271e)
 

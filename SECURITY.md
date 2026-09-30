@@ -26,4 +26,4 @@
 
 使用 HTTPS；内部密钥以 `openssl rand -hex 32` 等方式生成并存于服务端。`.env`、用户数据库、WAL/SHM、备份与私有日志不进入 Git。使用 SQLite backup API 一致性备份，在候选副本上验证迁移后再发布；详见[部署指南](deploy/README.md)。
 
-CI 使用最小 `contents: read` 权限和固定 Action commit；PR 不自动部署或自动合并。Dependabot 提交依赖更新建议，维护者负责验证与合并。仓库本地检查会发现敏感文件名，但它不是内容级 secret scanner；公开前还需检查历史与启用适用的 GitHub secret scanning 设置。
+CI 使用最小 `contents: read` 权限和固定 Action commit；PR 不自动部署或自动合并。上游采用单主分支维护，Dependabot 漏洞告警与自动安全修复保留，常规版本更新 PR 自动创建关闭；维护者负责检查、验证与提交修复。GitHub secret scanning 与 push protection 用于检查支持的凭证类型。仓库本地检查会发现敏感文件名，但它不是内容级 secret scanner；公开资料和 Git 历史仍需按实际内容审查。

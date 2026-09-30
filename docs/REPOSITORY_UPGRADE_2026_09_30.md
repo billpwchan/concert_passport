@@ -33,8 +33,16 @@
 
 README 采用本地渲染完成视觉验收。GitHub 原生 callout / Mermaid 渲染未单独验收；远端 Actions 的结果以关联 PR 与工作流记录为准。
 
+## 后续公开与单主分支整理
+
+维护者公开仓库并授权整理全部分支后，将已报告的 Next.js、MapLibre、sharp、js-yaml 和 brace-expansion 依赖修复纳入交付。MapLibre 升到 6.4.1，并适配 ESM 模块导出；Next.js 升到 16.3.3。新锁文件重新安装后，根目录完整检查再次通过，包含 116 项 Web 测试、10 项仓库测试、lint、typecheck 与生产构建；`npm audit` 包含开发依赖，报告 0 项漏洞。
+
+CI 改用官方稳定的 checkout 7.0.1 / setup-node 7.0.0 完整 SHA 与 Node 24 Action 运行时；应用仍按 `.nvmrc` 使用 Node 22。公开仓库的 secret scanning 和 push protection 已启用。按维护者选择保留自动安全修复与漏洞告警，常规版本更新 PR 的创建上限设为 0。当前上游只保留 main；以后自动安全修复仍可能创建临时分支。
+
+旧分支完整历史先保存为仓库外的 Git bundle 并校验，再关闭遗留 PR、清理分支。最终提交与远端验收见[交付 PR #5](https://github.com/billpwchan/concert_passport/pull/5)，不把恢复快照或临时测试数据纳入仓库。
+
 ## 发布边界
 
-初次本地验收时，远端只读检查显示仓库为 private，About / homepage / Topics 为空。维护者随后授权将累计应用与仓库改动统一整理、提交并合并到主分支；Git 交付以关联 PR 与远端提交为准。仓库可见性、生产数据和生产部署不属于本次 Git 交付；检查使用独立临时数据，没有创建公开 Release。
+初次本地验收时，远端只读检查显示仓库为 private，About / homepage / Topics 为空。维护者随后授权将累计应用与仓库改动统一整理、提交并合并到主分支；Git 交付以关联 PR 与远端提交为准。维护者随后将仓库设为 public，并要求远端与本地仅保留 main；简介、主页和 Topics 已同步。生产数据与生产部署不属于本次 Git 交付；检查使用独立临时数据，没有创建公开 Release。
 
 截图对应历史日期，第三方媒体不由 MIT 再授权；公开前核对素材公开再分发条件与历史隐私信息。具体公开准备和文案见[展示资料](SHOWCASE.md)，发布过程见[发布指南](RELEASING.md)。代码、文档和 CI 配置完成不代表 Star / Follow 增长已经验证。

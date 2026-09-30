@@ -24,7 +24,8 @@
 
 ## 持续维护
 
-- Dependabot 按配置提出 npm 与 GitHub Actions 更新，维护者 review；不会自动合并或强制升级 major。
+- 上游仓库只保留 `main`；贡献者使用 Fork 中的聚焦分支，维护者合并后清理临时分支。
+- Dependabot 常规版本更新 PR 自动创建已关闭，漏洞告警与自动安全修复保持开启。自动安全修复仍可能创建临时 PR 分支；维护者验证并合并后删除。维护者定期检查 Dependency graph / Dependabot alerts 与 `npm --prefix apps/web audit`，验证修复后提交；配置中的分组策略保留，便于将来恢复自动建议。
 - 在依赖更新、来源结构变化、字段冲突或用户反馈出现时补充对应验证；不为了展示重复跑无关全量检查。
 - 安全问题按 [SECURITY](../SECURITY.md)处理；社区争议按[行为准则](../CODE_OF_CONDUCT.md)处理。
 - 发布说明明确新增能力、已知限制与部署要求，让 Watch → Releases 的读者得到有意义的更新。

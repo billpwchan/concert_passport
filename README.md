@@ -9,7 +9,7 @@
 
 [在线体验](https://concert-passport.52-198-144-26.sslip.io) · [本地体验](#本地体验) · [技术设计](#值得研究的技术设计) · [参与贡献](CONTRIBUTING.md) · [English](README.en.md)
 
-[![CI](https://img.shields.io/badge/CI-Web_%2B_Swift_%2B_Repo-17271e?logo=githubactions&logoColor=d5ff70)](https://github.com/billpwchan/concert_passport/actions/workflows/ci.yml)
+[![CI](https://github.com/billpwchan/concert_passport/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/billpwchan/concert_passport/actions/workflows/ci.yml)
 [![MIT License](https://img.shields.io/badge/license-MIT-d5ff70?labelColor=17271e)](LICENSE)
 ![Next.js 16](https://img.shields.io/badge/Next.js-16-17271e?logo=nextdotjs&logoColor=white)
 ![React 19](https://img.shields.io/badge/React-19-17271e?logo=react&logoColor=d5ff70)

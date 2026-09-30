@@ -41,7 +41,7 @@ export function ConcertMap({
 
     void import('maplibre-gl').then((module) => {
       if (cancelled || !containerRef.current) return;
-      const maplibregl = module.default;
+      const maplibregl = module;
       const map = new maplibregl.Map({
         container: containerRef.current,
         style: `https://tiles.openfreemap.org/styles/${initialThemeRef.current === 'dark' ? 'dark' : 'positron'}`,
@@ -81,7 +81,7 @@ export function ConcertMap({
 
     void import('maplibre-gl').then((module) => {
       if (disposed || !mapRef.current) return;
-      const maplibregl = module.default;
+      const maplibregl = module;
       markersRef.current.forEach(({ marker }) => marker.remove());
       markersRef.current = points.map((point) => {
         const element = document.createElement('button');
