@@ -1,0 +1,110 @@
+{
+  "id": "1682922",
+  "allTicketStatus": 1,
+  "contentType": 400,
+  "directPurchaseButton": {
+    "label": "",
+    "url": "",
+    "themeId": ""
+  },
+  "encodedName": "itzy-3rd-world-tour-tunnel-vision-in-singapore",
+  "eventDate": "2026-10-03T00:00:00Z",
+  "eventDateUtc": "2026-10-03T10:00:00Z",
+  "eventDateTo": "2026-10-03T00:00:00Z",
+  "eventDateToUtc": "2026-10-03T10:00:00Z",
+  "eventSortDateUtc": "2026-10-03T15:59:00Z",
+  "curfewTime": "",
+  "doorTime": "",
+  "showTime": "18:00",
+  "genres": [
+    {
+      "key": "pop",
+      "name": "Pop"
+    }
+  ],
+  "image": "https://dynamicmedia.livenationinternational.com/t/b/i/e13c1b61-e746-4561-b852-74d03227b549.jpg",
+  "imageAltTag": "itzy",
+  "imagePlacement": "None",
+  "isDeleted": false,
+  "isInternational": false,
+  "lineup": [
+    {
+      "id": "1285170",
+      "encodedName": "itzy",
+      "name": "ITZY",
+      "url": "/itzy-tickets-adp1285170",
+      "tmId": "K8vZ917bJaV",
+      "type": "headline",
+      "isPrimary": true,
+      "aka": [],
+      "image": "https://dynamicmedia.livenationinternational.com/f/l/o/37288dbb-815a-46c1-95fb-75a77bafb944.jpg",
+      "imageAltTag": "ITZY",
+      "imagePlacement": 2,
+      "spotifyId": ""
+    }
+  ],
+  "promoter": "Live Nation",
+  "promoterId": 0,
+  "promoterIds": [
+    0
+  ],
+  "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+  "siteId": 52,
+  "tickets": [
+    {
+      "id": 1682926,
+      "currencySymbol": "zh-SG",
+      "currencyCode": "SGD",
+      "description": "",
+      "disclaimer": "",
+      "displayLabel": "Buy Tickets",
+      "isVisible": true,
+      "loggedInLabel": "Buy tickets",
+      "packageDescription": "",
+      "packageImage": "",
+      "packageImageAltTag": "",
+      "packageTermsAndConditionsUrl": "",
+      "packageTermsAndConditionsUrlTitle": "",
+      "priceFrom": 0,
+      "priceTo": 0,
+      "ticketTypeCategory": 0,
+      "ticketTypeImage": "",
+      "ticketTypeImageAltTag": "",
+      "ticketTypeMembersOnly": false,
+      "type": "General Onsale",
+      "typeId": 2,
+      "ticketStatus": 1,
+      "ticketUrl": "",
+      "validFromUtc": "2026-07-02T08:00:00Z",
+      "validToUtc": "2026-10-03T10:00:00Z",
+      "featuredName": "",
+      "highlightedName": "",
+      "themeId": "",
+      "waitroomOpenUtc": null
+    }
+  ],
+  "mainEventInformation": "<p><strong>ITZY 3RD WORLD TOUR &lt;TUNNEL VISION&gt; in SINGAPORE</strong></p>\r\n<p>Date: 3 October 2026 (Saturday), 6PM&nbsp;<strong>&nbsp;</strong></p>\r\n<p>Venue: Singapore Indoor Stadium</p>\r\n<p>Ticket price:&nbsp;$358 / $348 / $298 / $288 / $258 / $228 / $178 / $158 (excluding booking fee)</p>\r\n<p>&nbsp;</p>\r\n<p><strong>VIP Benefits:</strong></p>\r\n<p>- One (1) seated / standing* ticket</p>\r\n<p>- Commemorative VIP laminate and lanyard</p>\r\n<p>- Limited edition VIP gift item</p>\r\n<p>- Access to pre-show soundcheck party</p>\r\n<p>- Dedicated VIP merchandise lane (Subject to availability)</p>\r\n<p>- Priority entry to the venue</p>\r\n<p>&nbsp;</p>\r\n<p>*No designated standing area in the standing pens</p>\r\n<p>&nbsp;</p>\r\n<p><strong>Booking Channels:</strong></p>\r\n<p>- Online:&nbsp;<a href=\"https://ticketmaster.sg/activity/detail/26sg_itzy\" target=\"_blank\">www.ticketmaster.sg</a></p>\r\n<p>- Hotline: +65 6018 7645&nbsp;</p>",
+  "agePolicyText": "",
+  "eventListingText": "",
+  "venue": {
+    "id": 40651,
+    "name": "Singapore Indoor Stadium",
+    "city": "Singapore",
+    "country": "Singapore",
+    "url": "/singapore-indoor-stadium-tickets-vdp40651",
+    "disabledAccess": "",
+    "countryId": "199",
+    "cityId": 103584,
+    "address": "2 Stadium Walk, #01-00 Kallang Indoor Stadium",
+    "latitude": 0,
+    "longitude": 0,
+    "zipCode": "397691"
+  },
+  "ianaTimeZone": "Asia/Singapore",
+  "isNewEvent": false,
+  "url": "https://www.livenation.sg/show/1682922/itzy-3rd-world-tour-tunnel-vision-in-singapore/singapore/2026-10-03/en",
+  "agePolicy": "",
+  "showWaitList": false,
+  "festivalId": 0,
+  "doorTimeDate": "2026-10-03T00:00:00.000Z"
+}

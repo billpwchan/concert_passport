@@ -1,0 +1,34 @@
+name: 功能建议 / Feature request
+description: 从一个真实用户问题开始，提出可以验证的改进。
+title: '[Feature] '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先搜索已有 Issue，并阅读 docs/ROADMAP.md。建议说明实际任务，避免只罗列技术或视觉效果。
+        不要提交票码、私人行程、账号凭证或其他用户的记录。
+  - type: textarea
+    id: problem
+    attributes:
+      label: 谁在什么情况下遇到什么问题？ / User problem
+      description: 说明使用者、当前做法与阻碍。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 建议的行为 / Proposed behavior
+      description: 一个具体的前后变化，有替代方案也可以说明。
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 怎样确认它有效？ / Acceptance
+      description: 可观察的结果、示例或验收条件。
+  - type: checkboxes
+    id: participation
+    attributes:
+      label: 参与方式 / Participation
+      options:
+        - label: 我可以补充用例、设计、fixture 或实现。

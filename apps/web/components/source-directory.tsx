@@ -1,4 +1,7 @@
 'use client';
+import type { CollectionCoverage } from '@/db/coverage';
+import { SourceCorrectionForm } from './source-correction-form';
+import { CoverageDashboard } from './coverage-dashboard';
 
 import { useMemo, useState } from 'react';
 import type { ConnectorHealth, MarketCode, SourceChannel } from '@/lib/domain/types';
@@ -9,7 +12,7 @@ import {
 import { usePreferences } from './preferences-provider';
 import { SourceLogo } from './source-logo';
 
-const markets: Array<'ALL' | MarketCode> = ['ALL', 'SG', 'HK', 'TW', 'TH', 'KR', 'MY', 'PH', 'ID', 'VN', 'JP', 'AU'];
+const markets: Array<'ALL' | MarketCode> = ['ALL', 'SG', 'HK', 'TW', 'TH', 'KR', 'MY', 'PH', 'ID', 'VN', 'JP', 'AU', 'NZ'];
 const categories: Array<'ALL' | SourceChannel['category']> = [
   'ALL',
   'fan_platform',
@@ -19,9 +22,9 @@ const categories: Array<'ALL' | SourceChannel['category']> = [
 
 export function SourceDirectory({
   sources,
-  connectors,
+  connectors, coverage,
 }: {
-  sources: SourceChannel[];
+  sources: SourceChannel[]; coverage: CollectionCoverage;
   connectors: ConnectorHealth[];
 }) {
   const { t } = usePreferences();
@@ -37,13 +40,14 @@ export function SourceDirectory({
 
   return (
     <div className="page-body sources-page">
+      <CoverageDashboard coverage={coverage} />
       <section className="connector-strip" aria-label={t('sources.title')}>
         {connectors.map((connector) => (
           <div className="connector-item" key={connector.id}>
             <i className={connector.status} aria-hidden="true" />
             <span>
               <strong>{connector.name.replace(' API', '')}</strong>
-              <small>{t(connector.status === 'connected' ? 'sources.updatingLive' : 'sources.temporarilyOffline')}</small>
+              <small>{t(connector.status === 'connected' ? 'collection.observed' : connector.status === 'authentication_failed' ? 'collection.authFailed' : connector.status === 'unchecked' ? 'collection.never' : 'collection.retry')}</small>
             </span>
           </div>
         ))}
@@ -122,7 +126,7 @@ export function SourceDirectory({
           <span className="section-label">{t('sources.missingNotice')}</span>
           <h2>{t('sources.sendLink')}</h2>
           <p>{t('sources.submitDescription')}</p>
-          <small>{t('sources.reviewNote')}</small>
+          <SourceCorrectionForm />
         </aside>
       </div>
     </div>

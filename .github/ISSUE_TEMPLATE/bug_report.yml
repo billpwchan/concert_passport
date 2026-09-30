@@ -1,0 +1,41 @@
+name: 问题报告 / Bug report
+description: 用合成或公开数据报告可以复现的问题。
+title: '[Bug] '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请搜索已有 Issue。安全漏洞走 SECURITY.md，不公开利用细节。
+        日志与截图请去掉 cookie、token、票码、私人行程和个人数据库内容。
+  - type: textarea
+    id: problem
+    attributes:
+      label: 预期与实际行为 / Expected vs actual
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 最小复现步骤 / Steps to reproduce
+      description: 尽可能使用 demo、合成数据或公开官方页面。
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境 / Environment
+      description: Revision、Node、系统/浏览器、语言、official 或 hybrid、部署方式。
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 证据 / Evidence
+      description: 已脱敏的日志或截图；日期问题注明场馆时区，来源问题提供公开 URL。
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 提交检查 / Submission check
+      options:
+        - label: 已去掉凭证、票码与私人记录。
+          required: true

@@ -6,7 +6,7 @@ Base path: `/api/v1`. JSON is used for requests and responses.
 
 `artist` is required and must contain at least two characters. Optional parameters are `city`, `countryCode`, `startDateTime`, and `endDateTime`. Country codes are restricted to supported Asia-Pacific markets and date ranges may not exceed 370 days.
 
-Returns normalized live-provider results with stable canonical IDs, coordinates when available, event URLs, connector health, per-provider errors, cache state, and `generatedAt`. Ticketmaster records carry the provider’s exact official event URL. PredictHQ records carry a Concert Passport detail URL until an official ticket link is matched. Results are upserted into the canonical event catalog. Requests are limited per client and normalized searches are cached for ten minutes. When a connector is unavailable, `events` remains truthful and the consumer UI shows a neutral service state without exposing configuration details.
+Returns normalized live-provider results with stable canonical IDs, coordinates when available, event URLs, connector health, per-provider errors, cache state, and `generatedAt`. Ticketmaster records carry the provider’s exact official event URL. Live Nation artist calendars contribute structured official tour dates and promoter event pages, including dates omitted from regional API inventory. An exact-date official calendar supplements only performances verified against first-party artist, promoter, venue, or seller pages; it does not infer dates or times. PredictHQ records carry a Concert Passport detail URL until an official ticket link is matched. Results are upserted into the canonical event catalog. Requests are limited per client and normalized searches are cached for ten minutes. When a connector is unavailable, `events` remains truthful and the consumer UI shows a neutral service state without exposing configuration details.
 
 ## `GET /sources`
 
@@ -60,10 +60,14 @@ Mutation requests require a same-origin browser context. Authentication endpoint
 Accepted body:
 
 ```json
-{ "url": "https://weverse.io/artist/notice" }
+{ "url": "https://www.livenation.sg/event/example", "eventId": "optional-canonical-id", "note": "Information to recheck" }
 ```
 
-Only HTTPS URLs are accepted. The response identifies whether the host exists in the curated official-host registry, but every submission remains `pending` until event-level review.
+Only HTTPS URLs on configured collector hosts are accepted. Same-origin requests are rate-limited. The response returns the submission ID and `queued` status; the official verification queue determines `checked` or `needs_review`. A report cannot directly modify public data.
+
+## `GET /coverage`
+
+Returns actual source checks, durable page queue counts, recent catalog changes and scheduler outcomes. No credentials or private user data are exposed.
 
 ## Sessions
 
@@ -74,3 +78,17 @@ Verified email delivery, recovery, passkeys/MFA, device management, export, and 
 ## Environment
 
 `TICKETMASTER_API_KEY` activates Ticketmaster Discovery. `PREDICTHQ_ACCESS_TOKEN` activates PredictHQ. `TICKETMASTER_DAILY_REQUEST_BUDGET` defaults to 4500, below the standard 5000-call quota. `INGESTION_CRON_SECRET` authenticates the isolated refresh worker. Secrets remain server-side and are never prefixed for client exposure or rendered in consumer status copy.
+
+## September 2026 journal API additions
+
+All journal mutations require a same-origin request and the current account or private browser session. JSON shape/date/length/distance validation returns 400; missing or another user's record returns 404. Personal responses use `Cache-Control: private, no-store`.
+
+- `GET /api/v1/passport`: `{ entries: [...] }`, excluding removed records.
+- `POST /api/v1/passport`: manual `{ artist, city, market, attendedAt, eventName?, venue?, travelDistanceKm? }`. A manual `YYYY-MM-DD` stays date-only. Alternatively `{ eventId }` records a saved, non-quarantined past performance; retries reuse the same record and restore it if removed. Future, cancelled, postponed and deleted events are rejected.
+- `PATCH /api/v1/passport`: `{ id, ...manualFields }` edits the current user's record. `{ id, restore: true }` restores a removed record.
+- `DELETE /api/v1/passport`: `{ id }` performs recoverable removal.
+- `DELETE /api/v1/follows`: `{ artist, market }`, scoped to the current user.
+- `GET /api/health`: lightweight SQLite readiness, schema version and official collection status/age. A delayed worker is reported separately from app readiness. Private data and credentials are never returned.
+- `GET /api/v1/events/:eventId/calendar`: returns 409 while a recorded timing conflict remains unresolved.
+
+Schema v10 adds nullable `attendance_records.event_id`, `deleted_at` and a unique user/event index. Anonymous-to-account merge preserves both memories if each identity recorded the same event, detaching the redundant source link without deleting either record.

@@ -10,10 +10,14 @@ export function eventDetailHref(event: LinkableEvent): string {
 }
 
 export function verifiedEventHref(event: LinkableEvent): string | undefined {
-  return event.bestLinkUrl && event.bestLinkRole ? event.bestLinkUrl : undefined;
+  if (!event.bestLinkUrl || !event.bestLinkRole) return undefined;
+  try { const url = new URL(event.bestLinkUrl); return url.protocol === 'https:' && !url.username && !url.password ? url.href : undefined; } catch { return undefined; }
 }
 
 export function primaryEventHref(event: LinkableEvent): { href: string; external: boolean } {
+  if (event.id || event.canonicalId) {
+    return { href: eventDetailHref(event), external: false };
+  }
   const verified = verifiedEventHref(event);
   return verified
     ? { href: verified, external: true }
@@ -39,6 +43,9 @@ export function eventLinkActionKey(role: EventLinkRole | undefined):
 export function linkSourceName(source: string | undefined): string | undefined {
   const labels: Record<string, string> = {
     'ticketmaster-discovery': 'Ticketmaster',
+    'livenation-tour': 'Live Nation',
+    'official-event-calendar': 'Official calendar',
+    predicthq: 'PredictHQ',
     'ticketmaster-sg': 'Ticketmaster Singapore',
     ticketmaster: 'Ticketmaster',
     tixcraft: 'tixCraft',

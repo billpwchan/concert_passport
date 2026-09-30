@@ -1,0 +1,26 @@
+version: 2
+# Maintain a single upstream main branch. Retain update policy for manual re-enablement.
+# Dependency alerts stay enabled; automated security PRs remain enabled unless separately authorized.
+updates:
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 0
+    groups:
+      runtime-minor-patch:
+        dependency-type: production
+        update-types: [minor, patch]
+      tooling-minor-patch:
+        dependency-type: development
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 0
+    groups:
+      actions:
+        patterns: ['*']

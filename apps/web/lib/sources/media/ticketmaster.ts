@@ -1,37 +1,19 @@
-import { getArtistMedia, touchArtistMedia, upsertArtistMedia, type ArtistMediaRecord } from '@/db/media';
-import { canonicalCoreArtistName, coreArtists } from '@/lib/domain/core-artists';
+import {
+  deleteArtistMedia,
+  getArtistMedia,
+  touchArtistMedia,
+  upsertArtistMedia,
+  type ArtistMediaRecord,
+} from '@/db/media';
+import { canonicalCoreArtistName } from '@/lib/domain/core-artists';
+import { isAmbiguousArtistName } from '@/lib/domain/ambiguous-artist-names';
 import {
   selectTicketmasterImage,
   ticketmasterConfigured,
-  ticketmasterRequest,
-  type TicketmasterImage,
 } from '@/lib/sources/ticketmaster-client';
-
-type TicketmasterAttraction = {
-  id: string;
-  name: string;
-  url?: string;
-  images?: TicketmasterImage[];
-  classifications?: Array<{ segment?: { name?: string } }>;
-};
-
-type AttractionResponse = {
-  _embedded?: { attractions?: TicketmasterAttraction[] };
-};
+import { findTicketmasterAttraction } from '@/lib/sources/ticketmaster-attractions';
 
 const REFRESH_AFTER_MS = 12 * 60 * 60_000;
-
-function matchKey(value: string): string {
-  return value.toLocaleLowerCase('en-US').replace(/[\s\p{P}\p{S}]+/gu, '');
-}
-
-function acceptedArtistNames(value: string): Set<string> {
-  const canonical = canonicalCoreArtistName(value) ?? value;
-  const artist = coreArtists.find((candidate) => candidate.name === canonical);
-  return new Set([canonical, artist?.query, ...(artist?.aliases ?? [])]
-    .filter((name): name is string => Boolean(name))
-    .map(matchKey));
-}
 
 export async function syncArtistMediaFromTicketmaster(
   requestedName: string,
@@ -40,24 +22,20 @@ export async function syncArtistMediaFromTicketmaster(
   const canonicalName = canonicalCoreArtistName(requestedName) ?? requestedName.trim();
   if (!canonicalName || !ticketmasterConfigured()) return getArtistMedia(canonicalName);
   const existing = getArtistMedia(canonicalName);
+  if (isAmbiguousArtistName(canonicalName)) {
+    if (existing?.provider === 'ticketmaster-discovery') deleteArtistMedia(canonicalName);
+    return undefined;
+  }
   if (!force && existing?.provider === 'ticketmaster-discovery'
     && Date.now() - existing.lastCheckedAt < REFRESH_AFTER_MS) return existing;
 
-  const params = new URLSearchParams({
-    keyword: canonicalName,
-    classificationName: 'music',
-    size: '8',
-    sort: 'relevance,desc',
-  });
-  const response = await ticketmasterRequest<AttractionResponse>('/discovery/v2/attractions.json', params);
-  const names = acceptedArtistNames(canonicalName);
-  const attraction = response?._embedded?.attractions?.find((candidate) => (
-    names.has(matchKey(candidate.name))
-    && candidate.classifications?.some((item) => item.segment?.name === 'Music') !== false
-  ));
+  const attraction = await findTicketmasterAttraction(canonicalName);
   const image = selectTicketmasterImage(attraction?.images);
   if (!attraction || !image) {
-    if (existing?.provider === 'ticketmaster-discovery') touchArtistMedia(canonicalName);
+    if (existing?.provider === 'ticketmaster-discovery') {
+      if (existing.isFallback) deleteArtistMedia(canonicalName);
+      else touchArtistMedia(canonicalName);
+    }
     return undefined;
   }
   return upsertArtistMedia({

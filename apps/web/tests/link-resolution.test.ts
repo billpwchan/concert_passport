@@ -45,6 +45,7 @@ test('extracts schema Event identity, venue and direct offers URL', () => {
     <html><head><link rel="canonical" href="https://www.livenation.com.tw/event/ive-taipei">
     <script type="application/ld+json">{
       "@context":"https://schema.org","@type":"Event","name":"IVE WORLD TOUR in Taipei",
+      "image":{"@type":"ImageObject","url":"https://www.livenation.com.tw/media/ive-tour.jpg"},
       "startDate":"2026-09-11T19:00:00+08:00",
       "performer":{"@type":"MusicGroup","name":"IVE"},
       "location":{"@type":"Place","name":"Taipei Arena","address":{"addressLocality":"Taipei","addressCountry":"TW"}},
@@ -55,6 +56,20 @@ test('extracts schema Event identity, venue and direct offers URL', () => {
   assert.equal(parsed.data.venue, 'Taipei Arena');
   assert.equal(parsed.offerUrl, 'https://tixcraft.com/activity/detail/26_ive');
   assert.equal(parsed.data.saleStartsAt, '2026-07-01T12:00:00+08:00');
+  assert.equal(parsed.data.imageUrl, 'https://www.livenation.com.tw/media/ive-tour.jpg');
+  assert.equal(parsed.data.imageSourceUrl, 'https://www.livenation.com.tw/event/ive-taipei');
+});
+
+test('uses Open Graph art only when the page identifies one structured event', () => {
+  const parsed = parseEventPage(`
+    <script type="application/ld+json">{"@type":"MusicEvent","name":"IVE Tour","startDate":"2026-09-06T18:00:00+08:00"}</script>
+    <meta property="og:image" content="/assets/tour-key-art.webp">
+    <meta property="og:image:width" content="1600">
+    <meta property="og:image:height" content="900">
+  `, 'https://tixcraft.com/activity/detail/26_ive');
+  assert.equal(parsed.data.imageUrl, 'https://tixcraft.com/assets/tour-key-art.webp');
+  assert.equal(parsed.data.imageWidth, 1600);
+  assert.equal(parsed.data.imageHeight, 900);
 });
 
 test('keeps an event-specific seller path when page canonical points to a generic listing', async () => {
@@ -90,6 +105,28 @@ test('publishes a unique exact match and quarantines a conflicting date', () => 
   });
   assert.equal(conflict.state, 'quarantined');
   assert.ok(conflict.conflicts.includes('date'));
+
+  const unavailableCatalogPage = scoreCandidate(event, candidate, {
+    requestedUrl: candidate.url,
+    canonicalUrl: candidate.url,
+    httpStatus: 403,
+    fetched: false,
+    failureCode: 'http_403',
+    data: {},
+  });
+  assert.equal(unavailableCatalogPage.state, 'quarantined');
+
+  const providerAssertion = scoreCandidate(event, {
+    ...candidate,
+    discoveredBy: 'ticketmaster',
+  }, {
+    requestedUrl: candidate.url,
+    canonicalUrl: candidate.url,
+    fetched: false,
+    data: {},
+  });
+  assert.equal(providerAssertion.state, 'verified');
+  assert.ok(providerAssertion.reasons.includes('provider_asserted'));
 });
 
 test('normalizes localized country names without weakening date identity', () => {
@@ -151,6 +188,14 @@ test('persists verified evidence, selects the link and versions authoritative co
   assert.equal(row.startsAt, '2026-09-11T11:00:00.000Z');
   assert.equal((getDb().prepare('SELECT COUNT(*) AS count FROM event_link_evidence').get() as { count: number }).count, 1);
   assert.equal((getDb().prepare("SELECT COUNT(*) AS count FROM event_versions WHERE change_type = 'authority_reconciled'").get() as { count: number }).count, 1);
+
+  recordLinkEvidence(stored.id, { ...scored, state: 'quarantined' });
+  const revoked = getDb().prepare(`
+    SELECT best_link_url AS url, best_link_verified_at AS verifiedAt
+    FROM canonical_events WHERE id = ?
+  `).get(stored.id) as { url: string | null; verifiedAt: number | null };
+  assert.equal(revoked.url, null);
+  assert.equal(revoked.verifiedAt, null);
 });
 
 test('interprets timezone-less official page times in the venue timezone', async () => {
@@ -187,4 +232,38 @@ test('interprets timezone-less official page times in the venue timezone', async
   linkRepository.publishBestLinkAndReconcile(stored, result);
   const row = getDb().prepare('SELECT starts_at AS startsAt FROM canonical_events WHERE id = ?').get(stored.id) as { startsAt: string };
   assert.equal(row.startsAt, '2026-10-27T11:30:00.000Z');
+});
+
+test('keeps quarantined links out of the queue until exponential retry is due', async () => {
+  const linkRepository = await import('../db/link-resolution.ts');
+  const { upsertDiscoveredEvents } = await import('../db/events.ts');
+  const { getDb } = await import('../db/index.ts');
+  const startsAt = new Date(Date.now() + 30 * 86_400_000).toISOString();
+  upsertDiscoveredEvents([{
+    provider: 'predicthq', providerEventId: 'retry-backoff', name: 'IVE RETRY TEST',
+    artist: 'IVE', startsAt, timezone: 'Asia/Singapore', venue: 'Test Hall',
+    city: 'Singapore', countryCode: 'SG', officialUrl: '/events/retry-backoff', confidence: 'reported',
+  }]);
+  const stored = linkRepository.getEventsForLinkResolution(100)
+    .find((item) => item.id === 'predicthq:retry-backoff')!;
+  const quarantined = scoreCandidate(stored, {
+    url: 'https://ticketmaster.sg/activity/detail/26_retry', sourceId: 'ticketmaster-sg',
+    role: 'ticket', authority: 'seller', discoveredBy: 'searxng',
+    data: { artist: 'IVE', name: 'Different event', startsAt: new Date(Date.now() + 80 * 86_400_000).toISOString(), countryCode: 'SG' },
+  }, {
+    requestedUrl: 'https://ticketmaster.sg/activity/detail/26_retry',
+    canonicalUrl: 'https://ticketmaster.sg/activity/detail/26_retry', fetched: true,
+    data: { artist: 'IVE', name: 'Different event', startsAt: new Date(Date.now() + 80 * 86_400_000).toISOString(), countryCode: 'SG' },
+  });
+  assert.equal(quarantined.state, 'quarantined');
+  linkRepository.recordLinkEvidence(stored.id, quarantined);
+  assert.ok(!linkRepository.getEventsForLinkResolution(100, new Date(Date.now() + 60 * 60_000)).some((item) => item.id === stored.id));
+  assert.ok(linkRepository.getEventsForLinkResolution(100, new Date(Date.now() + 7 * 60 * 60_000)).some((item) => item.id === stored.id));
+  linkRepository.recordLinkEvidence(stored.id, quarantined);
+  const retry = getDb().prepare(`
+    SELECT retry_count AS retryCount, next_check_at - last_checked_at AS delay
+    FROM event_link_evidence WHERE event_id = ?
+  `).get(stored.id) as { retryCount: number; delay: number };
+  assert.equal(retry.retryCount, 2);
+  assert.equal(retry.delay, 12 * 60 * 60_000);
 });

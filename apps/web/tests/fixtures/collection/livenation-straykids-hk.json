@@ -1,0 +1,116 @@
+{
+  "id": "1691372",
+  "allTicketStatus": 1,
+  "contentType": 400,
+  "directPurchaseButton": {
+    "label": "",
+    "url": "",
+    "themeId": ""
+  },
+  "encodedName": "stray-kids-world-tour-run-it-hong-kong-",
+  "eventDate": "2026-12-05T00:00:00Z",
+  "eventDateUtc": "2026-12-05T09:00:00Z",
+  "eventDateTo": "2026-12-05T00:00:00Z",
+  "eventDateToUtc": "2026-12-05T09:00:00Z",
+  "eventSortDateUtc": "2026-12-05T15:59:00Z",
+  "curfewTime": "",
+  "doorTime": "",
+  "showTime": "17:00",
+  "genres": [
+    {
+      "key": "hip-hop-and-rap",
+      "name": "Hip Hop And Rap"
+    },
+    {
+      "key": "pop",
+      "name": "Pop"
+    }
+  ],
+  "image": "https://dynamicmedia.livenationinternational.com/b/k/x/bfe70a9d-47c7-4626-ad84-55e65aa12ddc.png",
+  "imageAltTag": "Stray Kids",
+  "imagePlacement": "None",
+  "isDeleted": false,
+  "isInternational": false,
+  "lineup": [
+    {
+      "id": "1182958",
+      "encodedName": "stray-kids",
+      "name": "Stray Kids",
+      "url": "/stray-kids-tickets-adp1182958",
+      "tmId": "K8vZ9179Vpf",
+      "type": "headline",
+      "isPrimary": true,
+      "aka": [
+        "skz"
+      ],
+      "image": "https://dynamicmedia.livenationinternational.com/b/k/x/bfe70a9d-47c7-4626-ad84-55e65aa12ddc.png",
+      "imageAltTag": "Stray Kids",
+      "imagePlacement": 2,
+      "spotifyId": "2dIgFjalVxs4ThymZ67YCE"
+    }
+  ],
+  "promoter": "Live Nation",
+  "promoterId": 0,
+  "promoterIds": [
+    0
+  ],
+  "name": "Stray Kids World Tour <RUN IT HONG KONG>",
+  "siteId": 51,
+  "tickets": [
+    {
+      "id": 1691376,
+      "currencySymbol": "zh-HK",
+      "currencyCode": "HKD",
+      "description": "",
+      "disclaimer": "一般門票 *包括門票價格及顧客服務費，但不包括郵寄費用。",
+      "displayLabel": "公開發售",
+      "isVisible": true,
+      "loggedInLabel": "公開發售",
+      "packageDescription": "",
+      "packageImage": "",
+      "packageImageAltTag": "",
+      "packageTermsAndConditionsUrl": "",
+      "packageTermsAndConditionsUrlTitle": "",
+      "priceFrom": 0,
+      "priceTo": 0,
+      "ticketTypeCategory": 0,
+      "ticketTypeImage": "",
+      "ticketTypeImageAltTag": "",
+      "ticketTypeMembersOnly": false,
+      "type": "公開發售",
+      "typeId": 2,
+      "ticketStatus": 1,
+      "ticketUrl": "https://hkt.hkticketing.com/en/#/allEvents/detail?projectId=50000001506002",
+      "validFromUtc": "2026-09-04T04:00:00Z",
+      "validToUtc": "2026-12-05T09:00:00Z",
+      "featuredName": "",
+      "highlightedName": "",
+      "themeId": "",
+      "waitroomOpenUtc": null
+    }
+  ],
+  "mainEventInformation": "$38",
+  "agePolicyText": "",
+  "eventListingText": "",
+  "venue": {
+    "id": 1518616,
+    "name": "Kai Tak Stadium",
+    "city": "Hong Kong",
+    "country": "Hong Kong",
+    "url": "/kai-tak-stadium-tickets-vdp1518616",
+    "disabledAccess": "",
+    "countryId": "98",
+    "cityId": 103574,
+    "address": "38-39, 承啟道九龍城",
+    "latitude": 0,
+    "longitude": 0,
+    "zipCode": ""
+  },
+  "ianaTimeZone": "Asia/Shanghai",
+  "isNewEvent": false,
+  "url": "https://www.livenation.hk/show/1691372/stray-kids-world-tour-run-it-hong-kong-/hong kong/2026-12-05/zh",
+  "agePolicy": "",
+  "showWaitList": false,
+  "festivalId": 0,
+  "doorTimeDate": "2026-12-05T00:00:00.000Z"
+}

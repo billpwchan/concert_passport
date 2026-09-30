@@ -22,7 +22,7 @@ The response must be demonstrated, not claimed:
 
 ### Challenge: “The data does not exist in one legal feed.”
 
-Correct. This is the largest existential risk. The proposed response is a deliberately narrow catalog, multiple licensed/official/user-forwarded adapters, and an editorial verification system. If the business cannot afford that operation or secure appropriate rights, it should reduce geography rather than pretend to be comprehensive.
+Correct. This is the largest existential risk. The response is a multi-source identity graph, licensed event adapters, official destinations, deterministic automatic verification and measured per-market recall. Ambiguous evidence fails closed and retries; it never becomes a human publication queue. If a lawful source mix cannot support a claim, the product must narrow the claim rather than pretend to be comprehensive.
 
 ### Challenge: “Fans will not pay for reminders.”
 
@@ -40,7 +40,7 @@ It becomes a gimmick if it is a badge collection disconnected from real attendan
 
 | Risk | Likelihood | Impact | Mitigation | Stop/trigger condition |
 |---|---|---:|---|---|
-| Critical milestones are incomplete or late | High | Existential | Narrow markets/artists, source hierarchy, field provenance, human verification, freshness SLAs | Pilot accuracy or latency misses gate for two cycles |
+| Critical milestones are incomplete or late | High | Existential | Measured scope, source hierarchy, field provenance, automatic quarantine, freshness SLAs | Pilot accuracy or latency misses gate for two cycles |
 | Source terms prohibit intended commercial use | High | Existential | Legal review, contracts, provider adapters, user-forwarded inputs, no unauthorized scraping | No lawful source mix for first two markets |
 | Platform dependence changes economics/coverage | High | High | Never make one provider canonical; preserve internal entities and source graph | One provider supplies >70% of critical milestones without fallback |
 | Push notification is delayed/disabled | Medium | High | Multi-channel coverage, local calendar, acknowledgement, in-app alert health | Product copy still implies guarantee or delivery audit is absent |
@@ -54,7 +54,7 @@ It becomes a gimmick if it is a badge collection disconnected from real attendan
 | Live/exact location enables stalking | Medium | High | Private default, delayed/coarse share, no background live social map | Exact location appears in public Passport or friend feed by default |
 | Cross-border privacy obligations diverge | High | High | Data minimization, regional counsel, deletion/export, processor inventory, residency review | Launch expands before data map and lawful basis review |
 | Account takeover exposes itineraries/codes | Medium | High | Strong password hashing, revocable sessions, passkeys/MFA, device review, encrypted secrets | Sensitive codes stored without threat model and recovery process |
-| Community submissions create misinformation | High | High | Evidence required, reputation and reviewer queue, source tier visible | Unverified submissions automatically trigger critical alerts |
+| Community submissions create misinformation | High | High | Do not use them as publication authority; require independent machine-verifiable official evidence | Unverified submissions automatically trigger critical alerts |
 | Support burden overwhelms subscription margin | High | High | Concierge pilot, correction tooling, per-market cost accounting, scope control | Data/support cost per payer cannot fit target annual price |
 | Cold start requires too much manual setup | High | High | Start with artist/city selection, share-sheet capture, CSV/history import later | <50% reach first protected journey in pilot |
 | Passport has no proof or is overly strict | Medium | Medium | Self-attested/confirmed/imported proof tiers; joy first, verification visible | Users abandon because logging needs ticket proof |
@@ -72,6 +72,10 @@ It becomes a gimmick if it is a badge collection disconnected from real attendan
 - time is published in the artist’s home zone rather than venue zone;
 - additional show inherits the wrong sale program;
 - translated artist or venue name creates a duplicate;
+- an ambiguous artist name such as `KEY` matches an unrelated event title;
+- a Filipino group and Korean soloist share the same Latin display name and are merged;
+- a provider's generic fallback image is presented as artist photography;
+- one promotional placeholder is inherited by several unrelated artists;
 - source page changes without a stable URL;
 - official social image contains the only deadline;
 - a cancellation appears on one channel but not the ticket page;
@@ -90,6 +94,12 @@ It becomes a gimmick if it is a badge collection disconnected from real attendan
 - alert rescheduling tied to the exact milestone version;
 - fan-visible correction and support path;
 - post-incident review for every missed or incorrect critical deadline.
+- reject provider fallback images before persistence;
+- quarantine an asset URL reused across distinct canonical artist IDs;
+- keep event art bound to provider event identity and artist art bound to canonical attraction identity;
+- prefer a deliberate no-image layout over inferred or shared imagery.
+- compare provider artist type and stable attraction ID before accepting a same-name catalog match;
+- resolve unknown Korean candidates through an exact external identity lookup and fail closed on zero/multiple matches.
 
 ## 4. Notification red team
 
@@ -238,21 +248,19 @@ Do:
 
 ## 9. Operational audit
 
-An internal admin console is a launch feature, not back-office polish. It needs:
+The system needs machine-readable health, not an editorial queue:
 
-- source and provider health;
-- unresolved entity matches;
-- conflicting critical facts;
-- upcoming milestones with missing authority;
-- change severity and alert impact preview;
-- reviewer assignment and four-eyes approval for highest-risk corrections;
-- user reports and correction SLA;
-- outbound-domain verification;
+- source and provider success, latency, quota and cursor health;
+- identity collisions, unmatched records and alias anomalies;
+- automatically quarantined critical conflicts and retry age;
+- milestones missing authority or exact ticket destinations;
+- change severity and affected-alert counts;
+- outbound-domain and event-page verification;
 - notification delivery audit;
-- per-market completeness and latency dashboards;
-- asset-rights expiry/removal queue.
+- per-market completeness, zero-state and latency metrics;
+- asset-rights expiry and automatic removal state.
 
-If operations are performed in ad hoc spreadsheets and direct database edits, the product is not ready for a protected-journey promise.
+No normal publication path may depend on spreadsheets, direct database edits, reviewer assignment, or four-eyes approval. High-risk ambiguity fails closed. Exceptional engineering incidents may still require incident response, but that is recovery of a degraded system rather than routine content operations.
 
 ## 10. Kill criteria and pivots
 
@@ -273,7 +281,7 @@ Possible pivots:
 
 - narrow to a high-touch K-pop cross-border lifecycle product;
 - sell verified timeline infrastructure to promoters/fan clubs;
-- focus on private/manual planning plus Passport, without claims of comprehensive automated coverage;
+- focus on private planning plus Passport while presenting only measured automated coverage;
 - begin as a concierge membership while the source network develops.
 
 ## 11. Pre-launch red-team gates

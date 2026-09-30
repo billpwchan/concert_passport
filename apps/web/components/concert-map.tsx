@@ -10,6 +10,7 @@ export type AtlasMapPoint = {
   artist: string;
   city: string;
   accent: string;
+  approximate?: boolean;
 };
 
 export function ConcertMap({
@@ -40,7 +41,8 @@ export function ConcertMap({
 
     void import('maplibre-gl').then((module) => {
       if (cancelled || !containerRef.current) return;
-      const maplibregl = module.default;
+      const maplibregl = module;
+      maplibregl.setWorkerUrl(`/generated/maplibre/${maplibregl.getVersion()}/maplibre-gl-worker.mjs`);
       const map = new maplibregl.Map({
         container: containerRef.current,
         style: `https://tiles.openfreemap.org/styles/${initialThemeRef.current === 'dark' ? 'dark' : 'positron'}`,
@@ -80,15 +82,15 @@ export function ConcertMap({
 
     void import('maplibre-gl').then((module) => {
       if (disposed || !mapRef.current) return;
-      const maplibregl = module.default;
+      const maplibregl = module;
       markersRef.current.forEach(({ marker }) => marker.remove());
       markersRef.current = points.map((point) => {
         const element = document.createElement('button');
         element.type = 'button';
-        element.className = 'concert-map-marker';
+        element.className = `concert-map-marker${point.approximate ? ' approximate' : ''}`;
         element.style.setProperty('--marker-color', point.accent);
-        element.setAttribute('aria-label', `${point.artist} · ${point.city}`);
-        element.title = `${point.artist} · ${point.city}`;
+        element.setAttribute('aria-label', `${point.artist} · ${point.city}${point.approximate ? ' ≈' : ''}`);
+        element.title = `${point.artist} · ${point.city}${point.approximate ? ' ≈' : ''}`;
         const dot = document.createElement('span');
         const label = document.createElement('strong');
         label.textContent = point.artist;

@@ -1,4 +1,3 @@
-import { PageHeader } from '@/components/page-header';
 import { PassportLedger } from '@/components/passport-ledger';
 import { getCurrentAccount } from '@/lib/server/auth';
 import { getPassportEntriesForCurrentSession } from '@/lib/server/passport';
@@ -13,14 +12,5 @@ export default async function PassportPage() {
     getPassportEntriesForCurrentSession(),
     getCurrentAccount(),
   ]);
-  return (
-    <>
-      <PageHeader
-        eyebrowKey="passport.eyebrow"
-        titleKey="passport.title"
-        descriptionKey="passport.description"
-      />
-      <PassportLedger entries={entries} displayName={account?.displayName} />
-    </>
-  );
+  return <PassportLedger entries={entries} displayName={account?.displayName} />;
 }

@@ -22,7 +22,28 @@ test('normalizes an artist search and APAC market code', () => {
   });
 });
 
-test('rejects empty artist searches and non-APAC markets', () => {
+test('accepts verified-style one-character stage names', () => {
+  assert.equal(normalizeDiscoveryQuery(new URLSearchParams({ artist: 'V' })).artist, 'V');
+});
+
+test('accepts a market-only trip search', () => {
+  assert.deepEqual(
+    normalizeDiscoveryQuery(new URLSearchParams({
+      countryCode: 'hk',
+      startDateTime: '2026-10-01T00:00:00Z',
+      endDateTime: '2026-10-07T23:59:59Z',
+    })),
+    {
+      artist: undefined,
+      city: undefined,
+      countryCode: 'HK',
+      startDateTime: '2026-10-01T00:00:00Z',
+      endDateTime: '2026-10-07T23:59:59Z',
+    },
+  );
+});
+
+test('rejects empty discovery searches and non-APAC markets', () => {
   assert.throws(
     () => normalizeDiscoveryQuery(new URLSearchParams()),
     DiscoveryInputError,

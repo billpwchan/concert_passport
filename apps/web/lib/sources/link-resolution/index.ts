@@ -44,7 +44,7 @@ export async function resolveUpcomingEventLinks(input: {
         discovered.errors.forEach((message) => stats.errors.push({ eventId: event.id, message }));
         const scored: ScoredCandidate[] = [];
         for (const candidate of discovered.candidates.slice(0, 12)) {
-          const inspection = await inspectCandidatePage(candidate.url);
+          const inspection = await inspectCandidatePage(candidate.url, event);
           const result = scoreCandidate(event, candidate, inspection);
           recordLinkEvidence(event.id, result);
           scored.push(result);

@@ -61,7 +61,7 @@ test('official host verification accepts owned subdomains and rejects lookalikes
 });
 
 test('source registry has unique ids and a tier-one path in every launch market', () => {
-  const launchMarkets = ['SG', 'HK', 'JP', 'TW', 'TH', 'KR', 'MY', 'PH', 'ID', 'VN', 'AU'];
+  const launchMarkets = ['SG', 'HK', 'JP', 'TW', 'TH', 'KR', 'MY', 'PH', 'ID', 'VN', 'AU', 'NZ'];
   assert.equal(new Set(sourceRegistry.map((source) => source.id)).size, sourceRegistry.length);
 
   for (const market of launchMarkets) {

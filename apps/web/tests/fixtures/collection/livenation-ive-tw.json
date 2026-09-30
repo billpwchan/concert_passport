@@ -1,0 +1,189 @@
+{
+  "total": 1,
+  "hasError": false,
+  "documents": [
+    {
+      "id": "1663145",
+      "ticketmasterDiscoveryId": "",
+      "agePolicy": "",
+      "allTicketStatus": 3,
+      "announceDateUtc": "2026-03-26T03:05:29Z",
+      "contentType": 400,
+      "directPurchaseButton": {
+        "label": "",
+        "url": "",
+        "themeId": ""
+      },
+      "encodedName": "ive-world-tour-show-what-i-am-in-taipei",
+      "encodedKeywords": "ive-world-tour-show-what-i-am-in-taipei-taipei",
+      "eventDate": "2026-09-11T00:00:00Z",
+      "eventDateUtc": "2026-09-11T15:59:00Z",
+      "eventDateTo": "2026-09-13T00:00:00Z",
+      "eventDateToUtc": "2026-09-13T15:59:00Z",
+      "eventSortDateUtc": "2026-09-11T15:59:00Z",
+      "modified": "2026-05-03T16:24:47Z",
+      "festivalId": 0,
+      "curfewTime": "",
+      "doorTime": "",
+      "showTime": "",
+      "genres": [
+        {
+          "key": "pop",
+          "name": "Pop"
+        }
+      ],
+      "image": "https://dynamicmedia.livenationinternational.com/w/p/a/f14e5d4a-d1bf-4b40-9517-f444c2b889cd.png",
+      "imageAltTag": "IVE",
+      "imagePlacement": "Top",
+      "includeInVoucherProgram": false,
+      "isDeleted": false,
+      "isNewEvent": false,
+      "isInternational": false,
+      "ianaTimeZone": "Asia/Taipei",
+      "lineup": [
+        {
+          "id": "1446287",
+          "encodedName": "ive",
+          "name": "IVE",
+          "tmId": "K8vZ917QF9f",
+          "spotifyId": "6RHTUrRF63xao58xh9FXYJ",
+          "type": "headline",
+          "isPrimary": true,
+          "url": "/ive-tickets-adp1446287",
+          "aka": [],
+          "rank": 1,
+          "image": "https://dynamicmedia.livenationinternational.com/w/p/a/f14e5d4a-d1bf-4b40-9517-f444c2b889cd.png",
+          "imageAltTag": "IVE",
+          "imagePlacement": 1,
+          "genres": [
+            "Pop"
+          ],
+          "genreKeys": [
+            {
+              "key": "pop",
+              "name": "Pop"
+            }
+          ],
+          "tmUsId": "2860741",
+          "genreId": "",
+          "genre": "",
+          "segment": ""
+        }
+      ],
+      "localizations": [
+        {
+          "additionalEventInformation": "<p>IVE WORLD TOUR &lt;SHOW WHAT I AM&gt; IN TAIPEI</p>\r\n<p>● 時間：2026/9/11(五) &amp; 9/12(六）</p>\r\n<p>● 加場時間：2026/9/13(日）</p>\r\n<p>● 地點：台北小巨蛋</p>\r\n<p>● 票價：NTD VIP 7,800 / 5,800 / 4,800 / 3,800 / 2,800 / 2,300 / 800</p>\r\n<p>● 關於限量 VIP：包含演前 Soundcheck、優先入場、VIP 掛繩和吊牌一組、周邊商品優先購買權（限演出現場有販售時），完整詳情請至拓元售票頁面</p>\r\n<p><br>➤ 加場開賣</p>\r\n<p>2026/4/8 11AM 拓元售票 全面開賣</p>\r\n<p><br>更多訊息 More Info www.livenation.com.tw</p>\r\n<p><br>※實際演出時間請以現場公告為準。演出時間不等於粉絲福利報到及活動時間，請務必於演出日前至 Live Nation Taiwan 官方平台詳讀活動入場須知及相關流程，以免損害權益</p>\r\n<p>※請注意拓元售票系統為官方唯一授權購票平台。</p>\r\n<p>※各預購階段僅提供特定或優先購買之服務，不保證序號或座位排號一定優於正式開賣，亦不保證購得票券</p>\r\n<p>※入場須配合安檢及入場須知</p>",
+          "cultureName": "zh-TW",
+          "cultureNameForUmbraco": "zh-TW",
+          "description": "<p>BANG！BANG！</p>\r\n<p>IVE 席捲台北</p>\r\n<p>全新巡迴 首次攻蛋<br><br></p>\r\n<p>IVE WORLD TOUR &lt;SHOW WHAT I AM&gt; IN TAIPEI</p>\r\n<p>9 月 11 - 12 日</p>\r\n<p>台北小巨蛋✦華麗開唱</p>",
+          "alertType": "0",
+          "alertText": "",
+          "alertValidFromUtc": "2026-03-25T01:00:00Z",
+          "alertValidToUtc": "2026-03-25T01:00:00Z",
+          "listingsText": "",
+          "mainEventInformation": "<p>BANG！BANG！</p>\r\n<p>IVE 席捲台北</p>\r\n<p>全新巡迴 首次攻蛋<br><br></p>\r\n<p>IVE WORLD TOUR &lt;SHOW WHAT I AM&gt; IN TAIPEI</p>\r\n<p>9 月 11 - 12 日</p>\r\n<p>台北小巨蛋✦華麗開唱</p>",
+          "agePolicyText": "",
+          "name": "IVE WORLD TOUR <SHOW WHAT I AM> IN TAIPEI",
+          "url": "/event/ive-world-tour-show-what-i-am-in-taipei-taipei-tickets-edp1663145",
+          "overridenTickets": []
+        }
+      ],
+      "promoter": "Live Nation",
+      "promoterId": 0,
+      "promoterIds": [
+        0
+      ],
+      "siteId": 41,
+      "tickets": [
+        {
+          "bankPartner": "",
+          "channelName": "Ticketmaster UK",
+          "currencySymbol": "zh-TW",
+          "currencyCode": "NTD",
+          "id": 1663152,
+          "isVisible": true,
+          "priceFrom": 0,
+          "priceTo": 0,
+          "ticketTypeCategory": 0,
+          "ticketStatus": 3,
+          "ticketPlatformId": 1,
+          "ticketUrl": "https://tixcraft.com/activity/detail/26_ive",
+          "type": "拓元售票系統 全面開賣",
+          "typeId": 2,
+          "ticketTypeImage": "",
+          "ticketTypeImageAltTag": "",
+          "ticketTypeMembersOnly": false,
+          "validFromUtc": "2026-04-03T03:00:00Z",
+          "validToUtc": "2026-09-12T01:00:00Z",
+          "vendorLinkId": "",
+          "description": "",
+          "descriptionLoggedIn": "",
+          "descriptionOverride": "售票系統將另外收取服務費，詳請見拓元售票系統之公告訊息。",
+          "disclaimer": "拓元售票系統 全面開賣 包含票價，但不包含服務費與運費",
+          "displayLabel": "一般售票",
+          "loggedInLabel": "一般售票",
+          "featuredName": "",
+          "highlightedName": "",
+          "nameOverride": "拓元售票系統 全面開賣",
+          "overrideDisclaimer": false,
+          "overrideUrl": "",
+          "packageDescription": "",
+          "packageTermsAndConditionsUrl": "",
+          "packageTermsAndConditionsUrlTitle": "",
+          "packageImage": "",
+          "packageImageAltTag": "",
+          "ticketTypeNameLabel": "一般售票",
+          "themeId": "",
+          "waitroomOpenUtc": null,
+          "localizations": [
+            {
+              "cultureName": "zh-TW",
+              "cultureNameForUmbraco": "zh-TW",
+              "type": "拓元售票系統 全面開賣",
+              "url": "https://tixcraft.com/activity/detail/26_ive",
+              "isDefault": true
+            }
+          ]
+        }
+      ],
+      "eventListingText": "",
+      "externalUrl": "",
+      "venue": {
+        "id": 665099,
+        "externalId": "",
+        "address": "2 Sec. 4, Nanjing E. Rd., Songshan District, Taipei City, Taiwan",
+        "city": "Taipei",
+        "cityId": 103723,
+        "country": "Taiwan",
+        "countryId": "215",
+        "encodedName": "台北小巨蛋",
+        "encodedKeywords": "台北小巨蛋-taipei",
+        "name": "台北小巨蛋",
+        "url": "/台北小巨蛋-tickets-vdp665099",
+        "timeZoneInfoId": "Taipei Standard Time",
+        "disabledAccess": "",
+        "venueType": 3,
+        "tmUsId": "",
+        "state": "",
+        "latitude": 25.0514463,
+        "longitude": 121.5507862,
+        "zipCode": "10553"
+      },
+      "showWaitList": false,
+      "additionalEventInformation": "",
+      "cultureName": "",
+      "cultureNameForUmbraco": "",
+      "description": "<p>BANG！BANG！</p>\r\n<p>IVE 席捲台北</p>\r\n<p>全新巡迴 首次攻蛋<br><br></p>\r\n<p>IVE WORLD TOUR &lt;SHOW WHAT I AM&gt; IN TAIPEI</p>\r\n<p>9 月 11 - 12 日</p>\r\n<p>台北小巨蛋✦華麗開唱</p>",
+      "alertType": "",
+      "alertText": "",
+      "alertValidFromUtc": "0001-01-01T00:00:00",
+      "alertValidToUtc": "0001-01-01T00:00:00",
+      "listingsText": "",
+      "mainEventInformation": "<p>BANG！BANG！</p>\r\n<p>IVE 席捲台北</p>\r\n<p>全新巡迴 首次攻蛋<br><br></p>\r\n<p>IVE WORLD TOUR &lt;SHOW WHAT I AM&gt; IN TAIPEI</p>\r\n<p>9 月 11 - 12 日</p>\r\n<p>台北小巨蛋✦華麗開唱</p>",
+      "agePolicyText": "",
+      "name": "IVE WORLD TOUR <SHOW WHAT I AM> IN TAIPEI",
+      "url": "/event/ive-world-tour-show-what-i-am-in-taipei-taipei-tickets-edp1663145",
+      "overridenTickets": []
+    }
+  ]
+}

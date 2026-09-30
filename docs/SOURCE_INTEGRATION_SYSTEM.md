@@ -1,122 +1,105 @@
 # Source Integration System
 
-## The coverage contract
+## Coverage contract
 
-The registry contains 40 useful K-pop sources, but they are not 40 interchangeable APIs:
+Concert Passport does not equate a source directory with live ingestion. The runtime has four distinct source roles:
 
-| Class | Current count | Product role | Current implementation |
-| --- | ---: | --- | --- |
-| Licensed event APIs | 2 | discover dated event records | Ticketmaster and PredictHQ adapters are live |
-| Artist identity reference | 1 | normalize artist names and aliases | catalog reference only; adapter is not yet enabled |
-| Official ticketing destinations | 27 | confirm seller, sale rules, inventory and purchase page | allowlisted outbound directory |
-| Official promoter destinations | 8 | confirm announcement, venue and presale | allowlisted outbound directory |
-| Official fan platforms | 2 | confirm membership and registration rules | allowlisted outbound directory |
+| Role | Current implementation | Authority |
+| --- | --- | --- |
+| Artist identity graph | MusicBrainz and Wikidata scheduled imports | names, aliases, type, origin and activity evidence only |
+| Licensed event discovery | Ticketmaster Discovery and PredictHQ | dated event candidates and provider metadata |
+| Official tour discovery | Live Nation artist calendars | complete structured tour dates and promoter event links when regional APIs omit a show |
+| Official ticket/promoter destinations | market-specific allowlisted registry | exact handoff destination and event-level corroboration |
+| Automatic web discovery | private SearXNG plus deterministic inspection | candidate discovery only; never grants authority by itself |
 
-“In the directory” therefore never means “continuously ingested.” The consumer UI presents the two live event connections separately from the 37 official destinations. A destination becomes an ingestion connector only after its access method, commercial terms, rate limits, attribution, field coverage and failure behaviour are recorded and approved.
+Counts are generated from the registry and database. They must not be repeated as fixed marketing claims.
 
-## Why a one-shot scraper is not an integration
+## Self-evolving K-pop graph
 
-Ticket and fan platforms differ by authentication, locale, JavaScript rendering, anti-bot controls, terms, robots policy and event-level seller authority. A generic crawler could return data once while silently missing lottery windows, translating local times incorrectly, or breaking the next day. That is worse than a clearly labelled official handoff.
-
-A production connector must satisfy all of these gates:
-
-1. **Authority** — an API, feed, partner export or permitted structured page is approved for this use.
-2. **Determinism** — the same provider record has a stable external ID and idempotent refresh behaviour.
-3. **Semantics** — announcement, fan-club registration, lottery, result, payment, presale and general sale remain distinct fields.
-4. **Time correctness** — every deadline has an absolute instant, source timezone and observed publication time.
-5. **Provenance** — every published field can point to a source record and last check.
-6. **Change handling** — material changes create a version and can reschedule reminders; they are never silently overwritten.
-7. **Operations** — budgets, retry policy, freshness target, error rate and a manual fallback owner are defined.
-
-## Implemented pipeline
+The launch list is a cold-start seed, not the catalog boundary. Scheduled identity syncs page through K-pop-tagged MusicBrainz artists and direct K-pop genre entities in Wikidata. Each observation is merged into `artist_catalog`, `artist_aliases`, and `artist_sources` using stable external IDs, normalized aliases, source confidence, and provenance.
 
 ```text
-core artist catalog + member follows
-                 │
-                 ▼
-        bounded refresh scheduler
-                 │
-        ┌────────┴───────────────┐
-        ▼                        ▼
- Ticketmaster API           PredictHQ API
-   │           │                  │
-   │      attraction media        │
-   │           │                  │
-   └──── normalized events ───────┐
-                                    ▼
-                         canonical event catalog
-                                    │
-                 ┌──────────────────┼──────────────────┐
-                 ▼                  ▼                  ▼
-          source links        event versions      connector runs
-                 │                  │                  │
-                 └──────────────► review/alerts ◄──────┘
-                                    │
-                                    ▼
-                       search / Atlas / saved plans
+MusicBrainz ─┐
+             ├─► identity evidence ─► artist graph ─► adaptive artist queue
+Wikidata ────┘                              ▲                  │
+                                            │                  ▼
+user follows ─► demand priority             │        licensed event APIs
+                                            │                  │
+market sweeps ─► explicit K-pop event ──────┘                  ▼
+                                                   canonical event catalog
+                                                            │
+                                     ┌──────────────────────┼──────────────────────┐
+                                     ▼                      ▼                      ▼
+                                exact links            link resolver         market coverage
 ```
 
-The worker rotates through a curated 76-act K-pop catalog in six-artist batches every 20 minutes and also prioritizes member follows. The full catalog is covered in 13 scheduled batches. Search uses a one-year horizon. Provider calls are isolated, so one failure does not discard another provider’s results.
+New acts can enter automatically through:
 
-The database now records:
+1. a K-pop identity reference with an external ID and qualifying tags;
+2. a provider event explicitly classified as K-pop;
+3. a member follow, which immediately creates a high-priority observed identity;
+4. a new alias or source mapping attached to an existing identity.
 
-- `canonical_events` — current normalized projection;
-- `event_source_links` — provider record, URL, authority and observation timestamps;
-- `event_versions` — immutable snapshots when material fields change;
-- `ingestion_runs` — whole refresh outcome;
-- `connector_run_items` — per-connector event and error counts;
-- `artist_follows` — demand signal used to prioritize refreshes.
-- `artist_media` — exact-match attraction image, provider artist ID, intrinsic size,
-  attribution, source page, fallback flag, and refresh timestamps;
-- `canonical_events.image_*` — event-specific media projection retained across
-  provider responses that temporarily omit an image.
+An unknown event name without K-pop evidence is not silently promoted into the graph or public K-pop catalog. A structured provider identity can remain in the durable candidate queue until another source, explicit provider classification, or member demand supplies the missing evidence. No publication path depends on a manual review queue.
 
-Provider discovery records without an exact official ticket URL open an internal event page. They are not presented as purchase links. Exact Ticketmaster event URLs can hand off directly.
+## Adaptive scheduling
 
-Ticketmaster event and attraction images are selected by explicit quality rules:
-HTTPS on an allowlisted Ticketmaster CDN, at least 640 × 360, non-fallback before
-fallback, 16:9 before other ratios, then largest area. Remote URLs are never
-accepted from a browser query. The page requests an event or normalized artist ID;
-the server resolves the stored URL and enforces content type and an 8 MB limit.
-Artist media refreshes after 12 hours and the binary response is cached for one day
-with a seven-day stale window. A failed image refresh never converts a valid event
-search into an error.
+The scheduler spends calls according to expected user value instead of rotating every artist equally:
 
-When an exact Ticketmaster attraction has no qualifying image, a separately curated
-canonical-name to English Wikipedia-title map can query the MediaWiki PageImages API.
-Only `upload.wikimedia.org` originals of at least 900 × 500 and a 1.45:1 landscape
-ratio are accepted, with the Wikipedia article retained as the source page and
-Wikimedia Commons attribution displayed. This fallback deliberately leaves some
-artists on the neutral product image instead of accepting a small portrait or an
-ambiguous search match.
+- followed and recently active artists are checked first;
+- artists with upcoming events return to the queue after six hours;
+- high-priority artists without events are checked daily;
+- medium-priority artists are checked every three days;
+- the long tail is revisited every fourteen days;
+- every batch reserves explicit capacity for hot, never-checked, and longest-overdue cohorts;
+- one APAC market-wide sweep runs each ingestion cycle and each market is revisited every four hours;
+- identity cursors persist per source, so a restart resumes the graph scan instead of returning to page one.
 
-## Connector modes for the remaining destinations
+Provider runs are isolated. A failed identity or event provider records a partial result and does not discard successful evidence from another provider. The next run retries from the last safe cursor.
 
-Each official destination must enter through one explicit mode:
+Forward searches are complemented by a resumable PredictHQ update feed over a fixed `updated.*` window and `active,deleted` states. Bounded pagination stores its continuation URL; the cursor advances only after the complete window commits. Every forward status and explicit deletion passes through the same authority reconciliation: a reported source cannot override an official source, and equally authoritative cancellation conflicts fail visible.
 
-- **partner API/feed** — preferred for ticketing inventory and sale milestones;
-- **official structured feed** — promoter or agency calendar with stable IDs;
-- **permitted structured-page monitor** — low-frequency conditional fetch, host-specific parser and change fixtures;
-- **operator-assisted intake** — official URL submitted, parsed into a draft and verified before publication;
-- **handoff only** — no ingestion authority; keep the official destination link without implying coverage.
+## Canonical event and link pipeline
 
-The platform must not automate seller login, queue access, CAPTCHA, ticket purchase or credential storage.
+Every accepted provider record is idempotently upserted into `canonical_events`. `event_source_links` retains all provider relationships and `event_versions` records material changes. The automatic link resolver then:
 
-## Expansion order
+1. prefers exact official provider URLs;
+2. searches through the private metasearch service when an event lacks a usable ticket page;
+3. filters candidates through the official-host registry;
+4. inspects the destination and scores artist, city, venue, date, ticket intent and source authority;
+5. publishes a direct handoff only above the deterministic acceptance threshold;
+6. quarantines conflicts automatically and retries them with backoff.
 
-1. **Identity foundation:** enable MusicBrainz alias resolution with its required client identification and rate policy. This reduces false negatives such as aliases and unit names.
-2. **Primary promoter feeds:** pursue Live Nation market feeds and event-level seller mappings because one promoter often covers several countries.
-3. **Fan-registration feeds:** partner integration for Weverse and b.stage; these contain high-value membership and registration windows that broad event APIs omit.
-4. **Market ticketing connectors:** prioritize by observed member demand and missing critical milestones, beginning with Korea, Hong Kong, Taiwan, Thailand, Singapore and Japan.
-5. **Review console and notifications:** conflicts, deadline changes, unlinked official pages, freshness breaches and delivery audit must be operable before claiming comprehensive protection.
+There is no operator approval state. Ambiguous evidence fails closed, stays on the internal event page, and is rescored when new evidence arrives. Seller login, queues, CAPTCHA, checkout and ticket purchase remain outside the platform.
 
-## Service objectives before a commercial coverage claim
+## Data model
 
-- event discovery freshness: 30 minutes for connected APIs;
-- critical sale-window freshness: 10 minutes only where the partner contract and quota permit it;
-- 100% of critical milestones have field-level provenance and timezone;
-- material date changes are versioned and queued for notification within one refresh cycle;
-- connector health and quota exhaustion are visible to operators;
-- a market is labelled covered only when its declared artist/source set meets a measured recall target.
+- `artist_catalog` — canonical identity, status, confidence, priority and adaptive refresh timestamps;
+- `artist_aliases` — normalized multilingual aliases used by search and event matching;
+- `artist_sources` — source-specific external ID, confidence and observation time;
+- `artist_catalog_sync_state` — durable source cursor, counts and failure state;
+- `market_discovery_state` — per-market sweep freshness, event count and last failure;
+- `canonical_events` — current normalized event projection;
+- `event_source_links` — provider record, URL, authority, observations and source lifecycle status;
+- `event_versions` — immutable snapshots of material changes;
+- `ingestion_runs` and `connector_run_items` — scheduled-run health and counts;
+- `provider_change_sync_state` — fixed update window, cursor, continuation and change-feed health;
+- `scheduler_jobs` — cross-process lease, last result and consecutive failure state;
+- `schema_migrations` — ordered transactional schema history;
+- `artist_follows` — demand signal that immediately changes catalog priority;
+- `artist_media` — exact-match provider media with attribution and refresh state.
 
-Counts are registry facts as of 2026-08-22. They should be generated in an operator inventory in the next migration rather than repeated in marketing copy.
+## Correctness gates
+
+An automatic connector must provide stable identity, idempotent refresh behavior, explicit time semantics, source provenance, deterministic conflict handling, rate-limit compliance, observability and bounded retries. A known host is not sufficient: the event-level page still has to match the artist, place, date and ticket intent.
+
+Service objectives before a commercial coverage claim:
+
+- connected event discovery freshness within 30 minutes;
+- critical sale-window freshness within ten minutes only where a contracted source permits it;
+- field-level provenance and source timezone for every critical milestone;
+- versioned material changes and alert rescheduling within one refresh cycle;
+- measured per-market recall, not a binary “supported” badge;
+- no sample events, invented ticket links, or silent fallback to stale provider data.
+
+MusicBrainz access must use a meaningful user agent and remain below its published rate limit. Wikidata queries stay bounded, paged, cached and deliberately narrow to avoid placing open infrastructure under unbounded load.

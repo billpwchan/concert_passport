@@ -1,0 +1,283 @@
+{
+  "observedAt": "2026-09-30T05:04:46.876Z",
+  "dataMode": "official",
+  "note": "Fresh isolated database; no event/search API keys. Counts are observations, not coverage guarantees.",
+  "sources": [
+    "official:livenation-sg",
+    "official:livenation-tw",
+    "official:livenation-hk",
+    "official:livenation-my",
+    "official:livenation-ph",
+    "official:livenation-tero",
+    "official:livenation-jp",
+    "official:livenation-kr",
+    "official:the-star-sg"
+  ],
+  "runs": [
+    {
+      "pages": 12,
+      "published": 14,
+      "review": 176,
+      "unchanged": 0,
+      "queued": 190,
+      "failed": 1,
+      "durationMs": 21456
+    },
+    {
+      "pages": 12,
+      "published": 0,
+      "review": 6,
+      "unchanged": 0,
+      "queued": 17,
+      "failed": 0,
+      "durationMs": 18277
+    },
+    {
+      "pages": 12,
+      "published": 0,
+      "review": 15,
+      "unchanged": 0,
+      "queued": 0,
+      "failed": 0,
+      "durationMs": 15752
+    },
+    {
+      "pages": 12,
+      "published": 1,
+      "review": 16,
+      "unchanged": 0,
+      "queued": 0,
+      "failed": 2,
+      "durationMs": 16253
+    }
+  ],
+  "sourceOutcomes": [
+    {
+      "source_id": "official:the-star-sg",
+      "status": "healthy",
+      "last_attempt_at": 1790744678099,
+      "last_success_at": 1790744678099,
+      "last_error": null
+    },
+    {
+      "source_id": "official:livenation-my",
+      "status": "healthy",
+      "last_attempt_at": 1790744680015,
+      "last_success_at": 1790744680015,
+      "last_error": null
+    },
+    {
+      "source_id": "official:livenation-hk",
+      "status": "parse_error",
+      "last_attempt_at": 1790744681852,
+      "last_success_at": 1790744670621,
+      "last_error": "No supported structured event; page retained for review"
+    },
+    {
+      "source_id": "official:livenation-sg",
+      "status": "healthy",
+      "last_attempt_at": 1790744683571,
+      "last_success_at": 1790744683571,
+      "last_error": null
+    },
+    {
+      "source_id": "official:livenation-tero",
+      "status": "unavailable",
+      "last_attempt_at": 1790744683812,
+      "last_success_at": null,
+      "last_error": "fetch failed"
+    },
+    {
+      "source_id": "official:livenation-tw",
+      "status": "healthy",
+      "last_attempt_at": 1790744685343,
+      "last_success_at": 1790744685343,
+      "last_error": null
+    },
+    {
+      "source_id": "official:livenation-jp",
+      "status": "healthy",
+      "last_attempt_at": 1790744686875,
+      "last_success_at": 1790744686875,
+      "last_error": null
+    },
+    {
+      "source_id": "official:livenation-kr",
+      "status": "healthy",
+      "last_attempt_at": 1790744677106,
+      "last_success_at": 1790744677106,
+      "last_error": null
+    },
+    {
+      "source_id": "official:livenation-ph",
+      "status": "healthy",
+      "last_attempt_at": 1790744678021,
+      "last_success_at": 1790744678021,
+      "last_error": null
+    }
+  ],
+  "catalog": [
+    {
+      "id": "official:livenation-sg:20f8a65b04adc8306ebbadfb",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "starts_at": "2026-10-03T10:00:00Z",
+      "timezone": "Asia/Singapore",
+      "venue": "Singapore Indoor Stadium",
+      "official_url": "https://www.livenation.sg/event/itzy-3rd-world-tour-tunnel-vision-in-singapore-singapore-tickets-edp1682922"
+    },
+    {
+      "id": "official:livenation-my:7ebed70c51821bef6a057075",
+      "artist": "BABYMONSTER",
+      "name": "2026-27 BABYMONSTER WORLD TOUR [춤 (CHOOM)] IN KUALA LUMPUR",
+      "starts_at": "2026-11-14",
+      "timezone": "Asia/Singapore",
+      "venue": "Unifi Arena",
+      "official_url": "https://www.livenation.my/event/2026-27-babymonster-world-tour-%EC%B6%A4-choom-in-kuala-lumpur-kuala-lumpur-tickets-edp1682916"
+    },
+    {
+      "id": "official:livenation-tw:f04e2437f5fec88ea1e26269",
+      "artist": "BTS",
+      "name": "BTS WORLD TOUR 'ARIRANG' IN KAOHSIUNG",
+      "starts_at": "2026-11-19",
+      "timezone": "Asia/Taipei",
+      "venue": "高雄國家體育場(世運主場館)",
+      "official_url": "https://www.livenation.com.tw/event/bts-world-tour-arirang-in-kaohsiung-kaohsiung-tickets-edp1675883"
+    },
+    {
+      "id": "official:livenation-hk:c3b8f07f1abc9e691cba8233",
+      "artist": "Stray Kids",
+      "name": "Stray Kids World Tour <RUN IT HONG KONG>",
+      "starts_at": "2026-12-05T09:00:00Z",
+      "timezone": "Asia/Shanghai",
+      "venue": "Kai Tak Stadium",
+      "official_url": "https://www.livenation.hk/event/stray-kids-world-tour-run-it-hong-kong--hong-kong-tickets-edp1691372"
+    },
+    {
+      "id": "official:livenation-tw:f0020d73bd4fcba33726c243",
+      "artist": "Stray Kids",
+      "name": "Stray Kids World Tour <RUN IT TAIPEI>",
+      "starts_at": "2026-12-12",
+      "timezone": "Asia/Taipei",
+      "venue": "臺北大巨蛋 Taipei Dome",
+      "official_url": "https://www.livenation.com.tw/event/stray-kids-world-tour-run-it-taipei--taipei-tickets-edp1695879"
+    },
+    {
+      "id": "official:livenation-hk:d3c1d8078e0a1378b4e01617",
+      "artist": "BABYMONSTER",
+      "name": "2026-27 BABYMONSTER WORLD TOUR [춤 (CHOOM)] IN HONG KONG",
+      "starts_at": "2027-01-08",
+      "timezone": "Asia/Shanghai",
+      "venue": "AsiaWorld-Arena",
+      "official_url": "https://www.livenation.hk/event/2026-27-babymonster-world-tour-%EC%B6%A4-choom-in-hong-kong-hong-kong-tickets-edp1700851"
+    },
+    {
+      "id": "official:livenation-hk:0aaafbf69106a85cb51c8245",
+      "artist": "BABYMONSTER",
+      "name": "2026-27 BABYMONSTER WORLD TOUR [춤 (CHOOM)] IN HONG KONG",
+      "starts_at": "2027-01-09T10:00:00Z",
+      "timezone": "Asia/Shanghai",
+      "venue": "AsiaWorld-Arena",
+      "official_url": "https://www.livenation.hk/event/2026-27-babymonster-world-tour-%EC%B6%A4-choom-in-hong-kong-hong-kong-tickets-edp1696758"
+    },
+    {
+      "id": "official:livenation-hk:d0c2358cba814142882bf5c5",
+      "artist": "BABYMONSTER",
+      "name": "2026-27 BABYMONSTER WORLD TOUR [춤 (CHOOM)] IN HONG KONG",
+      "starts_at": "2027-01-10",
+      "timezone": "Asia/Shanghai",
+      "venue": "AsiaWorld-Arena",
+      "official_url": "https://www.livenation.hk/event/2026-27-babymonster-world-tour-%EC%B6%A4-choom-in-hong-kong-hong-kong-tickets-edp1699668"
+    },
+    {
+      "id": "official:livenation-hk:be8d6b17e69098613b95a2e1",
+      "artist": "BTS",
+      "name": "BTS WORLD TOUR 'ARIRANG' IN HONG KONG",
+      "starts_at": "2027-03-04T11:30:00Z",
+      "timezone": "Asia/Shanghai",
+      "venue": "Kai Tak Stadium",
+      "official_url": "https://www.livenation.hk/event/bts-world-tour-arirang-in-hong-kong-hong-kong-tickets-edp1675688"
+    },
+    {
+      "id": "official:livenation-hk:8272b5df535bca0cfa1bb4cc",
+      "artist": "BTS",
+      "name": "BTS WORLD TOUR 'ARIRANG' IN HONG KONG",
+      "starts_at": "2027-03-06T11:30:00Z",
+      "timezone": "Asia/Shanghai",
+      "venue": "Kai Tak Stadium",
+      "official_url": "https://www.livenation.hk/event/bts-world-tour-arirang-in-hong-kong-hong-kong-tickets-edp1675927"
+    },
+    {
+      "id": "official:livenation-hk:26b075c9e2067bf456d5b6c7",
+      "artist": "BTS",
+      "name": "BTS WORLD TOUR 'ARIRANG' IN HONG KONG",
+      "starts_at": "2027-03-07T11:30:00Z",
+      "timezone": "Asia/Shanghai",
+      "venue": "Kai Tak Stadium",
+      "official_url": "https://www.livenation.hk/event/bts-world-tour-arirang-in-hong-kong-hong-kong-tickets-edp1675932"
+    },
+    {
+      "id": "official:livenation-ph:961a085700e2e5b0bad7c435",
+      "artist": "BTS",
+      "name": "BTS WORLD TOUR ‘ARIRANG' IN BULACAN",
+      "starts_at": "2027-03-13",
+      "timezone": "Asia/Singapore",
+      "venue": "Philippine Sports Stadium",
+      "official_url": "https://www.livenation.ph/event/bts-world-tour-arirang-in-bulacan-bulacan-tickets-edp1676000"
+    },
+    {
+      "id": "official:livenation-ph:a3edb3f169687000bdf9c2d3",
+      "artist": "BTS",
+      "name": "BTS WORLD TOUR ‘ARIRANG' IN BULACAN",
+      "starts_at": "2027-03-14",
+      "timezone": "Asia/Singapore",
+      "venue": "Philippine Sports Stadium",
+      "official_url": "https://www.livenation.ph/event/bts-world-tour-arirang-in-bulacan-bulacan-tickets-edp1676004"
+    },
+    {
+      "id": "official:livenation-ph:128af0312a96424da6c669f1",
+      "artist": "BTS",
+      "name": "BTS WORLD TOUR ‘ARIRANG' IN BULACAN",
+      "starts_at": "2027-03-16",
+      "timezone": "Asia/Singapore",
+      "venue": "Philippine Sports Stadium",
+      "official_url": "https://www.livenation.ph/event/bts-world-tour-arirang-in-bulacan-bulacan-tickets-edp1682248"
+    }
+  ],
+  "candidateStates": [
+    {
+      "status": "historical",
+      "reason": null,
+      "count": 2
+    },
+    {
+      "status": "needs_review",
+      "reason": "artist_identity_not_established",
+      "count": 206
+    },
+    {
+      "status": "needs_review",
+      "reason": "individual_performance_times_not_published",
+      "count": 5
+    },
+    {
+      "status": "needs_review",
+      "reason": "missing_or_conflicting_event_identity",
+      "count": 2
+    },
+    {
+      "status": "needs_review",
+      "reason": "structured_event_missing",
+      "count": 1
+    },
+    {
+      "status": "published",
+      "reason": null,
+      "count": 15
+    }
+  ],
+  "integrity": {
+    "integrity_check": "ok"
+  },
+  "scope": "Read-only official websites; fresh local database. Production was not modified."
+}

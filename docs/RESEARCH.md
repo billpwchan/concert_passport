@@ -119,7 +119,7 @@ Ticketmaster Singapore advises users to join a waiting room before sale, use one
 
 ### Conclusion
 
-There is no credible “one API solves Asia-Pacific ticket milestones” path. The product requires an adapter architecture plus an editorial verification operation. That operating system and source graph can become the moat, but only if the company treats data operations as a first-class product.
+There is no credible “one API solves Asia-Pacific ticket milestones” path. The product requires an adapter architecture, a multi-source identity graph, deterministic automatic verification and measurable failure states. That operating system and source graph can become the moat, but only if the company treats data correctness and recovery as first-class product behavior.
 
 ## 6. Ticket-purchase boundary
 

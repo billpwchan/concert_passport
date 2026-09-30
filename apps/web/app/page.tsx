@@ -9,5 +9,5 @@ export default async function Home() {
     Promise.resolve(getUpcomingCatalogEvents(12)),
     getCurrentAccount(),
   ]);
-  return <HomeHub events={events} catalogEvents={catalogEvents} signedIn={Boolean(account)} />;
+  return <HomeHub events={events} catalogEvents={catalogEvents} signedIn={Boolean(account)} nowIso={new Date().toISOString()} />;
 }

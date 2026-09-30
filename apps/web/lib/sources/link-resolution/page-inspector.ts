@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { canonicalizeCandidateUrl, trustedSourceForUrl } from './trusted-sources.ts';
-import type { CandidateEventData, CandidateInspection } from './types.ts';
+import type { CandidateEventData, CandidateInspection, ResolvableEvent } from './types.ts';
 
 const MAX_HTML_BYTES = 1_500_000;
 
@@ -33,7 +33,7 @@ function eventNodes(value: unknown, output: Array<Record<string, unknown>>): voi
   if (!value || typeof value !== 'object') return;
   const record = value as Record<string, unknown>;
   const types = Array.isArray(record['@type']) ? record['@type'] : [record['@type']];
-  if (types.some((type) => typeof type === 'string' && type.toLowerCase() === 'event')) output.push(record);
+  if (types.some((type) => typeof type === 'string' && type.toLowerCase().endsWith('event'))) output.push(record);
   if (record['@graph']) eventNodes(record['@graph'], output);
 }
 
@@ -61,7 +61,39 @@ function offersData(value: unknown): { offerUrl?: string; saleStartsAt?: string 
   return {};
 }
 
-export function parseEventPage(html: string, finalUrl: string): Omit<CandidateInspection, 'requestedUrl' | 'httpStatus' | 'fetched' | 'contentHash'> {
+function metaContent(html: string, key: string): string | undefined {
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = html.match(new RegExp(`<meta\\b[^>]*(?:property|name)=["']${escaped}["'][^>]*content=["']([^"']+)["']`, 'i'))
+    ?? html.match(new RegExp(`<meta\\b[^>]*content=["']([^"']+)["'][^>]*(?:property|name)=["']${escaped}["']`, 'i'));
+  return match?.[1] ? decodeHtml(match[1]) : undefined;
+}
+
+function eventImageData(
+  event: Record<string, unknown> | undefined,
+  html: string,
+  finalUrl: string,
+): Pick<CandidateEventData, 'imageUrl' | 'imageWidth' | 'imageHeight' | 'imageSourceUrl' | 'imageScope'> {
+  const candidate = firstString(event?.image) ?? metaContent(html, 'og:image')
+    ?? metaContent(html, 'twitter:image');
+  if (!candidate) return {};
+  try {
+    const image = new URL(candidate, finalUrl);
+    if (image.protocol !== 'https:' || image.username || image.password) return {};
+    const width = Number(metaContent(html, 'og:image:width'));
+    const height = Number(metaContent(html, 'og:image:height'));
+    return {
+      imageUrl: image.toString(),
+      ...(event ? { imageScope: 'event' as const } : {}),
+      imageWidth: Number.isFinite(width) && width > 0 ? width : undefined,
+      imageHeight: Number.isFinite(height) && height > 0 ? height : undefined,
+      imageSourceUrl: finalUrl,
+    };
+  } catch {
+    return {};
+  }
+}
+
+export function parseEventPage(html: string, finalUrl: string, expected?: ResolvableEvent): Omit<CandidateInspection, 'requestedUrl' | 'httpStatus' | 'fetched' | 'contentHash'> {
   const nodes: Array<Record<string, unknown>> = [];
   const scripts = html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
   for (const match of scripts) {
@@ -71,7 +103,14 @@ export function parseEventPage(html: string, finalUrl: string): Omit<CandidateIn
       // Invalid third-party JSON-LD is ignored; page metadata remains usable.
     }
   }
-  const event = nodes[0];
+  const expectedDate = expected ? new Intl.DateTimeFormat('en-CA', {timeZone:expected.timezone??'UTC',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(expected.startsAt)) : undefined;
+  const relevant = expected ? nodes.filter(node => {
+    const title = firstString(node.name)?.toLowerCase() ?? '';
+    const performer = firstString((node.performer as Record<string,unknown>)?.name)?.toLowerCase();
+    const artist = (expected.artist ?? expected.name).toLowerCase();
+    return (performer === artist || title.includes(artist)) && firstString(node.startDate)?.slice(0,10) === expectedDate;
+  }) : nodes;
+  const event = relevant.length === 1 ? relevant[0] : undefined;
   const offers = offersData(event?.offers);
   const canonicalMatch = html.match(/<link\b[^>]*rel=["'][^"']*canonical[^"']*["'][^>]*href=["']([^"']+)["']/i)
     ?? html.match(/<link\b[^>]*href=["']([^"']+)["'][^>]*rel=["'][^"']*canonical[^"']*["']/i);
@@ -85,6 +124,7 @@ export function parseEventPage(html: string, finalUrl: string): Omit<CandidateIn
   const artist = Array.isArray(performer)
     ? performer.map((item) => firstString(item && typeof item === 'object' ? (item as Record<string, unknown>).name : item)).find(Boolean)
     : firstString(performer && typeof performer === 'object' ? (performer as Record<string, unknown>).name : performer);
+  const image = nodes.length > 1 && !event ? {} : eventImageData(event, event ? html : '', canonicalUrl);
   return {
     canonicalUrl,
     data: {
@@ -93,6 +133,7 @@ export function parseEventPage(html: string, finalUrl: string): Omit<CandidateIn
       startsAt: firstString(event?.startDate),
       ...location,
       saleStartsAt: offers.saleStartsAt,
+      ...image,
     },
     offerUrl: offers.offerUrl ? new URL(offers.offerUrl, finalUrl).toString() : undefined,
   };
@@ -131,13 +172,13 @@ async function fetchTrustedHtml(initialUrl: string): Promise<{
   throw new Error('too_many_redirects');
 }
 
-export async function inspectCandidatePage(url: string): Promise<CandidateInspection> {
+export async function inspectCandidatePage(url: string, expected?: ResolvableEvent): Promise<CandidateInspection> {
   if (!trustedSourceForUrl(url)) {
     return { requestedUrl: url, canonicalUrl: url, fetched: false, data: {}, failureCode: 'untrusted_host' };
   }
   try {
     const result = await fetchTrustedHtml(url);
-    const parsed = parseEventPage(result.html, result.finalUrl);
+    const parsed = parseEventPage(result.html, result.finalUrl, expected);
     let canonicalUrl = trustedSourceForUrl(parsed.canonicalUrl)
       ? canonicalizeCandidateUrl(parsed.canonicalUrl)
       : canonicalizeCandidateUrl(result.finalUrl);

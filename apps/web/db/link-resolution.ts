@@ -4,28 +4,88 @@ import type { LinkResolutionStats, ResolvableEvent, ScoredCandidate } from '../l
 
 type ResolutionEventRow = ResolvableEvent & {
   dataAuthorityScore: number;
+  imageUrl?: string;
 };
 
 export function getEventsForLinkResolution(limit = 36, now = new Date()): ResolutionEventRow[] {
   return getDb().prepare(`
     SELECT id, name, artist, starts_at AS startsAt, timezone, venue, city,
-      country_code AS countryCode, data_authority_score AS dataAuthorityScore
+      country_code AS countryCode, data_authority_score AS dataAuthorityScore,
+      image_url AS imageUrl
     FROM canonical_events
     WHERE datetime(starts_at) >= datetime(?)
+      AND lifecycle_status NOT IN ('cancelled', 'deleted')
+      AND NOT EXISTS (
+        SELECT 1 FROM event_publication_quarantine q
+        WHERE q.event_id = canonical_events.id AND q.released_at IS NULL
+      )
       AND (
         best_link_url IS NULL
         OR best_link_verified_at IS NULL
         OR best_link_verified_at < ?
       )
+      AND (
+        NOT EXISTS (
+          SELECT 1 FROM event_link_evidence e WHERE e.event_id = canonical_events.id
+        )
+        OR EXISTS (
+          SELECT 1 FROM event_link_evidence e
+          WHERE e.event_id = canonical_events.id
+            AND COALESCE(e.next_check_at, 0) <= ?
+        )
+      )
     ORDER BY CASE WHEN best_link_url IS NULL THEN 0 ELSE 1 END, datetime(starts_at) ASC
     LIMIT ?
-  `).all(now.toISOString(), now.getTime() - 12 * 60 * 60_000, limit) as unknown as ResolutionEventRow[];
+  `).all(now.toISOString(), now.getTime() - 12 * 60 * 60_000, now.getTime(), limit) as unknown as ResolutionEventRow[];
+}
+
+function recomputeCanonicalBestLink(eventId: string): void {
+  const db = getDb();
+  const best = db.prepare(`
+    SELECT canonical_url AS url, link_role AS role, source_id AS source,
+      match_score AS score, last_verified_at AS verifiedAt
+    FROM event_link_evidence
+    WHERE event_id = ? AND validation_state = 'verified'
+    ORDER BY match_score DESC,
+      CASE link_role WHEN 'ticket' THEN 0 WHEN 'event' THEN 1 ELSE 2 END,
+      last_verified_at DESC
+    LIMIT 1
+  `).get(eventId) as {
+    url: string;
+    role: string;
+    source: string;
+    score: number;
+    verifiedAt: number;
+  } | undefined;
+  db.prepare(`
+    UPDATE canonical_events SET
+      best_link_url = ?, best_link_role = ?, best_link_source = ?,
+      best_link_score = ?, best_link_verified_at = ?, updated_at = ?
+    WHERE id = ?
+  `).run(
+    best?.url ?? null,
+    best?.role ?? null,
+    best?.source ?? null,
+    best?.score ?? null,
+    best?.verifiedAt ?? null,
+    Date.now(),
+    eventId,
+  );
 }
 
 export function recordLinkEvidence(eventId: string, candidate: ScoredCandidate): void {
+  const db = getDb();
   const now = Date.now();
-  const retryDelay = Math.min(7 * 86_400_000, 6 * 60 * 60_000 * (2 ** Math.min(5, candidate.inspection.failureCode ? 1 : 0)));
-  getDb().prepare(`
+  const previous = db.prepare(`
+    SELECT retry_count AS retryCount FROM event_link_evidence
+    WHERE event_id = ? AND canonical_url = ?
+  `).get(eventId, candidate.canonicalUrl) as { retryCount: number } | undefined;
+  const retryCount = candidate.state === 'verified' ? 0 : (previous?.retryCount ?? 0) + 1;
+  const retryDelay = Math.min(
+    7 * 86_400_000,
+    6 * 60 * 60_000 * (2 ** Math.min(5, Math.max(0, retryCount - 1))),
+  );
+  db.prepare(`
     INSERT INTO event_link_evidence
       (id, event_id, source_id, source_event_id, candidate_url, canonical_url,
        link_role, authority, validation_state, match_score, evidence_json,
@@ -44,7 +104,7 @@ export function recordLinkEvidence(eventId: string, candidate: ScoredCandidate):
       content_hash = excluded.content_hash,
       http_status = excluded.http_status,
       failure_code = excluded.failure_code,
-      retry_count = CASE WHEN excluded.validation_state = 'verified' THEN 0 ELSE event_link_evidence.retry_count + 1 END,
+      retry_count = excluded.retry_count,
       next_check_at = excluded.next_check_at,
       last_checked_at = excluded.last_checked_at,
       last_verified_at = excluded.last_verified_at,
@@ -63,10 +123,11 @@ export function recordLinkEvidence(eventId: string, candidate: ScoredCandidate):
     candidate.inspection.contentHash ?? null,
     candidate.inspection.httpStatus ?? null,
     candidate.inspection.failureCode ?? null,
-    candidate.state === 'verified' ? 0 : 1,
+    retryCount,
     candidate.state === 'verified' ? now + 12 * 60 * 60_000 : now + retryDelay,
     now, now, candidate.state === 'verified' ? now : null, now,
   );
+  recomputeCanonicalBestLink(eventId);
 }
 
 function normalizedCountry(value: string | undefined): string | undefined {
@@ -101,7 +162,7 @@ function zonedLocalTimestamp(value: string, timeZone: string): string | undefine
   return new Date(instant).toISOString();
 }
 
-function verifiedTimestamp(value: string | undefined, timeZone: string | undefined): string | undefined {
+export function verifiedTimestamp(value: string | undefined, timeZone: string | undefined): string | undefined {
   if (!value || !value.includes('T')) return undefined;
   if (/T00:00(?::00)?(?:\.000)?$/.test(value)) return undefined;
   if (!/(?:Z|[+-]\d{2}:?\d{2})$/i.test(value)) {
@@ -133,6 +194,10 @@ export function publishBestLinkAndReconcile(
     const countryCode = normalizedCountry(data.countryCode);
     if (countryCode && countryCode !== event.countryCode) patch.countryCode = countryCode;
   }
+  const candidateImage = candidate.score >= 85 && candidate.inspection.data.imageScope === 'event' && candidate.inspection.data.imageUrl
+    ? candidate.inspection.data.imageUrl
+    : undefined;
+  if (!event.imageUrl && candidateImage) patch.imageUrl = candidateImage;
 
   db.exec('BEGIN IMMEDIATE');
   try {
@@ -142,6 +207,10 @@ export function publishBestLinkAndReconcile(
         best_link_score = ?, best_link_verified_at = ?,
         starts_at = COALESCE(?, starts_at), venue = COALESCE(?, venue),
         city = COALESCE(?, city), country_code = COALESCE(?, country_code),
+        image_url = COALESCE(image_url, ?),
+        image_width = COALESCE(image_width, ?), image_height = COALESCE(image_height, ?),
+        image_attribution = COALESCE(image_attribution, ?),
+        image_source_url = COALESCE(image_source_url, ?),
         data_authority_score = CASE WHEN ? > data_authority_score THEN ? ELSE data_authority_score END,
         data_source_id = CASE WHEN ? >= data_authority_score THEN ? ELSE data_source_id END,
         data_verified_at = CASE WHEN ? >= data_authority_score THEN ? ELSE data_verified_at END,
@@ -151,8 +220,17 @@ export function publishBestLinkAndReconcile(
       candidate.canonicalUrl, candidate.resolvedRole, candidate.sourceId,
       candidate.score, now,
       patch.startsAt ?? null, patch.venue ?? null, patch.city ?? null, patch.countryCode ?? null,
+      candidateImage ?? null,
+      candidate.inspection.data.imageWidth ?? null,
+      candidate.inspection.data.imageHeight ?? null,
+      candidateImage ? `Official media · ${candidate.sourceId}` : null,
+      candidateImage ? candidate.canonicalUrl : null,
       sourceScore, sourceScore, sourceScore, candidate.sourceId, sourceScore, now, now, event.id,
     );
+    db.prepare("UPDATE event_media_proofs SET state='stale' WHERE event_id=? AND source_url=? AND image_url<>?").run(event.id,candidate.inspection.requestedUrl,candidateImage??'');
+    if (candidateImage) db.prepare(`INSERT INTO event_media_proofs(event_id,image_url,source_url,scope,content_hash,observed_at)
+      VALUES(?,?,?,'event',?,?) ON CONFLICT(event_id,image_url) DO UPDATE SET observed_at=excluded.observed_at,content_hash=excluded.content_hash,state='verified'`)
+      .run(event.id,candidateImage,candidate.inspection.requestedUrl,candidate.inspection.contentHash??null,now);
     const changedFields = Object.keys(patch);
     if (changedFields.length) {
       db.prepare(`

@@ -11,23 +11,36 @@
     "start": "next start",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test tests/*.test.ts"
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "audit:sources": "node --experimental-strip-types scripts/audit-official-sources.mjs",
+    "demo": "node --experimental-strip-types scripts/demo.mjs",
+    "check": "npm test && npm run lint && npm run typecheck && npm run build",
+    "predev": "node scripts/prepare-map-worker.mjs",
+    "prebuild": "node scripts/prepare-map-worker.mjs",
+    "predemo": "node scripts/prepare-map-worker.mjs"
   },
   "dependencies": {
-    "maplibre-gl": "5.7.3",
-    "next": "16.3.2",
+    "@react-three/fiber": "^9.7.0",
+    "cheerio": "1.2.0",
+    "intl-messageformat": "^11.2.14",
+    "maplibre-gl": "6.4.1",
+    "motion": "^13.1.1",
+    "next": "16.3.3",
     "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "react-dom": "19.2.6",
+    "three": "0.182.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@types/three": "0.182.0",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "4.2.1",
     "typescript": "5.9.3"
   },
-  "type": "module"
+  "type": "module",
+  "license": "MIT"
 }
