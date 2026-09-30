@@ -9,9 +9,17 @@ export type MarketCode =
   | 'PH'
   | 'ID'
   | 'VN'
-  | 'AU';
+  | 'AU'
+  | 'NZ';
 
 export type Confidence = 'official' | 'verified' | 'reported' | 'unverified';
+export type EventLifecycleStatus =
+  | 'scheduled'
+  | 'offsale'
+  | 'postponed'
+  | 'rescheduled'
+  | 'cancelled'
+  | 'deleted';
 
 export type EventLinkRole = 'ticket' | 'event' | 'tour';
 export type EventLinkAuthority = 'seller' | 'promoter' | 'artist' | 'venue' | 'discovery';
@@ -112,7 +120,7 @@ export type ProviderStatus = 'live' | 'key_required' | 'partner_required' | 'ver
 export type SourceChannel = {
   id: string;
   name: string;
-  category: 'fan_platform' | 'promoter' | 'ticketing' | 'event_api' | 'artist_identity';
+  category: 'fan_platform' | 'promoter' | 'ticketing' | 'event_api' | 'artist_identity' | 'venue';
   markets: MarketCode[];
   url: string;
   host: string;
@@ -134,10 +142,13 @@ export type DiscoveryQuery = {
 
 export type DiscoveredEvent = {
   canonicalId?: string;
+  timingConflict?: boolean;
   provider: string;
   providerEventId: string;
   name: string;
   artist?: string;
+  artistType?: 'group' | 'person' | 'unknown';
+  artistProviderId?: string;
   startsAt: string;
   timezone?: string;
   venue?: string;
@@ -147,6 +158,7 @@ export type DiscoveredEvent = {
   longitude?: number;
   officialUrl: string;
   confidence: Confidence;
+  lifecycleStatus?: EventLifecycleStatus;
   bestLinkUrl?: string;
   bestLinkRole?: EventLinkRole;
   bestLinkSource?: string;
@@ -158,11 +170,19 @@ export type DiscoveredEvent = {
   imageAttribution?: string;
   imageSourceUrl?: string;
   imageFallback?: boolean;
+  imageKind?: 'event' | 'artist';
+  classificationTags?: string[];
+  sourceObservedAt?: number;
+  lastSeenAt?: number;
+  dataVerifiedAt?: number;
+  updatedAt?: number;
 };
 
 export type ConnectorHealth = {
   id: string;
   name: string;
-  status: 'connected' | 'configuration_required' | 'partnership_required';
+  status: 'connected' | 'configuration_required' | 'partnership_required' | 'unchecked' | 'authentication_failed' | 'rate_limited' | 'stale' | 'degraded';
+  checkedAt?: number;
+  lastSuccessAt?: number;
   detail: string;
 };

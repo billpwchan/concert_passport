@@ -1,0 +1,9 @@
+# Keep a minimal issue available for requesting a private contact channel.
+blank_issues_enabled: true
+contact_links:
+  - name: 使用帮助 / Support
+    url: https://github.com/billpwchan/concert_passport/blob/main/SUPPORT.md
+    about: 启动、空目录、数据边界和部署常见问题。
+  - name: 安全报告 / Security
+    url: https://github.com/billpwchan/concert_passport/blob/main/SECURITY.md
+    about: 漏洞或隐私问题请按指南请求私下联系，不在公开 Issue 附利用细节。

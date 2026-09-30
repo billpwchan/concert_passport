@@ -1,0 +1,28 @@
+name: 来源建议或数据纠错 / Data source
+description: 提供官方公开入口，或报告艺人、日期、场馆与链接问题。
+title: '[Source] '
+body:
+  - type: input
+    id: url
+    attributes:
+      label: 官方公开 URL / Official public URL
+      description: 可公开访问的主办方、场馆、艺人或授权售票页面；不附私有参数。
+    validations:
+      required: true
+  - type: textarea
+    id: facts
+    attributes:
+      label: 可以核验的事实 / Expected facts
+      description: 艺人、市场、当地日期/时间、IANA 时区、场馆、已公布的开售细节；说明当前哪里不一致。
+    validations:
+      required: true
+  - type: textarea
+    id: coverage
+    attributes:
+      label: 来源范围与访问条件 / Coverage and access
+      description: 新来源请注明市场、结构化数据、robots、刷新频率、登录/授权条件与媒体使用条件。
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 证据与取得时间 / Evidence and timestamp
+      description: 公开原文片段或脱敏截图；不要上传个人票据、二维码或私人账号页面。

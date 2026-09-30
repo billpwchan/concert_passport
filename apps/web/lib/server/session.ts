@@ -25,7 +25,7 @@ export function getPrivateSession(request: Request): PrivateSession {
       email: `${userId}@private.concert-passport`,
       displayName: 'Private listener',
     },
-    setCookie: existing
+    setCookie: getPrivateSessionUserId(existing)
       ? undefined
       : `${PRIVATE_SESSION_COOKIE}=${userId}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax${secure}`,
   };

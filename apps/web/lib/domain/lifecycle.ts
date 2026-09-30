@@ -40,9 +40,11 @@ export function formatVenueTime(
   iso: string,
   timezone: string,
   locale = 'en-GB',
+  includeYear = false,
 ): string {
   return new Intl.DateTimeFormat(locale, {
     timeZone: timezone,
+    ...(includeYear ? { year: 'numeric' as const } : {}),
     day: '2-digit',
     month: 'short',
     hour: '2-digit',

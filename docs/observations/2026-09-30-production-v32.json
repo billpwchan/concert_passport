@@ -1,0 +1,679 @@
+{
+  "generatedAt": 1790751353761,
+  "quality": {
+    "upcoming": 86,
+    "withOfficialLink": 65,
+    "checkedRecently": 9,
+    "withPlaceAndTimezone": 86
+  },
+  "queue": {
+    "total": 575,
+    "due": 247,
+    "unseen": 29
+  },
+  "candidates": [
+    {
+      "status": "historical",
+      "count": 27
+    },
+    {
+      "status": "needs_review",
+      "count": 2956
+    },
+    {
+      "status": "published",
+      "count": 186
+    }
+  ],
+  "reviewReasons": [
+    {
+      "reason": "artist_identity_not_established",
+      "count": 1843
+    },
+    {
+      "reason": "missing_or_conflicting_event_identity",
+      "count": 761
+    },
+    {
+      "reason": "structured_event_missing",
+      "count": 316
+    },
+    {
+      "reason": "individual_performance_times_not_published",
+      "count": 36
+    }
+  ],
+  "sources": [
+    {
+      "id": "official:the-star-sg",
+      "name": "The Star Performing Arts Centre",
+      "market": "SG",
+      "url": "https://www.thestar.sg/events",
+      "pages": 24,
+      "checkedPages": 2,
+      "due": 22,
+      "status": "healthy",
+      "checkedAt": 1790751314858,
+      "successAt": 1790751314858,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:ticket-pia-jp",
+      "name": "Ticket PIA Japan",
+      "market": "JP",
+      "url": "https://t.pia.jp/en/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "blocked",
+      "checkedAt": 1790747666460,
+      "successAt": null,
+      "nextAt": 1790834066460,
+      "accepted": 0
+    },
+    {
+      "id": "official:eplus-jp",
+      "name": "e+ Japan",
+      "market": "JP",
+      "url": "https://eplus.jp/sf/live/k-pop-asian",
+      "pages": 69,
+      "checkedPages": 69,
+      "due": 62,
+      "status": "unavailable",
+      "checkedAt": 1790739746910,
+      "successAt": 1790272568919,
+      "nextAt": 1790761346910,
+      "accepted": 0
+    },
+    {
+      "id": "official:lawson-ticket-jp",
+      "name": "Lawson Ticket Japan",
+      "market": "JP",
+      "url": "https://l-tike.com/concert/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "unavailable",
+      "checkedAt": 1790738669232,
+      "successAt": null,
+      "nextAt": 1790760269232,
+      "accepted": 0
+    },
+    {
+      "id": "official:ticketmaster-sg",
+      "name": "Ticketmaster Singapore",
+      "market": "SG",
+      "url": "https://ticketmaster.sg/",
+      "pages": 12,
+      "checkedPages": 12,
+      "due": 11,
+      "status": "authentication",
+      "checkedAt": 1790750372442,
+      "successAt": null,
+      "nextAt": 1790771972442,
+      "accepted": 0
+    },
+    {
+      "id": "official:sistic",
+      "name": "SISTIC",
+      "market": "SG",
+      "url": "https://www.sistic.com.sg/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "healthy",
+      "checkedAt": 1790750390064,
+      "successAt": 1790750390064,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:bookmyshow-sg",
+      "name": "BookMyShow Singapore",
+      "market": "SG",
+      "url": "https://sg.bookmyshow.com/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "blocked",
+      "checkedAt": 1790747666526,
+      "successAt": null,
+      "nextAt": 1790834066526,
+      "accepted": 0
+    },
+    {
+      "id": "official:hkticketing",
+      "name": "HK Ticketing",
+      "market": "HK",
+      "url": "https://www.hkticketing.com/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "blocked",
+      "checkedAt": 1790747666578,
+      "successAt": null,
+      "nextAt": 1790834066578,
+      "accepted": 0
+    },
+    {
+      "id": "official:cityline",
+      "name": "Cityline",
+      "market": "HK",
+      "url": "https://www.cityline.com/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "healthy",
+      "checkedAt": 1790750390929,
+      "successAt": 1790750390929,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:tixcraft",
+      "name": "tixCraft",
+      "market": "TW",
+      "url": "https://tixcraft.com/",
+      "pages": 4,
+      "checkedPages": 4,
+      "due": 3,
+      "status": "authentication",
+      "checkedAt": 1790750391203,
+      "successAt": null,
+      "nextAt": 1790771991203,
+      "accepted": 0
+    },
+    {
+      "id": "official:ibon",
+      "name": "ibon Tickets",
+      "market": "TW",
+      "url": "https://ticket.ibon.com.tw/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "authentication",
+      "checkedAt": 1790750391448,
+      "successAt": null,
+      "nextAt": 1790771991448,
+      "accepted": 0
+    },
+    {
+      "id": "official:famiticket",
+      "name": "FamiTicket",
+      "market": "TW",
+      "url": "https://www.famiticket.com.tw/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "blocked",
+      "checkedAt": 1790747666720,
+      "successAt": null,
+      "nextAt": 1790834066720,
+      "accepted": 0
+    },
+    {
+      "id": "official:thaiticketmajor",
+      "name": "ThaiTicketMajor",
+      "market": "TH",
+      "url": "https://www.thaiticketmajor.com/",
+      "pages": 44,
+      "checkedPages": 44,
+      "due": 5,
+      "status": "healthy",
+      "checkedAt": 1790751315378,
+      "successAt": 1790751315378,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:allticket",
+      "name": "AllTicket",
+      "market": "TH",
+      "url": "https://www.allticket.com/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "healthy",
+      "checkedAt": 1790750391794,
+      "successAt": 1790750391794,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:global-interpark",
+      "name": "NOL Ticket / Global Interpark",
+      "market": "KR",
+      "url": "https://www.globalinterpark.com/en/category-list/concert",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "blocked",
+      "checkedAt": 1790747666902,
+      "successAt": null,
+      "nextAt": 1790834066902,
+      "accepted": 0
+    },
+    {
+      "id": "official:melon-ticket",
+      "name": "Melon Ticket",
+      "market": "KR",
+      "url": "https://ticket.melon.com/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "blocked",
+      "checkedAt": 1790747667102,
+      "successAt": null,
+      "nextAt": 1790834067102,
+      "accepted": 0
+    },
+    {
+      "id": "official:ticketlink-kr",
+      "name": "Ticketlink Korea",
+      "market": "KR",
+      "url": "https://www.ticketlink.co.kr/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "healthy",
+      "checkedAt": 1790750392375,
+      "successAt": 1790750392375,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:sm-tickets",
+      "name": "SM Tickets",
+      "market": "PH",
+      "url": "https://smtickets.com/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "blocked",
+      "checkedAt": 1790747667635,
+      "successAt": null,
+      "nextAt": 1790834067635,
+      "accepted": 0
+    },
+    {
+      "id": "official:ticketnet-ph",
+      "name": "TicketNet Philippines",
+      "market": "PH",
+      "url": "https://www.ticketnet.com.ph/",
+      "pages": 44,
+      "checkedPages": 37,
+      "due": 44,
+      "status": "unavailable",
+      "checkedAt": 1790739742345,
+      "successAt": 1790403669610,
+      "nextAt": 1790761342345,
+      "accepted": 0
+    },
+    {
+      "id": "official:ticket2u",
+      "name": "Ticket2U",
+      "market": "MY",
+      "url": "https://www.ticket2u.com.my/",
+      "pages": 26,
+      "checkedPages": 26,
+      "due": 25,
+      "status": "blocked",
+      "checkedAt": 1790675641949,
+      "successAt": 1790674195534,
+      "nextAt": 1790762041949,
+      "accepted": 0
+    },
+    {
+      "id": "official:golive-my",
+      "name": "GoLive Asia",
+      "market": "MY",
+      "url": "https://www.golive-asia.com/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "healthy",
+      "checkedAt": 1790751040556,
+      "successAt": 1790751040556,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:bookmyshow-my",
+      "name": "BookMyShow Malaysia",
+      "market": "MY",
+      "url": "https://my.bookmyshow.com/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "blocked",
+      "checkedAt": 1790750669393,
+      "successAt": null,
+      "nextAt": 1790837069393,
+      "accepted": 0
+    },
+    {
+      "id": "official:loket-id",
+      "name": "LOKET",
+      "market": "ID",
+      "url": "https://www.loket.com/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "blocked",
+      "checkedAt": 1790750669763,
+      "successAt": null,
+      "nextAt": 1790837069763,
+      "accepted": 0
+    },
+    {
+      "id": "official:tiket-id",
+      "name": "tiket.com To Do",
+      "market": "ID",
+      "url": "https://www.tiket.com/to-do",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "partial",
+      "checkedAt": 1790750669947,
+      "successAt": null,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:ticketbox-vn",
+      "name": "Ticketbox Vietnam",
+      "market": "VN",
+      "url": "https://ticketbox.vn/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "healthy",
+      "checkedAt": 1790750670469,
+      "successAt": 1790750670469,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:ticketmaster-au",
+      "name": "Ticketmaster Australia",
+      "market": "AU",
+      "url": "https://www.ticketmaster.com.au/",
+      "pages": 10,
+      "checkedPages": 10,
+      "due": 9,
+      "status": "blocked",
+      "checkedAt": 1790750670707,
+      "successAt": null,
+      "nextAt": 1790837070707,
+      "accepted": 0
+    },
+    {
+      "id": "official:ticketek-au",
+      "name": "Ticketek Australia",
+      "market": "AU",
+      "url": "https://premier.ticketek.com.au/",
+      "pages": 3,
+      "checkedPages": 3,
+      "due": 2,
+      "status": "unavailable",
+      "checkedAt": 1790738677249,
+      "successAt": null,
+      "nextAt": 1790760277249,
+      "accepted": 0
+    },
+    {
+      "id": "official:ticketmaster-nz",
+      "name": "Ticketmaster New Zealand",
+      "market": "NZ",
+      "url": "https://www.ticketmaster.co.nz/",
+      "pages": 4,
+      "checkedPages": 4,
+      "due": 3,
+      "status": "blocked",
+      "checkedAt": 1790750670948,
+      "successAt": null,
+      "nextAt": 1790837070948,
+      "accepted": 0
+    },
+    {
+      "id": "official:livenation-my",
+      "name": "Live Nation Malaysia",
+      "market": "MY",
+      "url": "https://www.livenation.my/",
+      "pages": 19,
+      "checkedPages": 19,
+      "due": 0,
+      "status": "healthy",
+      "checkedAt": 1790751296833,
+      "successAt": 1790751296833,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:mecimapro-id",
+      "name": "Mecimapro Indonesia",
+      "market": "ID",
+      "url": "https://www.mecimapro.com/",
+      "pages": 1,
+      "checkedPages": 1,
+      "due": 0,
+      "status": "healthy",
+      "checkedAt": 1790741543720,
+      "successAt": 1790741543720,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:livenation-sg",
+      "name": "Live Nation Singapore",
+      "market": "SG",
+      "url": "https://www.livenation.sg/",
+      "pages": 33,
+      "checkedPages": 33,
+      "due": 5,
+      "status": "healthy",
+      "checkedAt": 1790751305486,
+      "successAt": 1790751305486,
+      "nextAt": 0,
+      "accepted": 1
+    },
+    {
+      "id": "official:livenation-hk",
+      "name": "Live Nation Hong Kong",
+      "market": "HK",
+      "url": "https://www.livenation.hk/",
+      "pages": 44,
+      "checkedPages": 44,
+      "due": 9,
+      "status": "healthy",
+      "checkedAt": 1790751055555,
+      "successAt": 1790751055555,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:livenation-tw",
+      "name": "Live Nation Taiwan",
+      "market": "TW",
+      "url": "https://www.livenation.com.tw/",
+      "pages": 43,
+      "checkedPages": 43,
+      "due": 0,
+      "status": "healthy",
+      "checkedAt": 1790750021822,
+      "successAt": 1790750021822,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:livenation-tero",
+      "name": "Live Nation Tero",
+      "market": "TH",
+      "url": "https://www.livenationtero.co.th/",
+      "pages": 49,
+      "checkedPages": 49,
+      "due": 8,
+      "status": "healthy",
+      "checkedAt": 1790751299590,
+      "successAt": 1790751299590,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:livenation-ph",
+      "name": "Live Nation Philippines",
+      "market": "PH",
+      "url": "https://www.livenation.ph/",
+      "pages": 34,
+      "checkedPages": 34,
+      "due": 3,
+      "status": "healthy",
+      "checkedAt": 1790751314403,
+      "successAt": 1790751314403,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:livenation-jp",
+      "name": "Live Nation H.I.P. Japan",
+      "market": "JP",
+      "url": "https://www.livenationhip.co.jp/",
+      "pages": 74,
+      "checkedPages": 74,
+      "due": 34,
+      "status": "healthy",
+      "checkedAt": 1790751303091,
+      "successAt": 1790751303091,
+      "nextAt": 0,
+      "accepted": 0
+    },
+    {
+      "id": "official:livenation-kr",
+      "name": "Live Nation Korea",
+      "market": "KR",
+      "url": "https://www.livenation.kr/",
+      "pages": 20,
+      "checkedPages": 20,
+      "due": 2,
+      "status": "healthy",
+      "checkedAt": 1790751309065,
+      "successAt": 1790751309065,
+      "nextAt": 0,
+      "accepted": 0
+    }
+  ],
+  "jobs": [
+    {
+      "name": "artist_catalog_sync",
+      "status": "partial",
+      "finishedAt": 1790751096370
+    },
+    {
+      "name": "event_ingestion",
+      "status": "partial",
+      "finishedAt": 1790750504455
+    },
+    {
+      "name": "event_link_resolution",
+      "status": "completed",
+      "finishedAt": 1790751108065
+    },
+    {
+      "name": "artist_media_refresh",
+      "status": "completed",
+      "finishedAt": 1790751124121
+    },
+    {
+      "name": "official_collection",
+      "status": "completed",
+      "finishedAt": 1790751315382
+    }
+  ],
+  "updates": [
+    {
+      "eventId": "ticketmaster-discovery:Z8ymWIMJlyZziZ7kA7",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "observedAt": 1790751305391,
+      "fields": "[\"imageWidth\",\"imageHeight\"]"
+    },
+    {
+      "eventId": "ticketmaster-discovery:Z8ymWIMJlyZziZ7kA7",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "observedAt": 1790748399791,
+      "fields": "[\"imageWidth\",\"imageHeight\"]"
+    },
+    {
+      "eventId": "official:livenation-hk:0aaafbf69106a85cb51c8245",
+      "artist": "BABYMONSTER",
+      "name": "2026-27 BABYMONSTER WORLD TOUR [춤 (CHOOM)] IN HONG KONG",
+      "observedAt": 1790748393757,
+      "fields": "[\"officialUrl\",\"bestLinkUrl\",\"imageSourceUrl\"]"
+    },
+    {
+      "eventId": "ticketmaster-discovery:Z8ymWIMJlyZziZ7kA7",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "observedAt": 1790746236452,
+      "fields": "[\"imageWidth\",\"imageHeight\"]"
+    },
+    {
+      "eventId": "official:livenation-tero:bb5c6debfa309d9cf969713c",
+      "artist": "Stray Kids",
+      "name": "Stray Kids World Tour <RUN IT BANGKOK>",
+      "observedAt": 1790745515089,
+      "fields": "[\"officialUrl\",\"bestLinkUrl\",\"imageSourceUrl\"]"
+    },
+    {
+      "eventId": "ticketmaster-discovery:Z8ymWIMJlyZziZ7kA7",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "observedAt": 1790744074809,
+      "fields": "[\"imageWidth\",\"imageHeight\"]"
+    },
+    {
+      "eventId": "ticketmaster-discovery:Z8ymWIMJlyZziZ7kA7",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "observedAt": 1790741906874,
+      "fields": "[\"imageWidth\",\"imageHeight\"]"
+    },
+    {
+      "eventId": "ticketmaster-discovery:Z8ymWIMJlyZziZ7kA7",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "observedAt": 1790741545501,
+      "fields": "[\"imageWidth\",\"imageHeight\"]"
+    },
+    {
+      "eventId": "ticketmaster-discovery:Z8ymWIMJlyZziZ7kA7",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "observedAt": 1790739395875,
+      "fields": "[\"imageWidth\",\"imageHeight\"]"
+    },
+    {
+      "eventId": "ticketmaster-discovery:Z8ymWIMJlyZziZ7kA7",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "observedAt": 1790737230304,
+      "fields": "[\"imageWidth\",\"imageHeight\"]"
+    },
+    {
+      "eventId": "ticketmaster-discovery:Z8ymWIMJlyZziZ7kA7",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "observedAt": 1790735424901,
+      "fields": "[\"imageWidth\",\"imageHeight\"]"
+    },
+    {
+      "eventId": "ticketmaster-discovery:Z8ymWIMJlyZziZ7kA7",
+      "artist": "ITZY",
+      "name": "ITZY 3RD WORLD TOUR <TUNNEL VISION> in SINGAPORE",
+      "observedAt": 1790734349295,
+      "fields": "[\"imageWidth\",\"imageHeight\"]"
+    }
+  ]
+}

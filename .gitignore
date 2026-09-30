@@ -13,3 +13,15 @@ xcuserdata/
 # Editors
 .idea/
 .vscode/
+
+# Private database snapshots, logs and credentials anywhere in the repo
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.pem
+*.key
+*.p12
+*.pfx
+*.log
+*.tsbuildinfo

@@ -1,6 +1,7 @@
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { runMigrations } from './migrations.ts';
 
 let database: DatabaseSync | undefined;
 
@@ -86,6 +87,22 @@ export function getDb(): DatabaseSync {
       longitude REAL,
       official_url TEXT NOT NULL,
       confidence TEXT NOT NULL,
+      lifecycle_status TEXT NOT NULL DEFAULT 'scheduled',
+      status_changed_at INTEGER,
+      image_url TEXT,
+      image_width INTEGER,
+      image_height INTEGER,
+      image_attribution TEXT,
+      image_source_url TEXT,
+      image_fallback INTEGER NOT NULL DEFAULT 0,
+      best_link_url TEXT,
+      best_link_role TEXT,
+      best_link_source TEXT,
+      best_link_score INTEGER,
+      best_link_verified_at INTEGER,
+      data_authority_score INTEGER NOT NULL DEFAULT 40,
+      data_source_id TEXT,
+      data_verified_at INTEGER,
       first_seen_at INTEGER NOT NULL,
       last_seen_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL,
@@ -103,6 +120,10 @@ export function getDb(): DatabaseSync {
       image_width INTEGER NOT NULL,
       image_height INTEGER NOT NULL,
       image_attribution TEXT,
+      creator TEXT,
+      license_name TEXT,
+      license_url TEXT,
+      usage_policy TEXT NOT NULL DEFAULT 'linked_preview',
       source_url TEXT NOT NULL,
       is_fallback INTEGER NOT NULL DEFAULT 0,
       first_seen_at INTEGER NOT NULL,
@@ -112,12 +133,144 @@ export function getDb(): DatabaseSync {
     CREATE INDEX IF NOT EXISTS idx_artist_media_checked
       ON artist_media(last_checked_at DESC);
 
+    CREATE TABLE IF NOT EXISTS media_asset_quarantine (
+      image_url TEXT PRIMARY KEY NOT NULL,
+      reason TEXT NOT NULL,
+      artists_json TEXT NOT NULL DEFAULT '[]',
+      first_seen_at INTEGER NOT NULL,
+      last_seen_at INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS provider_artist_lookup_cache (
+      provider TEXT NOT NULL,
+      normalized_name TEXT NOT NULL COLLATE NOCASE,
+      provider_artist_id TEXT,
+      payload_json TEXT,
+      status TEXT NOT NULL,
+      checked_at INTEGER NOT NULL,
+      expires_at INTEGER NOT NULL,
+      PRIMARY KEY (provider, normalized_name)
+    );
+    CREATE INDEX IF NOT EXISTS idx_provider_artist_lookup_expiry
+      ON provider_artist_lookup_cache(provider, expires_at);
+
+    CREATE TABLE IF NOT EXISTS artist_catalog (
+      id TEXT PRIMARY KEY NOT NULL,
+      canonical_name TEXT NOT NULL,
+      normalized_name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      artist_type TEXT NOT NULL DEFAULT 'unknown',
+      country_code TEXT,
+      life_span_begin TEXT,
+      life_span_end TEXT,
+      active INTEGER NOT NULL DEFAULT 1,
+      status TEXT NOT NULL DEFAULT 'observed',
+      confidence_score INTEGER NOT NULL DEFAULT 0,
+      priority_score INTEGER NOT NULL DEFAULT 40,
+      aliases_json TEXT NOT NULL DEFAULT '[]',
+      tags_json TEXT NOT NULL DEFAULT '[]',
+      source_count INTEGER NOT NULL DEFAULT 1,
+      first_seen_at INTEGER NOT NULL,
+      last_verified_at INTEGER,
+      next_identity_check_at INTEGER,
+      next_event_check_at INTEGER,
+      last_event_check_at INTEGER,
+      last_event_seen_at INTEGER,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_artist_catalog_event_queue
+      ON artist_catalog(active, next_event_check_at, priority_score DESC);
+    CREATE INDEX IF NOT EXISTS idx_artist_catalog_status
+      ON artist_catalog(status, confidence_score DESC);
+
+    CREATE TABLE IF NOT EXISTS artist_aliases (
+      alias_normalized TEXT PRIMARY KEY NOT NULL COLLATE NOCASE,
+      alias TEXT NOT NULL,
+      artist_id TEXT NOT NULL,
+      locale TEXT,
+      source_id TEXT NOT NULL,
+      confidence_score INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY (artist_id) REFERENCES artist_catalog(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_artist_aliases_artist ON artist_aliases(artist_id);
+
+    CREATE TABLE IF NOT EXISTS artist_sources (
+      artist_id TEXT NOT NULL,
+      source_id TEXT NOT NULL,
+      external_id TEXT NOT NULL DEFAULT '',
+      confidence_score INTEGER NOT NULL,
+      first_seen_at INTEGER NOT NULL,
+      last_seen_at INTEGER NOT NULL,
+      PRIMARY KEY (artist_id, source_id),
+      FOREIGN KEY (artist_id) REFERENCES artist_catalog(id) ON DELETE CASCADE
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_artist_sources_external
+      ON artist_sources(source_id, external_id) WHERE external_id <> '';
+
+    CREATE TABLE IF NOT EXISTS artist_catalog_sync_state (
+      source_id TEXT PRIMARY KEY NOT NULL,
+      cursor_offset INTEGER NOT NULL DEFAULT 0,
+      total_count INTEGER,
+      status TEXT NOT NULL DEFAULT 'idle',
+      items_seen INTEGER NOT NULL DEFAULT 0,
+      items_accepted INTEGER NOT NULL DEFAULT 0,
+      last_error TEXT,
+      started_at INTEGER,
+      finished_at INTEGER,
+      updated_at INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS artist_identity_candidates (
+      provider TEXT NOT NULL,
+      provider_artist_id TEXT NOT NULL,
+      artist_name TEXT NOT NULL,
+      artist_type TEXT NOT NULL DEFAULT 'unknown',
+      event_title TEXT NOT NULL,
+      market_code TEXT,
+      priority_score INTEGER NOT NULL DEFAULT 40,
+      status TEXT NOT NULL DEFAULT 'pending',
+      attempts INTEGER NOT NULL DEFAULT 0,
+      next_check_at INTEGER NOT NULL DEFAULT 0,
+      last_error TEXT,
+      first_seen_at INTEGER NOT NULL,
+      last_seen_at INTEGER NOT NULL,
+      last_checked_at INTEGER,
+      PRIMARY KEY (provider, provider_artist_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_artist_identity_candidates_queue
+      ON artist_identity_candidates(status, next_check_at, priority_score DESC);
+
+    CREATE TABLE IF NOT EXISTS artist_provider_identities (
+      provider TEXT NOT NULL,
+      provider_artist_id TEXT NOT NULL,
+      artist_id TEXT NOT NULL,
+      artist_type TEXT NOT NULL DEFAULT 'unknown',
+      confidence_score INTEGER NOT NULL,
+      first_seen_at INTEGER NOT NULL,
+      last_seen_at INTEGER NOT NULL,
+      PRIMARY KEY (provider, provider_artist_id),
+      FOREIGN KEY (artist_id) REFERENCES artist_catalog(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_artist_provider_identities_artist
+      ON artist_provider_identities(artist_id, provider);
+
+    CREATE TABLE IF NOT EXISTS market_discovery_state (
+      market_code TEXT PRIMARY KEY NOT NULL,
+      last_swept_at INTEGER,
+      next_sweep_at INTEGER,
+      events_seen INTEGER NOT NULL DEFAULT 0,
+      last_error TEXT,
+      updated_at INTEGER NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS event_source_links (
       event_id TEXT NOT NULL,
       source_id TEXT NOT NULL,
       source_event_id TEXT NOT NULL,
       url TEXT NOT NULL,
       confidence TEXT NOT NULL,
+      source_status TEXT NOT NULL DEFAULT 'scheduled',
       first_seen_at INTEGER NOT NULL,
       last_seen_at INTEGER NOT NULL,
       last_checked_at INTEGER NOT NULL,
@@ -248,43 +401,6 @@ export function getDb(): DatabaseSync {
     CREATE INDEX IF NOT EXISTS idx_connector_run_items_connector_date
       ON connector_run_items(connector_id, recorded_at DESC);
   `);
-  const canonicalEventColumns = new Set(
-    (database.prepare('PRAGMA table_info(canonical_events)').all() as Array<{ name: string }>)
-      .map((column) => column.name),
-  );
-  const mediaColumns = [
-    ['image_url', 'TEXT'],
-    ['image_width', 'INTEGER'],
-    ['image_height', 'INTEGER'],
-    ['image_attribution', 'TEXT'],
-    ['image_source_url', 'TEXT'],
-    ['image_fallback', 'INTEGER NOT NULL DEFAULT 0'],
-  ] as const;
-  for (const [name, definition] of mediaColumns) {
-    if (!canonicalEventColumns.has(name)) {
-      database.exec(`ALTER TABLE canonical_events ADD COLUMN ${name} ${definition}`);
-    }
-  }
-  const linkColumns = [
-    ['best_link_url', 'TEXT'],
-    ['best_link_role', 'TEXT'],
-    ['best_link_source', 'TEXT'],
-    ['best_link_score', 'INTEGER'],
-    ['best_link_verified_at', 'INTEGER'],
-    ['data_authority_score', 'INTEGER NOT NULL DEFAULT 40'],
-    ['data_source_id', 'TEXT'],
-    ['data_verified_at', 'INTEGER'],
-  ] as const;
-  for (const [name, definition] of linkColumns) {
-    if (!canonicalEventColumns.has(name)) {
-      database.exec(`ALTER TABLE canonical_events ADD COLUMN ${name} ${definition}`);
-    }
-  }
-  database.exec(`
-    UPDATE canonical_events
-    SET official_url = '/events/' || id
-    WHERE provider = 'predicthq'
-      AND official_url LIKE 'https://www.predicthq.com/events/%';
-  `);
+  runMigrations(database);
   return database;
 }

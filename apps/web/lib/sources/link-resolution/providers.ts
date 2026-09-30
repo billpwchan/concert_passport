@@ -1,3 +1,4 @@
+import { paidEventApisEnabled } from '../data-mode.ts';
 import { ticketmasterAdapter } from '../adapters/ticketmaster.ts';
 import { catalogCandidatesForEvent, localEventDate } from './catalog.ts';
 import { trustedSourceForUrl } from './trusted-sources.ts';
@@ -64,7 +65,7 @@ function searchPhrase(event: ResolvableEvent): string {
 }
 
 async function braveCandidates(event: ResolvableEvent): Promise<EventLinkCandidate[]> {
-  const key = process.env.BRAVE_SEARCH_API_KEY;
+  const key = paidEventApisEnabled() ? process.env.BRAVE_SEARCH_API_KEY : undefined;
   if (!key) return [];
   const params = new URLSearchParams({ q: searchPhrase(event), count: '10', safesearch: 'strict' });
   const response = await fetch(`https://api.search.brave.com/res/v1/web/search?${params}`, {

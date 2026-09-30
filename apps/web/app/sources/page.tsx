@@ -1,3 +1,5 @@
+import { getCollectionCoverage } from '@/db/coverage';
+import { observedConnectorHealth, officialCollectionHealth } from '@/db/collection';
 import { PageHeader } from '@/components/page-header';
 import { SourceDirectory } from '@/components/source-directory';
 import { eventSourceAdapters } from '@/lib/sources/adapters';
@@ -19,10 +21,11 @@ export default function SourcesPage() {
         descriptionKey="sources.description"
       />
       <SourceDirectory
+        coverage={getCollectionCoverage()}
         sources={sourceRegistry.filter(
           (source) => source.category !== 'event_api' && source.category !== 'artist_identity',
         )}
-        connectors={eventSourceAdapters.map((adapter) => adapter.health())}
+        connectors={[officialCollectionHealth(), ...eventSourceAdapters.map((adapter) => observedConnectorHealth(adapter.health()))]}
       />
     </>
   );

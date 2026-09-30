@@ -10,6 +10,7 @@ export type AtlasMapPoint = {
   artist: string;
   city: string;
   accent: string;
+  approximate?: boolean;
 };
 
 export function ConcertMap({
@@ -85,10 +86,10 @@ export function ConcertMap({
       markersRef.current = points.map((point) => {
         const element = document.createElement('button');
         element.type = 'button';
-        element.className = 'concert-map-marker';
+        element.className = `concert-map-marker${point.approximate ? ' approximate' : ''}`;
         element.style.setProperty('--marker-color', point.accent);
-        element.setAttribute('aria-label', `${point.artist} · ${point.city}`);
-        element.title = `${point.artist} · ${point.city}`;
+        element.setAttribute('aria-label', `${point.artist} · ${point.city}${point.approximate ? ' ≈' : ''}`);
+        element.title = `${point.artist} · ${point.city}${point.approximate ? ' ≈' : ''}`;
         const dot = document.createElement('span');
         const label = document.createElement('strong');
         label.textContent = point.artist;

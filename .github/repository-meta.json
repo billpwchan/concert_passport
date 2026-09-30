@@ -1,0 +1,17 @@
+{
+  "description": "Concert Passport｜无密钥、可追溯的亚太 K-pop 演出发现与私人现场档案。Keyless concert discovery & your live-music passport.",
+  "homepage": "https://concert-passport.52-198-144-26.sslip.io",
+  "topics": [
+    "kpop",
+    "concerts",
+    "concert-discovery",
+    "self-hosted",
+    "nextjs",
+    "react",
+    "typescript",
+    "sqlite",
+    "swiftui",
+    "maplibre",
+    "open-source"
+  ]
+}

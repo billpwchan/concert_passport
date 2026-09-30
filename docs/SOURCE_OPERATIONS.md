@@ -1,70 +1,69 @@
 # Source Operations
 
-## Coverage thesis
+> September 30 update: [keyless collection is now the default](KEYLESS_DATA.md). Commercial API jobs are opt-in; per-page access failures no longer stop an otherwise working source.
 
-Concert Passport launches as a K-pop product across Singapore, Hong Kong, Japan, Taiwan, Thailand, South Korea, Malaysia, the Philippines, Indonesia, Vietnam, and Australia. Japan is included for K-pop tours; J-pop artist coverage is not part of the initial catalog.
+## Operating model
 
-The source graph combines:
+Concert Passport covers K-pop tours in Singapore, Hong Kong, Japan, Taiwan, Thailand, South Korea, Malaysia, the Philippines, Indonesia, Vietnam, and Australia. Japan is included for K-pop tours; J-pop identity discovery is outside the current graph.
 
-1. artist, agency, fan-club, and membership notices;
-2. local promoters and venues;
-3. official primary ticket sellers;
-4. contracted event discovery APIs;
-5. reviewed user-submitted official links.
+The production data plane is autonomous. It combines scheduled identity scans, licensed event APIs, rotating market sweeps, automatic official-link discovery, deterministic page inspection, event versioning and bounded retry. User-submitted evidence is not required for baseline coverage and there is no manual publication queue.
 
-No single provider is treated as complete across these markets.
+## Authority and source tiers
 
-## Tiers
+- **Tier 1** — primary operational source for a market or lifecycle phase.
+- **Tier 2** — important supplement or identity/discovery source.
 
-- **Tier 1:** primary operational source for a market or lifecycle phase.
-- **Tier 2:** important supplement or identity/discovery provider.
-- **Tier 3:** reviewed fallback; not currently included in the launch registry.
+Tier affects scheduling and evidence weight; it is not displayed as unexplained “T1/T2” shorthand in the consumer interface. The seller or promoter explicitly named for a particular event remains authoritative for that event.
 
-Tier describes operational priority, not blanket authority. The official seller named by an event promoter or artist notice remains authoritative for that event.
+Registry inclusion permits safe link verification and explicitly supported API/feed use. It is not permission to bypass authentication, robots policy, rate limits, anti-bot controls, or commercial terms.
 
-## Launch registry
+## Automatic acceptance
 
-The code registry includes fan platforms, Ticketmaster Discovery, PredictHQ, MusicBrainz, major local ticket sellers, and market-specific Live Nation/promoter properties. Japan coverage includes Ticket PIA, e+, and Lawson Ticket; Malaysia includes GoLive Asia and BookMyShow; Indonesia includes LOKET, tiket.com, and Mecimapro; Vietnam includes Ticketbox.
+A critical milestone is publishable only when the system has:
 
-Registry inclusion permits only normal link verification and explicitly contracted API use. It is not a scraping approval and does not imply a commercial distribution agreement.
+- a canonical artist, tour, performance and venue identity;
+- an absolute instant plus the source-local IANA timezone;
+- an explicit lifecycle semantic such as registration close, lottery, presale or general sale;
+- source URL, observed time, provider record and authority score;
+- a deterministic match above the configured threshold;
+- no unresolved higher-authority contradiction.
 
-## Record acceptance
+Conflicting or incomplete evidence is quarantined automatically. It does not publish a critical deadline, trigger an alert, or receive an “official” label. A later provider observation retries the decision; repeated failures use exponential backoff. This is a failure state, not a human work queue.
 
-A protected milestone needs:
+Media follows the same fail-closed rule. `fallback=true` provider artwork is never stored, exact artist identity is required before an artist image is accepted, and cross-artist duplicate URLs enter a durable automatic quarantine. Missing imagery is an acceptable presentation state; an unrelated image is not.
 
-- normalized artist, tour, performance, and venue identity;
-- the exact local date/time and IANA zone;
-- a milestone type and close/open semantic;
-- source URL, host, check time, and authority tier;
-- official seller identity for any purchase handoff;
-- reviewer state when facts conflict or came from an image/community submission.
+Artist identity is also typed. A same-name provider attraction cannot inherit a catalog record when `group` and `person` disagree. Unknown structured attractions are resolved against an exact South Korean MusicBrainz identity under a globally rate-limited queue; ambiguous or absent matches stay unpublished and retry through later sweeps.
 
-High-impact conflicts must not auto-resolve. Registration deadlines, lottery results, payment closes, cancellations, and seller changes require second review until a contracted authoritative feed proves reliable.
+The resolver is a persistent queue rather than a loop over the first search page. Candidates are keyed by stable provider artist ID, prioritized, retried with backoff and processed under a fixed runtime budget. One slow MusicBrainz response cannot abort an otherwise successful market scan.
 
-## Host verification
+Provider artist IDs have an explicit crosswalk to canonical catalog IDs. The presence of an attraction ID alone is not evidence of identity. Crosswalks are created only after exact external resolution, cannot silently move between canonical artists, and are consulted before aliases.
 
-The allowlist accepts an exact official host or its true subdomain. It rejects suffix lookalikes such as `weverse.io.example.com`. Host verification is necessary but insufficient; review must confirm the exact event page and seller relationship.
+## Continuous health
 
-## Ingestion states
+The runtime records, per connector and market:
 
-```text
-discovered → parsed → matched → reviewed → published
-                      ↘ conflict → second review
-published → changed → impact assessment → alert reschedule
-```
+- last success and failure;
+- cursor and rows seen/accepted;
+- events discovered and identities learned;
+- last market sweep and next due time;
+- missing/exact ticket-link counts;
+- quarantined conflicts and retry age;
+- fallback rejection, cross-artist image collisions and quarantined media URLs;
+- provider latency, quota and error class.
 
-Machine extraction is a reviewer suggestion. It must not directly publish a critical time.
+Consumer empty states expose what users need: the actual number of future events, number of configured official sources, last automatic scan, and nearby markets with published dates. They never imply that a market is unsupported merely because it currently has zero announced events.
 
-## Operational targets for the pilot
+## Operational targets
 
-- ≥99% critical-field correctness within the declared supported catalog;
-- median contracted-source change latency under 15 minutes;
-- explicit per-market SLA for manually reviewed sources;
-- 100% of outbound purchase links on the verified host registry and checked at event level;
-- zero silent changes to a published critical timestamp.
+- at least 99% critical-field correctness inside the declared measured scope;
+- median connected-source latency under 15 minutes where quota permits;
+- 100% of outbound purchase links checked at event level and on the verified host registry;
+- zero silent overwrites of published critical timestamps;
+- catalog scan cursors always durable across restarts;
+- automatic recovery or a visible degraded state for every connector failure.
 
-If these targets cannot be sustained, narrow the artist/market catalog rather than claiming comprehensive coverage.
+If these targets are not sustained, the interface narrows its claim and reports measured freshness. It does not silently serve sample data or ask a user to trust an unexplained “updating” message.
 
 ## Ticket purchase boundary
 
-V1 may prepare prerequisites, show queue guidance, open the exact official seller by user action, and record an outcome. Automated queue activity, CAPTCHA bypass, login automation, stored payment data, ticket-limit evasion, inventory guarantees, and unofficial resale are prohibited.
+The product may prepare prerequisites, explain the sale stage, show countdowns, open the exact official seller after a user gesture, and record an outcome. It must not automate seller login, queue activity, CAPTCHA, refresh behavior, stored payment data, limit evasion or checkout.

@@ -38,3 +38,6 @@ next-env.d.ts
 /outputs/
 /work/
 *.tsbuildinfo
+
+# Generated during container builds; actual license sources stay installed upstream.
+THIRD_PARTY_LICENSES.txt

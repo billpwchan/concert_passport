@@ -1,0 +1,27 @@
+{
+  "name": "concert-passport",
+  "version": "0.1.0",
+  "private": true,
+  "description": "面向亚太 K-pop 观众的演出发现与私人现场档案。",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/billpwchan/concert_passport.git"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "npm --prefix apps/web run dev",
+    "demo": "npm --prefix apps/web run demo",
+    "build": "npm --prefix apps/web run build",
+    "start": "npm --prefix apps/web run start",
+    "test": "npm run test:repo && npm --prefix apps/web test",
+    "lint": "npm --prefix apps/web run lint",
+    "typecheck": "npm --prefix apps/web run typecheck",
+    "check:repo": "node scripts/check-repository.mjs",
+    "test:repo": "node --test scripts/tests/*.test.mjs",
+    "check": "npm run check:repo && npm run test:repo && npm --prefix apps/web run check",
+    "audit:sources": "npm --prefix apps/web run audit:sources"
+  }
+}

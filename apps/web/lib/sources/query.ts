@@ -23,14 +23,13 @@ function dateValue(params: URLSearchParams, name: string): string | undefined {
 
 export function normalizeDiscoveryQuery(params: URLSearchParams): DiscoveryQuery {
   const artist = textValue(params, 'artist', 80);
-  if (!artist || artist.length < 2) {
-    throw new DiscoveryInputError('Enter an artist name with at least 2 characters');
-  }
-
   const city = textValue(params, 'city', 80);
   const countryCode = textValue(params, 'countryCode', 2)?.toUpperCase();
   if (countryCode && !APAC_COUNTRY_CODES.has(countryCode)) {
     throw new DiscoveryInputError('countryCode must be an Asia-Pacific market');
+  }
+  if (!artist && !countryCode && !city) {
+    throw new DiscoveryInputError('Enter an artist name or choose a market');
   }
 
   const startDateTime = dateValue(params, 'startDateTime');

@@ -29,6 +29,7 @@ const supplementalSources: TrustedSource[] = [
 
 function authorityForCategory(category: (typeof sourceRegistry)[number]['category']): EventLinkAuthority {
   if (category === 'ticketing') return 'seller';
+  if (category === 'venue') return 'venue';
   if (category === 'promoter') return 'promoter';
   if (category === 'fan_platform') return 'artist';
   return 'discovery';

@@ -1,0 +1,42 @@
+name: concert-passport
+services:
+  app:
+    build:
+      context: ../apps/web
+    image: concert-passport:local
+    restart: unless-stopped
+    init: true
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      CONCERT_PASSPORT_DB_PATH: /data/concert-passport.sqlite
+      CONCERT_PASSPORT_MEDIA_CACHE_PATH: /data/media-cache
+      CONCERT_PASSPORT_DATA_MODE: official
+    ports: ["127.0.0.1:${APP_PORT:-3000}:3000"]
+    volumes: ["data:/data", "cache:/app/.next/cache"]
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=64m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 640m
+  worker:
+    image: concert-passport:local
+    restart: unless-stopped
+    init: true
+    command: ["node", "scripts/ingestion-worker.mjs"]
+    env_file: .env
+    environment:
+      INTERNAL_APP_URL: http://app:3000
+      CONCERT_PASSPORT_DATA_MODE: official
+    depends_on:
+      app: {condition: service_healthy}
+    healthcheck: {disable: true}
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=16m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 96m
+volumes:
+  data:
+  cache:

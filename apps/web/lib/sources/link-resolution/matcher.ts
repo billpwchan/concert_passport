@@ -1,3 +1,5 @@
+import { matchesArtist, normalizeIdentity } from '../../domain/discovery.ts';
+import { isAmbiguousArtistName } from '../../domain/ambiguous-artist-names.ts';
 import type { EventLinkAuthority } from '../../domain/types.ts';
 import { localEventDate } from './catalog.ts';
 import type { CandidateInspection, EventLinkCandidate, ResolvableEvent, ScoredCandidate } from './types.ts';
@@ -71,9 +73,8 @@ export function scoreCandidate(
 
   const eventArtist = event.artist ?? event.name;
   const artistText = data.artist ?? data.name;
-  const artistOverlap = overlap(eventArtist, artistText);
-  const titleIncludesArtist = normalize(data.name).includes(normalize(eventArtist));
-  const artistMatch = artistOverlap >= 0.7 || titleIncludesArtist;
+  const artistMatch = data.artist ? normalizeIdentity(data.artist) === normalizeIdentity(eventArtist)
+    : !isAmbiguousArtistName(eventArtist) && matchesArtist(artistText ?? '', eventArtist);
   if (artistMatch) {
     score += 30;
     reasons.push('artist');
@@ -116,6 +117,8 @@ export function scoreCandidate(
     score += 5;
     reasons.push('live_page');
   }
+  const providerAsserted = candidate.discoveredBy === 'ticketmaster';
+  if (providerAsserted) reasons.push('provider_asserted');
 
   const offerTrusted = Boolean(inspection.offerUrl);
   const resolvedRole = offerTrusted ? 'ticket' : candidate.role;
@@ -125,7 +128,9 @@ export function scoreCandidate(
   const hasDate = candidateDate === expectedDate;
   const hasMarket = !event.countryCode || !data.countryCode || countryIdentity(event.countryCode) === countryIdentity(data.countryCode);
   const threshold = resolvedRole === 'tour' ? 74 : 78;
-  const state = hasIdentity && hasDate && hasMarket && !conflicts.includes('country') && score >= threshold
+  const hasCurrentProof = inspection.fetched || providerAsserted;
+  const state = hasCurrentProof && hasIdentity && hasDate && hasMarket
+    && !conflicts.includes('country') && score >= threshold
     ? 'verified'
     : 'quarantined';
 

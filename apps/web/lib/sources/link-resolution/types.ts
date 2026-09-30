@@ -23,6 +23,12 @@ export type CandidateEventData = {
   city?: string;
   countryCode?: string;
   saleStartsAt?: string;
+  imageUrl?: string;
+  imageScope?: 'event';
+  imageWidth?: number;
+  imageHeight?: number;
+  imageAttribution?: string;
+  imageSourceUrl?: string;
 };
 
 export type EventLinkCandidate = {

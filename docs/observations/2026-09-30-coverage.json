@@ -1,0 +1,64 @@
+{
+  "endpoint": "https://concert-passport.52-198-144-26.sslip.io/api/v1/coverage",
+  "note": "Public read-only observation; selected response fields, not a current service guarantee.",
+  "generatedAt": 1790743326255,
+  "quality": {
+    "upcoming": 86,
+    "withOfficialLink": 65,
+    "checkedRecently": 9,
+    "withPlaceAndTimezone": 86
+  },
+  "queue": {
+    "total": 550,
+    "due": 195,
+    "unseen": 7
+  },
+  "candidates": [
+    {
+      "status": "historical",
+      "count": 27
+    },
+    {
+      "status": "needs_review",
+      "count": 2954
+    },
+    {
+      "status": "published",
+      "count": 186
+    }
+  ],
+  "sourceStatusCounts": {
+    "blocked": 8,
+    "unavailable": 4,
+    "authentication": 8,
+    "healthy": 15,
+    "parse_error": 1
+  },
+  "jobs": [
+    {
+      "name": "artist_catalog_sync",
+      "status": "partial",
+      "finishedAt": 1790743225642
+    },
+    {
+      "name": "event_ingestion",
+      "status": "partial",
+      "finishedAt": 1790743112833
+    },
+    {
+      "name": "event_link_resolution",
+      "status": "completed",
+      "finishedAt": 1790742096463
+    },
+    {
+      "name": "artist_media_refresh",
+      "status": "completed",
+      "finishedAt": 1790731654323
+    },
+    {
+      "name": "official_collection",
+      "status": "partial",
+      "finishedAt": 1790743000347
+    }
+  ]
+}

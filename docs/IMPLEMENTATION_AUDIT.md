@@ -29,7 +29,7 @@ This is suitable for controlled early access. It is not ready to promise compreh
 | Severity | Finding | Disposition |
 |---|---|---|
 | P0 | No production notification scheduler or delivery audit exists. | Blocks any missed-deadline reliability promise. |
-| P0 | API access exists, but contractual coverage and editorial verification are incomplete. | Keep declared coverage narrow and review critical ticket facts. |
+| P0 | API access exists, but contractual coverage and measured automatic recall remain incomplete. | Keep declared coverage narrow; publish critical ticket facts only after deterministic authority and conflict gates pass. |
 | P1 | Email verification and credential recovery are not implemented. | Required before broad public registration. |
 | P1 | Schema bootstrap is idempotent but not a versioned migration system. | Add forward/backward compatible migrations before overlapping releases. |
 | P1 | No operator console or event-level official-link approval exists. | Keep user submissions pending and do not elevate host reputation to event authority. |

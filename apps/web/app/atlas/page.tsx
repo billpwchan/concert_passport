@@ -8,11 +8,12 @@ export const metadata = {
   description: 'Find K-pop shows across your Asia travel windows.',
 };
 
-export default async function AtlasPage() {
+export default async function AtlasPage({ searchParams }: { searchParams: Promise<{ artist?: string; market?: string; days?: string; from?: string; until?: string; weekend?: string }> }) {
+  const params = await searchParams;
   const windowStartsAt = new Date().toISOString();
   const [savedEvents, catalogEvents] = await Promise.all([
     getSavedEventsForCurrentSession(),
-    Promise.resolve(getUpcomingCatalogEvents(36)),
+    Promise.resolve(getUpcomingCatalogEvents(180)),
   ]);
   return (
     <>
@@ -21,7 +22,7 @@ export default async function AtlasPage() {
         titleKey="atlas.title"
         descriptionKey="atlas.description"
       />
-      <AtlasExplorer savedEvents={savedEvents} catalogEvents={catalogEvents} windowStartsAt={windowStartsAt} />
+      <AtlasExplorer savedEvents={savedEvents} catalogEvents={catalogEvents} windowStartsAt={windowStartsAt} initialArtist={typeof params.artist === 'string' ? params.artist.slice(0, 80) : ''} initialMarket={params.market} initialDates={params} />
     </>
   );
 }

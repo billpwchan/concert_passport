@@ -1,47 +1,17 @@
 'use client';
-
+import { AttendEventButton } from './attend-event-button';
 import Link from 'next/link';
 import type { SavedEventRecord } from '@/db/events';
-import { formatVenueTime } from '@/lib/domain/lifecycle';
-import { eventLinkActionKey, primaryEventHref } from '@/lib/domain/event-link';
+import { EventCard } from './event-card';
 import { usePreferences } from './preferences-provider';
-
-export function SavedShowsDirectory({ events }: { events: SavedEventRecord[] }) {
-  const { dateLocale, t } = usePreferences();
-  return (
-    <section className="saved-shows-section">
-      <div className="section-heading">
-        <div><span>{t('plans.savedEyebrow')}</span><h2>{t('plans.savedTitle')}</h2></div>
-        <strong>{events.length}</strong>
-      </div>
-      {events.length ? (
-        <div className="saved-show-list">
-          {events.map((event) => {
-            const target = primaryEventHref(event);
-            const content = (
-              <>
-              <span className="saved-show-date">{formatVenueTime(event.startsAt, event.timezone ?? 'UTC', dateLocale)}</span>
-              <span><strong>{event.artist ?? event.name}</strong><small>{event.name}</small></span>
-              <span><strong>{event.city ?? event.countryCode ?? '—'}</strong><small>{event.venue ?? t('plans.venuePending')}</small></span>
-              <span className="official-link-label">
-                {t(eventLinkActionKey(event.bestLinkRole))} {target.external ? '↗' : '→'}
-              </span>
-              </>
-            );
-            return target.external ? (
-              <a href={target.href} target="_blank" rel="noreferrer" key={event.id}>{content}</a>
-            ) : (
-              <Link href={target.href} key={event.id}>{content}</Link>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="product-empty-state">
-          <h3>{t('plans.emptyTitle')}</h3>
-          <p>{t('plans.emptyDescription')}</p>
-          <a className="button-primary" href="/atlas">{t('plans.findShows')}</a>
-        </div>
-      )}
-    </section>
-  );
+export function SavedShowsDirectory({ events, nowIso, attendedIds }: { events: SavedEventRecord[]; nowIso: string; attendedIds: string[] }) {
+  const { t } = usePreferences();
+  const upcoming = events.filter((event) => Date.parse(event.startsAt) >= Date.parse(nowIso));
+  const past = events.filter((event) => Date.parse(event.startsAt) < Date.parse(nowIso));
+  return <section className="saved-shows-section">
+    <div className="discovery-section-head"><div><span className="editorial-eyebrow">YOUR SHORTLIST</span><h1>{t('explore.savedTitle')}</h1><p>{t('explore.savedBody')}</p></div><strong>{events.length}</strong></div>
+    {events.length ? <><div className="show-grid">{upcoming.map((event) => <EventCard key={event.id} event={event} saved />)}</div>
+      {past.length ? <section className="past-shows"><header className="discovery-section-head"><h2>{t('explore.past')}</h2><Link className="text-link" href="/passport">{t('explore.record')}</Link></header><div className="show-grid">{past.map((event) => <div key={event.id}><EventCard event={event} saved />{!event.publicationQuarantined && !['cancelled', 'postponed'].includes(event.lifecycleStatus ?? '') && <AttendEventButton eventId={event.id} recorded={attendedIds.includes(event.id)} />}</div>)}</div></section> : null}</>
+      : <div className="discovery-empty"><span className="empty-orbit" aria-hidden="true">＋</span><h3>{t('plans.emptyTitle')}</h3><p>{t('plans.emptyDescription')}</p><Link className="button-primary" href="/atlas">{t('explore.browse')} →</Link></div>}
+  </section>;
 }

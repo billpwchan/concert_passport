@@ -1,0 +1,98 @@
+{
+  "retrievedAt": "2026-09-30",
+  "precision": "city",
+  "license": "CC0",
+  "locations": [
+    {
+      "market": "SG",
+      "city": "Singapore",
+      "latitude": 1.3,
+      "longitude": 103.8,
+      "wikidata": "Q334"
+    },
+    {
+      "market": "TW",
+      "city": "Taipei",
+      "latitude": 25.0375,
+      "longitude": 121.5625,
+      "wikidata": "Q1867"
+    },
+    {
+      "market": "TW",
+      "city": "Kaohsiung",
+      "latitude": 22.615,
+      "longitude": 120.2975,
+      "wikidata": "Q181557"
+    },
+    {
+      "market": "HK",
+      "city": "Hong Kong",
+      "latitude": 22.2783,
+      "longitude": 114.1586,
+      "wikidata": "Q8646"
+    },
+    {
+      "market": "KR",
+      "city": "Seoul",
+      "latitude": 37.56,
+      "longitude": 126.99,
+      "wikidata": "Q8684"
+    },
+    {
+      "market": "JP",
+      "city": "Tokyo",
+      "latitude": 35.6894,
+      "longitude": 139.6917,
+      "wikidata": "Q1490"
+    },
+    {
+      "market": "TH",
+      "city": "Bangkok",
+      "latitude": 13.75,
+      "longitude": 100.5167,
+      "wikidata": "Q1861"
+    },
+    {
+      "market": "MY",
+      "city": "Kuala Lumpur",
+      "latitude": 3.1478,
+      "longitude": 101.6953,
+      "wikidata": "Q1865"
+    },
+    {
+      "market": "PH",
+      "city": "Manila",
+      "latitude": 14.5958,
+      "longitude": 120.9772,
+      "wikidata": "Q1461"
+    },
+    {
+      "market": "ID",
+      "city": "Jakarta",
+      "latitude": -6.1753,
+      "longitude": 106.8269,
+      "wikidata": "Q3630"
+    },
+    {
+      "market": "AU",
+      "city": "Sydney",
+      "latitude": -33.8678,
+      "longitude": 151.21,
+      "wikidata": "Q3130"
+    },
+    {
+      "market": "AU",
+      "city": "Melbourne",
+      "latitude": -37.8142,
+      "longitude": 144.9631,
+      "wikidata": "Q3141"
+    },
+    {
+      "market": "NZ",
+      "city": "Auckland",
+      "latitude": -36.8492,
+      "longitude": 174.7653,
+      "wikidata": "Q37100"
+    }
+  ]
+}

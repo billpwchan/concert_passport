@@ -1,4 +1,4 @@
-import { getDb } from './index';
+import { getDb } from './index.ts';
 
 export type AccountRecord = {
   userId: string;
@@ -103,6 +103,10 @@ export function mergeAnonymousState(anonymousUserId: string, accountUserId: stri
       SELECT ?, artist_name, market_code, created_at, updated_at
       FROM artist_follows WHERE user_id = ?
     `).run(accountUserId, anonymousUserId);
+    // Preserve both personal memories when the two sessions recorded the same show.
+    db.prepare(`UPDATE attendance_records SET event_id=NULL WHERE user_id=? AND event_id IN
+      (SELECT event_id FROM attendance_records WHERE user_id=? AND event_id IS NOT NULL)`)
+      .run(anonymousUserId, accountUserId);
     db.prepare(`
       UPDATE attendance_records SET user_id = ? WHERE user_id = ?
     `).run(accountUserId, anonymousUserId);
