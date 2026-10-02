@@ -1,9 +1,12 @@
 import { removeSavedEventForUser, saveEventForUser } from '@/db/events';
 import { getDataSession } from '@/lib/server/data-session';
+import { rateLimitResponse } from '@/lib/server/rate-limit';
 import { hasSameOrigin } from '@/lib/server/request-security';
 
 export async function POST(request: Request): Promise<Response> {
   if (!hasSameOrigin(request)) return Response.json({ error: 'Invalid request origin.' }, { status: 403 });
+  const limited = rateLimitResponse(request);
+  if (limited) return limited;
   const body = await request.json().catch(() => null) as { eventId?: unknown } | null;
   if (!body || typeof body.eventId !== 'string' || !body.eventId || body.eventId.length > 240) {
     return Response.json({ error: 'Invalid event.' }, { status: 400 });
@@ -18,6 +21,8 @@ export async function POST(request: Request): Promise<Response> {
 
 export async function DELETE(request: Request): Promise<Response> {
   if (!hasSameOrigin(request)) return Response.json({ error: 'Invalid request origin.' }, { status: 403 });
+  const limited = rateLimitResponse(request);
+  if (limited) return limited;
   const body = await request.json().catch(() => null) as { eventId?: unknown } | null;
   if (!body || typeof body.eventId !== 'string' || !body.eventId || body.eventId.length > 240) {
     return Response.json({ error: 'Invalid event.' }, { status: 400 });

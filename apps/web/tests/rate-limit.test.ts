@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { discoverRateLimit } from '../lib/server/rate-limit.ts';
+import { discoverRateLimit, rateLimitResponse } from '../lib/server/rate-limit.ts';
 
 test('limits repeated discovery requests per forwarded client', () => {
   const request = new Request('https://concert-passport.test/api/v1/discover', {
@@ -15,4 +15,20 @@ test('limits repeated discovery requests per forwarded client', () => {
   assert.equal(blocked.allowed, false);
   assert.equal(blocked.retryAfter, 60);
   assert.equal(discoverRateLimit(request, now + 60_001).allowed, true);
+});
+
+test('rejects writes past the per-client budget with a retryable 429', async () => {
+  const request = new Request('https://concert-passport.test/api/v1/plans', {
+    method: 'POST',
+    headers: { 'x-forwarded-for': '203.0.113.11' },
+  });
+  const now = Date.parse('2026-08-22T00:00:00Z');
+  for (let index = 0; index < 20; index += 1) {
+    assert.equal(rateLimitResponse(request, now), undefined);
+  }
+  const blocked = rateLimitResponse(request, now);
+  assert.equal(blocked?.status, 429);
+  assert.equal(blocked?.headers.get('retry-after'), '60');
+  assert.deepEqual(await blocked?.json(), { error: 'Too many requests. Try again shortly.' });
+  assert.equal(rateLimitResponse(request, now + 60_001), undefined);
 });

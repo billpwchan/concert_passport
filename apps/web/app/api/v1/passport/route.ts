@@ -1,6 +1,7 @@
 import { attendSavedEvent, createPassportEntry, getPassportEntries, setPassportEntryRemoved, updatePassportEntry } from '@/db/passport';
 import { passportInput } from '@/lib/domain/passport-input';
 import { getDataSession } from '@/lib/server/data-session';
+import { rateLimitResponse } from '@/lib/server/rate-limit';
 import { hasSameOrigin } from '@/lib/server/request-security';
 
 export async function GET(request: Request): Promise<Response> {
@@ -13,6 +14,8 @@ export async function GET(request: Request): Promise<Response> {
 
 async function mutate(request: Request): Promise<Response> {
   if (!hasSameOrigin(request)) return Response.json({ error: 'Invalid request origin.' }, { status: 403 });
+  const limited = rateLimitResponse(request);
+  if (limited) return limited;
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== 'object' || Array.isArray(body)) return Response.json({ error: 'Invalid record.' }, { status: 400 });
   const session = getDataSession(request);

@@ -36,3 +36,11 @@ export function discoverRateLimit(request: Request, now = Date.now()) {
     retryAfter: 0,
   };
 }
+
+/** Applies the same per-client budget to writes; returns the 429 response once it is spent. */
+export function rateLimitResponse(request: Request, now = Date.now()): Response | undefined {
+  const { allowed, retryAfter } = discoverRateLimit(request, now);
+  if (allowed) return undefined;
+  return Response.json({ error: 'Too many requests. Try again shortly.' },
+    { status: 429, headers: { 'retry-after': String(retryAfter) } });
+}
