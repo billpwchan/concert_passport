@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { claimScheduledJob, finishScheduledJob, type ScheduledJobStatus } from '../../db/scheduler.ts';
 
 type ScheduledRouteResult = {
@@ -12,14 +13,25 @@ type ScheduledRouteOptions = {
   failureMessage: string;
 };
 
+const MIN_SECRET_LENGTH = 32;
+const PLACEHOLDER_SECRET = 'replace-with-a-random-secret';
+
+/** Compares fixed-length digests so neither content nor length is leaked by timing. */
+function matchesBearer(header: string | null, secret: string): boolean {
+  const digest = (value: string) => createHash('sha256').update(value).digest();
+  return timingSafeEqual(digest(header ?? ''), digest(`Bearer ${secret}`));
+}
+
 export async function runScheduledRoute(
   request: Request,
   options: ScheduledRouteOptions,
   operation: () => Promise<ScheduledRouteResult>,
 ): Promise<Response> {
   const secret = process.env.INGESTION_CRON_SECRET;
-  if (!secret) return Response.json({ error: 'Scheduler is not configured.' }, { status: 503 });
-  if (request.headers.get('authorization') !== `Bearer ${secret}`) {
+  if (!secret || secret.length < MIN_SECRET_LENGTH || secret === PLACEHOLDER_SECRET) {
+    return Response.json({ error: 'Scheduler is not configured.' }, { status: 503 });
+  }
+  if (!matchesBearer(request.headers.get('authorization'), secret)) {
     return Response.json({ error: 'Unauthorized.' }, { status: 401 });
   }
   const lease = claimScheduledJob(options.jobName, options.leaseMs);

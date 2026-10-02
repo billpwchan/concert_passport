@@ -28,19 +28,44 @@ test('applies versioned migrations once and enforces scheduler leases', async ()
 });
 
 test('returns the persisted scheduler outcome to the isolated worker', async () => {
-  process.env.INGESTION_CRON_SECRET = 'test-scheduler-secret';
+  process.env.INGESTION_CRON_SECRET = 'test-scheduler-secret-0123456789abcdef';
   try {
     const { runScheduledRoute } = await import('../lib/server/scheduled-job.ts');
     const response = await runScheduledRoute(
       new Request('http://internal.test/job', {
         method: 'POST',
-        headers: { authorization: 'Bearer test-scheduler-secret' },
+        headers: { authorization: 'Bearer test-scheduler-secret-0123456789abcdef' },
       }),
       { jobName: 'partial-test-job', leaseMs: 60_000, failureMessage: 'failed' },
       async () => ({ body: { accepted: 3 }, outcome: 'partial' }),
     );
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), { accepted: 3, schedulerOutcome: 'partial' });
+  } finally {
+    delete process.env.INGESTION_CRON_SECRET;
+  }
+});
+
+test('refuses scheduler runs with weak secrets or mismatched bearers', async () => {
+  const { runScheduledRoute } = await import('../lib/server/scheduled-job.ts');
+  let ran = 0;
+  const run = (authorization?: string) => runScheduledRoute(
+    new Request('http://internal.test/job', { method: 'POST', headers: authorization ? { authorization } : {} }),
+    { jobName: 'secret-test-job', leaseMs: 60_000, failureMessage: 'failed' },
+    async () => { ran += 1; return { body: {} }; },
+  );
+  try {
+    for (const weak of ['replace-with-a-random-secret', 'x'.repeat(31)]) {
+      process.env.INGESTION_CRON_SECRET = weak;
+      assert.equal((await run(`Bearer ${weak}`)).status, 503);
+    }
+    process.env.INGESTION_CRON_SECRET = 'a'.repeat(64);
+    assert.equal((await run()).status, 401);
+    assert.equal((await run('Bearer short')).status, 401);
+    assert.equal((await run(`Bearer ${'b'.repeat(64)}`)).status, 401);
+    assert.equal(ran, 0);
+    assert.equal((await run(`Bearer ${'a'.repeat(64)}`)).status, 200);
+    assert.equal(ran, 1);
   } finally {
     delete process.env.INGESTION_CRON_SECRET;
   }
