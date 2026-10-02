@@ -9,9 +9,14 @@ export async function POST(request: Request): Promise<Response> {
   if (!hasSameOrigin(request)) return Response.json({ code: 'invalid_request' }, { status: 403 });
   const limit = authRateLimit(request, 'login');
   if (!limit.allowed) return Response.json({ code: 'rate_limited' }, { status: 429, headers: { 'retry-after': String(limit.retryAfter) } });
-  const body = (await request.json()) as { email?: string; password?: string };
-  const account = getAccountByEmail(normalizeEmail(body.email ?? ''));
-  if (!account || account.status !== 'active' || !verifyPassword(body.password ?? '', account.passwordHash)) {
+  const body = await request.json().catch(() => null) as { email?: unknown; password?: unknown } | null;
+  const email = body?.email ?? '';
+  const password = body?.password ?? '';
+  if (!body || typeof body !== 'object' || typeof email !== 'string' || typeof password !== 'string') {
+    return Response.json({ code: 'invalid_request' }, { status: 400 });
+  }
+  const account = getAccountByEmail(normalizeEmail(email));
+  if (!account || account.status !== 'active' || !verifyPassword(password, account.passwordHash)) {
     return Response.json({ code: 'invalid_credentials' }, { status: 401 });
   }
   const privateSession = getPrivateSession(request);
