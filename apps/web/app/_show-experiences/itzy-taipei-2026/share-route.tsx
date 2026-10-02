@@ -14,7 +14,7 @@ type Ratio = keyof typeof ratios;
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const requested = requestUrl.searchParams.get('ratio');
-  const ratio: Ratio = requested && requested in ratios ? requested as Ratio : 'xiaohongshu';
+  const ratio: Ratio = requested && Object.hasOwn(ratios, requested) ? requested as Ratio : 'xiaohongshu';
   const { width, height } = ratios[ratio];
   const compact = ratio === 'square';
   const internalPort = process.env.PORT || requestUrl.port || '3000';
